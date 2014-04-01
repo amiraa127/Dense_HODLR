@@ -63,7 +63,8 @@ public:
 
   /************************************ Acessing Matrix Entries *******************************/
   Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
-  /***************************Memory Management Functions*****************************/ 
+
+  /******************************Memory Management Functions***********************************/ 
   void freeDenseMatMem();
   
 

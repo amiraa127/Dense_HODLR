@@ -1364,17 +1364,204 @@ void HODLR_Matrix::fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root
 void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j){
   blkMatrix.block(blk_Min_i,blk_Min_j,LR_numRows,LR_numCols) = LR_U.block(LR_Min_i,0,LR_numRows,LR_U.cols()) * LR_K * LR_V.block(LR_Min_j,0,LR_numCols,LR_V.cols()).transpose();
 }
-
-/*
-void extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::map<int,int> &currIdxMap,std::map<int,int> &updateIdxMap){
-
+/**************************************Extend-Add Functions************************************/
+void extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &nodeIdxVec,std::vector<int> &updateIdxVec){
+  updateLRinTree(indexTree.rootNode,updateMatrix,nodeIdxVec,nodeIdxVec);
 }
 
-Eigen::MatrixXd get_compBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::map<int,int> & currIdxMap,std::map<int,int> & updateIdxMap){
-  
-  
-  
-  
-
+Eigen::MatrixXd get_updatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+  Eigen::MatrixXd result = get_Block(min_i,min_j,numRows,numCols);
+  for (int i = 0; i < numRows, i++)
+    for (int j = 0; j < numCols; j++){
+      std::vector<int>::iterator it_i,it_j;
+      iter_i = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),nodeIdxVec[i]);
+      iter_j = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),nodeIdxVec[j]);
+      bool found_i = (iter_i != updateIdxVec.end());
+      bool found_j = (iter_j != updateIdxVec.end());
+      if ((found_i == true) && (found_j ==true)){
+	int pos_i = iter_i - updateIdxVec.begin();
+	int pos_j = iter_j - updateIdxVec.begin();
+	result(i,j) += updateMatrix(pos_i,pos_j);
+      }
+    } 
+  return result;
 }
-*/
+
+
+void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+  // Base cases;
+  if (HODLR_Root == NULL)
+    return;
+  if (HODLR_Root->isLeaf == true){
+    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
+    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;
+    HODLR_Root->leafMatrix = get_UpdatedBlock(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols,updateMatrix,nodeIdxVec,updateIdxVec);
+    return;
+  }
+  // Calculate the LR factorizations
+  if (HODLR_Root->LR_Method == "partialPiv_ACA"){
+    Eigen::MatrixXd newU,newV;
+    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,updateMatrix,nodeIdxVec,updateIdxVec);
+    HODLR_Root->topOffDiagU = newU;
+    HODLR_Root->topOffDiagV = newV;
+
+    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,updateMatrix,nodeIdxVec,updateIdxVec);
+    HODLR_Root->bottOffDiagU = newU;
+    HODLR_Root->bottOffDiagV = newV;
+
+    HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
+    HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
+    
+  }else{
+    std::cout<<"Error!. Invalid low-rank approximation scheme."<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+    
+  storeLRinTree(HODLR_Root->left);
+  storeLRinTree(HODLR_Root->right);
+ 
+}
+
+
+double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+  
+  int nRows = max_i - min_i + 1;
+  int nCols = max_j - min_j + 1;
+  int maxRank = std::min(nRows,nCols);
+  int numColsW = 2;
+  int numColsV = 2;
+
+  Eigen::MatrixXd tempW(nRows,numColsW);
+  Eigen::MatrixXd tempV(nCols,numColsV);
+
+  Eigen::VectorXd residualRow,residualCol;
+  std::vector<bool> chosenRows(nRows),chosenCols(nCols);
+  for (int i = 0; i < nRows; i++)
+    chosenRows[i] = false;
+  for (int i = 0; i < nCols; i++)
+    chosenCols[i] = false;
+  
+  double frobNormSq = 0;
+  double frobNorm   = 0;   
+  double epsilon    = 1;
+  int currRowIndex  = 0;
+  int currColIndex  = 0;
+  int nextRowIndex  = 0;
+  int k = 0;
+  
+  while (((epsilon > tolerance) || (k < minRank)) && (k < maxRank)){
+    
+    if ( k == numColsW - 1){
+      numColsW = 2 * numColsW;
+      numColsV = 2 * numColsV;
+      tempW.conservativeResize(Eigen::NoChange,numColsW);
+      tempV.conservativeResize(Eigen::NoChange,numColsV);
+    }
+
+    chosenRows[currRowIndex] = true;
+    int globalCurrRowIdx = currRowIndex + min_i;
+    //Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,nCols).transpose();
+    Eigen::VectorXd currRow = getUpdatedBlock(globalCurrRowIdx,min_j,1,nCols,updateMatrix,nodeIdxVec,updateIdxVec).transpose();
+
+    // Update row of Residual
+    Eigen::VectorXd sum = Eigen::VectorXd::Zero(nCols);
+    for (int l = 0; l < k; l++){
+      sum += tempW(currRowIndex,l) * tempV.col(l);
+    }
+    residualRow = (currRow - sum);
+    // Find Next Column
+    int maxInd;
+    Eigen::VectorXd absCurrRow = residualRow.cwiseAbs();
+    double maxValue = absCurrRow.maxCoeff(&maxInd);
+    if (maxValue <= minValueACA){
+      currRowIndex = chooseNNZRowIndex(chosenRows);
+      if (currRowIndex == -1)
+	break;
+      continue;
+      absCurrRow = residualRow.cwiseAbs();
+      maxValue = absCurrRow.maxCoeff(&maxInd);
+      currColIndex = maxInd;
+    }
+    if (chosenCols[maxInd] == false){
+      currColIndex = maxInd;
+    }else{
+      currColIndex = chooseNextRowCol(chosenCols,residualRow.cwiseAbs());
+      if (currColIndex == -1)
+	break;
+    }
+    
+    // Update column of Residual
+    chosenCols[currColIndex] = true;
+    int globalCurrColIdx = currColIndex + min_j;
+    double currPivot = 1/residualRow(currColIndex);
+    //Eigen::VectorXd currColumn = matrixData.block(min_i,globalCurrColIdx,nRows,1);
+    Eigen::VectorXd currColmun = get_UpdatedBlock(min_i,globalCurrColIdx,nRows,1,updateMatrix,nodeIDxVec,updateIdxVec);
+
+    sum = Eigen::VectorXd::Zero(nRows);
+    for(int l = 0; l < k; l++){
+      sum += tempV(currColIndex,l) * tempW.col(l);
+    }
+    residualCol = currColumn - sum;
+    
+    // Find Next Row
+    Eigen::VectorXd absCurrCol = residualCol.cwiseAbs();
+    maxValue = absCurrCol.maxCoeff(&maxInd);
+    
+    if (chosenRows[maxInd] == false){
+      nextRowIndex = maxInd;
+    }else{
+      nextRowIndex = chooseNextRowCol(chosenRows,residualCol.cwiseAbs());
+    }
+    if (nextRowIndex == -1)
+      break;
+
+    // Write to W & V
+    tempW.col(k) = currPivot * residualCol;
+    tempV.col(k) = residualRow;
+       
+    // Update Frobenious Norm
+    double sumNorm = 0;
+    for(int j = 0; j < k; j++){
+      sumNorm += ((currPivot * residualCol.transpose()) * tempW.col(j)) * ((tempV.col(j).transpose()) * residualRow);
+    }
+    frobNormSq += 2 * sumNorm + ((currPivot * residualCol).squaredNorm()) * residualRow.squaredNorm();
+    frobNorm = sqrt(frobNormSq);
+    // Calculate epsilon
+    epsilon = (currPivot * residualCol).norm() * residualRow.norm()/frobNorm;
+    
+    // Set Values for next iteration
+    currRowIndex = nextRowIndex;
+    k++;
+  }
+  calculatedRank = k;
+  // Return zero for zero matrix
+  if ( k == 0){
+    W = Eigen::MatrixXd::Zero(nRows,1);
+    V = Eigen::MatrixXd::Zero(nCols,1);
+    calculatedRank = 1;
+    return epsilon;
+  }
+  
+  // Return the original matrix if rank is equal to matrix dimensions
+  if (k >= maxRank - 1){
+    // Return original matrix
+    // Skinny matrix
+    if (nCols <= nRows){
+      //  W = matrixData.block(min_i,min_j,nRows,nCols);
+      W = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,nodeIDxVec,updateIdxVec);
+      V = Eigen::MatrixXd::Identity(nCols,nCols);
+      calculatedRank = nCols;
+    }// Fat matrix      
+    else {
+      W = Eigen::MatrixXd::Identity(nRows,nRows);
+      //V = matrixData.block(min_i,min_j,nRows,nCols).transpose();
+      V = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,nodeIDxVec,updateIdxVec).transpose();
+      calculatedRank = nRows;
+    } 
+    return epsilon;
+  }
+  
+  W = tempW.leftCols(calculatedRank);
+  V = tempV.leftCols(calculatedRank);
+  return epsilon;
+}
