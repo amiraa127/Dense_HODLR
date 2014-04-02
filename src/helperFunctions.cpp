@@ -247,7 +247,6 @@ void testACASolverConv1DUnifromPts(const double intervalMin,const double interva
     Eigen::VectorXd solverSoln;
     if (solverType == "recLU")
       solverSoln = denseHODLR.recLU_Solve(RHS);
-    std::cout<<(denseMatrix.block(130,40,50,60) - denseHODLR.get_Block(130,40,50,60)).norm()<<std::endl;
     if (solverType == "extendedSp")
       solverSoln = denseHODLR.extendedSp_Solve(RHS);
     Eigen::VectorXd residual = solverSoln-exactSoln;

@@ -67,6 +67,17 @@ public:
   /******************************Memory Management Functions***********************************/ 
   void freeDenseMatMem();
   
+  /**********************************Extend Add Functions **************************************/
+  
+ /* Function : extendAddUpdate(updateMatrix,nodeIDxVec,updateIdxVec)
+ *-----------------------------------------------------------------
+ * This function performs an extend add operation for a sparse solver in a situation where the parent is an HODLR matrix and the child is a regular dense matrix.
+ * This function must be called on the parent HODLR matrix.
+ * updateMatrix : Child update matrix in the form of Eigen MatrixXd.
+ * parentIdxVec : Parent frontal matrix global index vector.
+ * updateIdxVec : Child update matrix global index vector.
+ */
+  void extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &parentIdxVec,std::vector<int> &updateIdxVec);
 
 private:
 
@@ -136,6 +147,14 @@ private:
   void fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j);
 
   void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
+
+  /***********************************Extend Add Functions *******************************/
+  Eigen::MatrixXd get_UpdatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+
+  void updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+
+  double extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+
 
 };
 

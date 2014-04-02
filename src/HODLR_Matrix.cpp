@@ -1365,17 +1365,26 @@ void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Mi
   blkMatrix.block(blk_Min_i,blk_Min_j,LR_numRows,LR_numCols) = LR_U.block(LR_Min_i,0,LR_numRows,LR_U.cols()) * LR_K * LR_V.block(LR_Min_j,0,LR_numCols,LR_V.cols()).transpose();
 }
 /**************************************Extend-Add Functions************************************/
-void extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &nodeIdxVec,std::vector<int> &updateIdxVec){
-  updateLRinTree(indexTree.rootNode,updateMatrix,nodeIdxVec,nodeIdxVec);
+
+/* Function : extendAddUpdate(updateMatrix,nodeIDxVec,updateIdxVec)
+ *-----------------------------------------------------------------
+ * This function performs an extend add operation for a sparse solver in a situation where the parent is an HODLR matrix and the child is a regular dense matrix.
+ * This function must be called on the parent HODLR matrix.
+ * updateMatrix : Child update matrix in the form of Eigen MatrixXd.
+ * parentIdxVec : Parent frontal matrix global index vector.
+ * updateIdxVec : Child update matrix global index vector.
+ */
+void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &parentIdxVec,std::vector<int> &updateIdxVec){
+  updateLRinTree(indexTree.rootNode,updateMatrix,parentIdxVec,updateIdxVec);
 }
 
-Eigen::MatrixXd get_updatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+Eigen::MatrixXd HODLR_Matrix::get_UpdatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
   Eigen::MatrixXd result = get_Block(min_i,min_j,numRows,numCols);
-  for (int i = 0; i < numRows, i++)
+  for (int i = 0; i < numRows; i++)
     for (int j = 0; j < numCols; j++){
-      std::vector<int>::iterator it_i,it_j;
-      iter_i = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),nodeIdxVec[i]);
-      iter_j = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),nodeIdxVec[j]);
+      std::vector<int>::iterator iter_i,iter_j;
+      iter_i = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),parentIdxVec[i]);
+      iter_j = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),parentIdxVec[j]);
       bool found_i = (iter_i != updateIdxVec.end());
       bool found_j = (iter_j != updateIdxVec.end());
       if ((found_i == true) && (found_j ==true)){
@@ -1388,24 +1397,24 @@ Eigen::MatrixXd get_updatedBlock(int min_i,int min_j,int numRows,int numCols,Eig
 }
 
 
-void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
   // Base cases;
   if (HODLR_Root == NULL)
     return;
   if (HODLR_Root->isLeaf == true){
     int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
     int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;
-    HODLR_Root->leafMatrix = get_UpdatedBlock(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols,updateMatrix,nodeIdxVec,updateIdxVec);
+    HODLR_Root->leafMatrix = get_UpdatedBlock(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols,updateMatrix,parentIdxVec,updateIdxVec);
     return;
   }
   // Calculate the LR factorizations
   if (HODLR_Root->LR_Method == "partialPiv_ACA"){
     Eigen::MatrixXd newU,newV;
-    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,updateMatrix,nodeIdxVec,updateIdxVec);
+    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,updateMatrix,parentIdxVec,updateIdxVec);
     HODLR_Root->topOffDiagU = newU;
     HODLR_Root->topOffDiagV = newV;
 
-    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,updateMatrix,nodeIdxVec,updateIdxVec);
+    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,updateMatrix,parentIdxVec,updateIdxVec);
     HODLR_Root->bottOffDiagU = newU;
     HODLR_Root->bottOffDiagV = newV;
 
@@ -1423,7 +1432,7 @@ void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &
 }
 
 
-double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & nodeIdxVec,std::vector<int> & updateIdxVec){
+double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
   
   int nRows = max_i - min_i + 1;
   int nCols = max_j - min_j + 1;
@@ -1461,7 +1470,7 @@ double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::Matri
     chosenRows[currRowIndex] = true;
     int globalCurrRowIdx = currRowIndex + min_i;
     //Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,nCols).transpose();
-    Eigen::VectorXd currRow = getUpdatedBlock(globalCurrRowIdx,min_j,1,nCols,updateMatrix,nodeIdxVec,updateIdxVec).transpose();
+    Eigen::VectorXd currRow = get_UpdatedBlock(globalCurrRowIdx,min_j,1,nCols,updateMatrix,parentIdxVec,updateIdxVec).transpose();
 
     // Update row of Residual
     Eigen::VectorXd sum = Eigen::VectorXd::Zero(nCols);
@@ -1489,13 +1498,13 @@ double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::Matri
       if (currColIndex == -1)
 	break;
     }
-    
+  
     // Update column of Residual
     chosenCols[currColIndex] = true;
     int globalCurrColIdx = currColIndex + min_j;
     double currPivot = 1/residualRow(currColIndex);
     //Eigen::VectorXd currColumn = matrixData.block(min_i,globalCurrColIdx,nRows,1);
-    Eigen::VectorXd currColmun = get_UpdatedBlock(min_i,globalCurrColIdx,nRows,1,updateMatrix,nodeIDxVec,updateIdxVec);
+    Eigen::VectorXd currColumn = get_UpdatedBlock(min_i,globalCurrColIdx,nRows,1,updateMatrix,parentIdxVec,updateIdxVec);
 
     sum = Eigen::VectorXd::Zero(nRows);
     for(int l = 0; l < k; l++){
@@ -1548,14 +1557,14 @@ double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::Matri
     // Skinny matrix
     if (nCols <= nRows){
       //  W = matrixData.block(min_i,min_j,nRows,nCols);
-      W = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,nodeIDxVec,updateIdxVec);
+      W = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,parentIdxVec,updateIdxVec);
       V = Eigen::MatrixXd::Identity(nCols,nCols);
       calculatedRank = nCols;
     }// Fat matrix      
     else {
       W = Eigen::MatrixXd::Identity(nRows,nRows);
       //V = matrixData.block(min_i,min_j,nRows,nCols).transpose();
-      V = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,nodeIDxVec,updateIdxVec).transpose();
+      V = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,parentIdxVec,updateIdxVec).transpose();
       calculatedRank = nRows;
     } 
     return epsilon;
