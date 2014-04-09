@@ -30,6 +30,11 @@ public:
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   ~HODLR_Matrix();
 
+  /************************************* Copy *****************************************/
+  // HODLR_Matrix& operator =  (const HODLR_Matrix & rhs);
+
+
+
   /************************************* Solve Methods **********************************/
   Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS);
   void recLU_Compute();
@@ -107,7 +112,7 @@ private:
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;
-  Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+  //Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
 
   std::string extendedSp_SavePath;
 

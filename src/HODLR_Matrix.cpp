@@ -51,6 +51,8 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
   setDefaultValues();
   matrixData = inputMatrix;
   sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createDefaultTree(inputMatrix.rows());
   matrixDataAvail = true;
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   matrixSize = inputMatrix.rows();
@@ -71,6 +73,51 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
 
 HODLR_Matrix::~HODLR_Matrix(){
 }
+
+/*
+HODLR_Matrix& HODLR_Matrix::operator = (const HODLR_Matrix & rhs){
+  
+  //public attributes
+  printLevelRankInfo = rhs.printLevelRankInfo;
+  printLevelAccuracy = rhs.printLevelAccuracy;
+  printLevelInfo     = rhs.printLevelInfo;
+  printResultInfo    = rhs.printResultInfo;
+  //private attributes
+  sizeThreshold      = rhs.sizeThreshold;
+  extendedSp_Size    = rhs.extendedSp_Size;
+  matrixSize         = rhs.matrixSize;
+  
+  recLU_FactorizationTime      = rhs.recLU_FactorizationTime;
+  recLU_SolveTime              = rhs.recLU_SolveTime;
+  LR_ComputationTime           = rhs.LR_ComputationTime;
+  extendedSp_AssemblyTime      = rhs.extendedSp_AssemblyTime;
+  extendedSp_FactorizationTime = rhs.extendedSp_FactorizationTime;
+  extendedSp_SolveTime         = rhs.extendedSp_SolveTime;
+  iter_SolveTime               = rhs.iter_SolveTime;
+
+  LRStoredInTree         = rhs.LRStoredInTree;
+  createdRecLUfactorTree = rhs.createdRecLUfactorTree;
+  assembled_ExtendedSp   = rhs.assembled_ExtendedSp;
+  saveExtendedSp_Matrix  = rhs.saveExtendedSp_Matrix;
+  freeMatrixMemory       = rhs.freeMatrixMemory;
+  matrixDataAvail        = rhs.matrixDataAvail;    
+  isSquareMatrix         = rhs.isSquareMatrix;
+
+  LR_Tolerance           = rhs.LR_Tolerance;
+  minValueACA            = rhs.minValueACA; 
+
+ 
+  matrixData          = rhs.matrixData;
+  extendedSp_Solver   = rhs.extendedSp_Solver; 
+  extendedSp_SavePath = rhs.extendedSp_SavePath;
+  indexTree           = rhs.indexTree;
+  //indexTree.rootNode  = rhs.indexTree.copyTree();
+  //recLUfactorTree needs to be copied :)) TODO
+  return *this;
+
+
+} 
+*/
 
 void HODLR_Matrix::storeLRinTree(){
   assert(indexTree.rootNode != NULL);
@@ -511,8 +558,8 @@ Eigen::SparseMatrix<double>  HODLR_Matrix::assembleExtendedSPMatrix(){
   for (int i = 0; i < tree_numLevels; i++){
     
     std::vector<HODLR_Tree::node*> currLevelNodesVec;
-    findNodesAtLevel(indexTree.rootNode,i,currLevelNodesVec);
-    
+    //findNodesAtLevel(indexTree.rootNode,i,currLevelNodesVec);
+    currLevelNodesVec = indexTree.nodeLevelVec[i];
     // Add ranks at current level
     int levelRankSum = 0;
     
@@ -616,7 +663,8 @@ Eigen::SparseMatrix<double>  HODLR_Matrix::assembleExtendedSPMatrix(){
   // Insert leaf nodes
   int leaf_assemblyIndex = 0;
   std::vector<HODLR_Tree::node*> leafNodesVec;
-  findLeafNodes(indexTree.rootNode,leafNodesVec);
+  //findLeafNodes(indexTree.rootNode,leafNodesVec);
+  leafNodesVec = indexTree.leafNodesVec;
   for (unsigned int i = 0; i < leafNodesVec.size(); i++){
     int leafSize = leafNodesVec[i]->max_i - leafNodesVec[i]->min_i + 1;
     //Eigen::MatrixXd leafMatrix = matrixData.block(leafNodesVec[i]->min_i,leafNodesVec[i]->min_j,leafSize,leafSize);
@@ -645,6 +693,8 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     LRStoredInTree = true;
   }
 
+  Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+    
   if (assembled_ExtendedSp == false){
     double startTime = clock();
     Eigen::SparseMatrix<double> extendedSp_Matrix = assembleExtendedSPMatrix();
@@ -655,7 +705,7 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
       //saveMatrixXdToBinary(sp,extendedSp_SavePath);
       // To Do
     }
-
+    
     extendedSp_AssemblyTime = (endTime-startTime)/CLOCKS_PER_SEC;
     extendedSp_Size = extendedSp_Matrix.rows();
     startTime = clock();
@@ -1310,6 +1360,7 @@ Eigen::MatrixXd HODLR_Matrix::get_Block(int min_i,int min_j,int numRows,int numC
 }
 
 void HODLR_Matrix::fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j){
+  
   if ((max_i < root->min_i) || (max_j < root->min_j) || (min_i > root->max_i) || (min_j > root->max_j ))
     return;
   // Find parts corresponding to off-diagonal blocks
@@ -1426,8 +1477,8 @@ void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &
     exit(EXIT_FAILURE);
   }
     
-  storeLRinTree(HODLR_Root->left);
-  storeLRinTree(HODLR_Root->right);
+  updateLRinTree(HODLR_Root->left,updateMatrix,parentIdxVec,updateIdxVec);
+  updateLRinTree(HODLR_Root->right,updateMatrix,parentIdxVec,updateIdxVec);
  
 }
 

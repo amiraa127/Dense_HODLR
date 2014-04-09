@@ -40,6 +40,9 @@ public:
   HODLR_Tree(const int matrixSize, const std::string LRMethod = "ACA");
   ~HODLR_Tree();
   
+  HODLR_Tree& operator = (const HODLR_Tree & rhs);
+
+  
   void createDefaultTree(const int matrixSize);
   void createFromUsrTree(const int matrixSize,const user_IndexTree &usrIndexTree);
   void printTree() const; 
@@ -52,18 +55,23 @@ public:
   std::string get_def_LRMethod()const;
 
   node* rootNode;
-
+  node* copyTree(std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec) const;
+  std::vector<std::vector<node*> > nodeLevelVec;
+  std::vector<node*> leafNodesVec;
 private: 
   
   int sizeThreshold;
   int numLevels;
   std::string def_LRMethod;
   
+  void copyNode(const node* oldNode, node* newNode,std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec)const;
   void createDefaultTree(node* root);
   void printTree(const node* root) const;
   void freeTree(node* root);
   void userTree_To_HODLRTree(const int currLevel,const int min_i,const int max_i,const int min_j,const int max_j,const user_IndexTree::node* user_IndexRoot, node* HODLR_IndexRoot);
   
+  void nodeLevelVec_Assign(unsigned int level,node* root);
+
 };
 
 
