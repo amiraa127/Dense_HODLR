@@ -239,7 +239,6 @@ void testACASolverConv1DUnifromPts(const double intervalMin,const double interva
   Eigen::MatrixXd denseMatrix = makeMatrix1DUniformPts (intervalMin, intervalMax, intervalMin, intervalMax, numPts, numPts, diagValue, kernel);
   Eigen::VectorXd RHS = denseMatrix * exactSoln;
   HODLR_Matrix denseHODLR(denseMatrix, sizeThreshold);
-  //HODLR_Matrix denseHODLR = denseHODLR1;
   std::ofstream outputFile;
   outputFile.open(outputFileName.c_str());
   for (int i = minTol; i >= maxTol; i--){

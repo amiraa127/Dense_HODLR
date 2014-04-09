@@ -74,9 +74,8 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
 HODLR_Matrix::~HODLR_Matrix(){
 }
 
-/*
-HODLR_Matrix& HODLR_Matrix::operator = (const HODLR_Matrix & rhs){
-  
+HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
+    
   //public attributes
   printLevelRankInfo = rhs.printLevelRankInfo;
   printLevelAccuracy = rhs.printLevelAccuracy;
@@ -111,13 +110,9 @@ HODLR_Matrix& HODLR_Matrix::operator = (const HODLR_Matrix & rhs){
   extendedSp_Solver   = rhs.extendedSp_Solver; 
   extendedSp_SavePath = rhs.extendedSp_SavePath;
   indexTree           = rhs.indexTree;
-  //indexTree.rootNode  = rhs.indexTree.copyTree();
   //recLUfactorTree needs to be copied :)) TODO
-  return *this;
 
-
-} 
-*/
+}
 
 void HODLR_Matrix::storeLRinTree(){
   assert(indexTree.rootNode != NULL);
@@ -693,7 +688,6 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     LRStoredInTree = true;
   }
 
-  Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
     
   if (assembled_ExtendedSp == false){
     double startTime = clock();

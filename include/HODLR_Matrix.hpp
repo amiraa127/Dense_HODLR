@@ -31,8 +31,7 @@ public:
   ~HODLR_Matrix();
 
   /************************************* Copy *****************************************/
-  // HODLR_Matrix& operator =  (const HODLR_Matrix & rhs);
-
+  HODLR_Matrix(const HODLR_Matrix & rhs);
 
 
   /************************************* Solve Methods **********************************/
@@ -112,7 +111,7 @@ private:
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;
-  //Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+  Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
 
   std::string extendedSp_SavePath;
 

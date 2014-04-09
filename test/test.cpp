@@ -20,6 +20,9 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
   CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
   CPPUNIT_TEST(iterative_Solve_Test);
+  CPPUNIT_TEST(assignment_Test_Simple);
+  CPPUNIT_TEST(assignment_Test_ExtendedSp);
+
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -288,6 +291,7 @@ public:
     Eigen::VectorXd inputF = schurComplement * exactSoln;
     schur_HODLR.set_LRTolerance(0.3 * 1e-7);
     Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
+
     Eigen::VectorXd difference = solverSoln - exactSoln;
     double relError = difference.norm()/exactSoln.norm();
     //std::cout<< relError<<std::endl;
@@ -425,7 +429,43 @@ public:
     Eigen::VectorXd difference = solverSoln-exactSoln;
     double relError = difference.norm()/exactSoln.norm();
     std::cout<<relError<<std::endl;
-    //CPPUNIT_ASSERT(relError < 1e-6);
+    CPPUNIT_ASSERT(relError < 1e-6);
+  }
+
+  void assignment_Test_Simple(){
+    int matrixSize = 12936;
+    Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+
+    // Initialize Solver
+    HODLR_Matrix sampleHODLR(sampleMatrix,30);
+    sampleHODLR.set_LRTolerance(1e-8);
+    HODLR_Matrix copy_sampleHODLR = sampleHODLR;
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,
+-2,2);
+    Eigen::VectorXd inputF = sampleMatrix * exactSoln;
+    Eigen::VectorXd solverSoln = copy_sampleHODLR.recLU_Solve(inputF);
+    Eigen::VectorXd difference = solverSoln - exactSoln;
+    double relError = difference.norm()/exactSoln.norm();
+    std::cout<<relError<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-6);    
+  }
+
+    void assignment_Test_ExtendedSp(){
+    int matrixSize = 12936;
+    Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+
+    // Initialize Solver
+    HODLR_Matrix sampleHODLR(sampleMatrix,30);
+    sampleHODLR.set_LRTolerance(1e-8);
+    HODLR_Matrix copy_sampleHODLR = sampleHODLR;
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,
+-2,2);
+    Eigen::VectorXd inputF = sampleMatrix * exactSoln;
+    Eigen::VectorXd solverSoln = copy_sampleHODLR.extendedSp_Solve(inputF);
+    Eigen::VectorXd difference = solverSoln - exactSoln;
+    double relError = difference.norm()/exactSoln.norm();
+    std::cout<<relError<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-6);    
   }
 
 };
