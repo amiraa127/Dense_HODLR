@@ -1568,4 +1568,72 @@ void HODLR_Matrix::fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root
 void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j){
   blkMatrix.block(blk_Min_i,blk_Min_j,LR_numRows,LR_numCols) = LR_U.block(LR_Min_i,0,LR_numRows,LR_U.cols()) * LR_K * LR_V.block(LR_Min_j,0,LR_numCols,LR_V.cols()).transpose();
 }
+
 /**************************************Extend-Add Functions************************************/
+
+void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_PtrVec,std::vector<std::vector<int>* > &updateIdxPtrVec,int sumChildRanks){
+
+
+
+
+
+}
+void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_V_PtrVec,int sumChildRanks){
+  int numChildren = LR_UpdateExtend_V_PtrVec.size();
+  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
+  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
+  int numCols_TopOffDiag  = numRows_BottOffDiag;
+  int numCols_BottOffDiag = numRows_TopOffDiag; 
+  Eigen::MatrixXd U2_TopOffDiag(numRows_TopOffDiag,sumChildRanks),U2_BottOffDiag(numRows_BottOffDiag,sumChildRanks);
+  Eigen::MatrixXd V2_TopOffDiag(numCols_TopOffDiag,sumChildRanks),V2_BottOffDiag(numCols_BottOffDiag,sumChildRanks);
+  int U2_j = 0;
+  int V2_j = 0;
+  for (int i = 0; i < numChildren; i++){ 
+    int currRank = (LR_UpdateExtend_U_PtrVec[i])->cols();
+    // Update topDiag U2s
+    U2_TopOffDiag.block(0,U2_j,numRows_TopOffDiag,currRank) = (*(LR_UpdateExtend_U_PtrVec[i])).block(HODLR_Root->min_i,0,numRows_TopOffDiag,currRank);
+    U2_BottOffDiag.block(0,U2_j,numRows_BottOffDiag,currRank) = (*(LR_UpdateExtend_U_PtrVec[i])).block(HODLR_Root->min_i + numRows_TopOffDiag,0,numRows_BottOffDiag,currRank);
+
+    // Update V2s
+    V2_TopOffDiag.block(0,V2_j,numCols_TopOffDiag,currRank) = (*(LR_UpdateExtend_V_PtrVec[i])).block(HODLR_Root->min_j,0,numCols_TopOffDiag,currRank);
+    V2_BottOffDiag.block(0,V2_j,numCols_BottOffDiag,currRank) = (*(LR_UpdateExtend_V_PtrVec[i])).block(HODLR_Root->min_j + numCols_TopOffDiag,0,numCols_BottOffDiag,currRank);
+
+    U2_j += currRank;
+    V2_j += currRank;
+  }
+  // Update current LR
+  add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag);
+  add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag);
+
+  // Do the same for children
+  extendAddLRinTree(HODLR_Root->left,LR_UpdateExtend_U_PtrVec,LR_UpdateExtend_V_PtrVec,sumChildRanks);
+  extendAddLRinTree(HODLR_Root->right,LR_UpdateExtend_U_PtrVec,LR_UpdateExtend_V_PtrVec,sumChildRanks);
+
+
+}
+
+
+void HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2){
+  assert(U1.rows() == U2.rows());
+  assert(V1.rows() == V2.rows());
+  Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
+  Eigen::MatrixXd Vtot(V1.rows(),V1.cols() + V2.cols());
+  Utot.topLeftCorner(U1.rows(),U1.cols())  = U1;
+  Utot.topRightCorner(U2.rows(),U2.cols()) = U2;
+  Vtot.topLeftCorner(V1.rows(),V1.cols())  = V1;
+  Vtot.topRightCorner(V2.rows(),V2.cols()) = V2;
+  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(Utot);
+  Eigen::MatrixXd thinQ;
+  thinQ.setIdentity(Utot.rows(),Utot.cols());
+  qr.householderQ().applyThisOnTheLeft(thinQ);
+
+
+
+
+
+
+
+
+
+
+}
