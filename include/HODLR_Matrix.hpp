@@ -10,6 +10,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
+#include <set>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -23,15 +24,23 @@ public:
   bool printLevelAccuracy;
   bool printLevelInfo;
   bool printResultInfo;
- 
-  HODLR_Matrix();
-  HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
-  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
-  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
-  ~HODLR_Matrix();
 
-  /************************************* Copy *****************************************/
-  HODLR_Matrix(const HODLR_Matrix & rhs);
+  /************************************ Constructors *********************************/
+  HODLR_Matrix();
+  
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix);
+  
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold);
+
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  
+  HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
+
+  ~HODLR_Matrix();
+  
 
 
   /************************************* Solve Methods **********************************/
@@ -49,6 +58,8 @@ public:
   
   void SVD_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank, const int minRank = -1) const;
   
+  void PS_LowRankApprox_Sp(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank)const;
+
   /************************************* Attribute Modification **********************************/
   void set_LRTolerance(double tolerance);  
   void set_MinValueACA(double minValue);
@@ -68,20 +79,7 @@ public:
   /************************************ Acessing Matrix Entries *******************************/
   Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
 
-  /******************************Memory Management Functions***********************************/ 
-  void freeDenseMatMem();
-  
   /**********************************Extend Add Functions **************************************/
-  
- /* Function : extendAddUpdate(updateMatrix,nodeIDxVec,updateIdxVec)
- *-----------------------------------------------------------------
- * This function performs an extend add operation for a sparse solver in a situation where the parent is an HODLR matrix and the child is a regular dense matrix.
- * This function must be called on the parent HODLR matrix.
- * updateMatrix : Child update matrix in the form of Eigen MatrixXd.
- * parentIdxVec : Parent frontal matrix global index vector.
- * updateIdxVec : Child update matrix global index vector.
- */
-  void extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &parentIdxVec,std::vector<int> &updateIdxVec);
 
 private:
 
@@ -102,7 +100,9 @@ private:
   bool assembled_ExtendedSp;
   bool saveExtendedSp_Matrix;
   bool freeMatrixMemory;
+  bool freeMatrixMemory_Sp;
   bool matrixDataAvail;
+  bool matrixDataAvail_Sp;
   bool isSquareMatrix;
 
   double LR_Tolerance;
@@ -111,6 +111,7 @@ private:
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;
+  Eigen::SparseMatrix<double> matrixData_Sp;
   Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
 
   std::string extendedSp_SavePath;
@@ -141,7 +142,7 @@ private:
   int chooseNNZRowIndex(const std::vector<bool> &chosenRows) const;
   int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow) const;
   
-  void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd & inputMatrix,const Eigen::VectorXi & rowIndex,const Eigen::VectorXi & colIndex)const;
+  void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd & inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex)const;
   
   void LUDecompose(const Eigen::MatrixXd &inputMatrix,Eigen::MatrixXd &LU,Eigen::MatrixXd &P) const;
 
@@ -152,12 +153,13 @@ private:
 
   void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
 
+  /******************************Memory Management Functions***********************************/ 
+  void freeDenseMatMem();
+  void freeSparseMatMem();
+  
+
+
   /***********************************Extend Add Functions *******************************/
-  Eigen::MatrixXd get_UpdatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
-
-  void updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
-
-  double extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
 
 
 };

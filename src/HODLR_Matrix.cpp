@@ -22,7 +22,9 @@ void HODLR_Matrix::setDefaultValues(){
   assembled_ExtendedSp   = false;
   saveExtendedSp_Matrix  = false;
   freeMatrixMemory       = false;
+  freeMatrixMemory_Sp    = false;
   matrixDataAvail        = false;
+  matrixDataAvail_Sp     = false;
   isSquareMatrix         = false;
 
   printLevelRankInfo     = false;
@@ -46,30 +48,67 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix){
   matrixSize = inputMatrix.rows();
 }
 
-HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
-  assert(inputMatrix.rows() == inputMatrix.cols());
+HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix){
   setDefaultValues();
-  matrixData = inputMatrix;
-  sizeThreshold = inputSizeThreshold;
-  indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.createDefaultTree(inputMatrix.rows());
-  matrixDataAvail = true;
+  matrixData_Sp = inputMatrix;
+  sizeThreshold = 30;
+  matrixDataAvail_Sp = true;
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  indexTree.set_def_LRMethod("PS_Sparse");
   matrixSize = inputMatrix.rows();
 }
+
+HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
+  setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
+  matrixData = inputMatrix;
+  matrixSize = inputMatrix.rows();
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createDefaultTree(matrixSize);
+  matrixDataAvail = true;  
+}
+
+HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold){
+  setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
+  matrixData_Sp = inputMatrix;
+  matrixSize = inputMatrix.rows();
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createDefaultTree(matrixSize);
+  indexTree.set_def_LRMethod("PS_Sparse");
+  matrixDataAvail_Sp = true;
+}
+
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
-  assert(inputMatrix.rows() == inputMatrix.cols());
-  setDefaultValues();
+   setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
   matrixData = inputMatrix;
+  matrixSize = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.createFromUsrTree(inputMatrix.rows(),input_IndexTree);
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   matrixDataAvail = true;
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  matrixSize = inputMatrix.rows();
+  
 }
 
+HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
+  setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
+  matrixData_Sp = inputMatrix;
+  matrixSize = inputMatrix.rows();
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
+  indexTree.set_def_LRMethod("PS_Sparse");
+  matrixDataAvail_Sp = true;
+}
 
 HODLR_Matrix::~HODLR_Matrix(){
 }
@@ -81,6 +120,7 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   printLevelAccuracy = rhs.printLevelAccuracy;
   printLevelInfo     = rhs.printLevelInfo;
   printResultInfo    = rhs.printResultInfo;
+  
   //private attributes
   sizeThreshold      = rhs.sizeThreshold;
   extendedSp_Size    = rhs.extendedSp_Size;
@@ -100,6 +140,7 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   saveExtendedSp_Matrix  = rhs.saveExtendedSp_Matrix;
   freeMatrixMemory       = rhs.freeMatrixMemory;
   matrixDataAvail        = rhs.matrixDataAvail;    
+  matrixDataAvail_Sp     = rhs.matrixDataAvail_Sp;
   isSquareMatrix         = rhs.isSquareMatrix;
 
   LR_Tolerance           = rhs.LR_Tolerance;
@@ -107,6 +148,7 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
 
  
   matrixData          = rhs.matrixData;
+  matrixData_Sp       = rhs.matrixData_Sp;
   extendedSp_Solver   = rhs.extendedSp_Solver; 
   extendedSp_SavePath = rhs.extendedSp_SavePath;
   indexTree           = rhs.indexTree;
@@ -116,10 +158,12 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
 
 void HODLR_Matrix::storeLRinTree(){
   assert(indexTree.rootNode != NULL);
-  assert(matrixDataAvail == true);
+  assert((matrixDataAvail == true) || (matrixDataAvail_Sp == true));
   storeLRinTree(indexTree.rootNode);
   if (freeMatrixMemory == true)
     freeDenseMatMem();
+  if (freeMatrixMemory_Sp == true)
+    freeSparseMatMem();
   return;
 }
 
@@ -130,7 +174,10 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   if (HODLR_Root->isLeaf == true){
     int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
     int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;
-    HODLR_Root->leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+    if (matrixDataAvail_Sp == true)
+      HODLR_Root->leafMatrix = Eigen::MatrixXd(matrixData_Sp.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols));
+    else
+      HODLR_Root->leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
     return;
   }
   // Calculate the LR factorizations
@@ -153,14 +200,19 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   }else if (HODLR_Root->LR_Method == "SVD"){ 
     SVD_LowRankApprox(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK, HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
     SVD_LowRankApprox(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK, HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
+
+  }else if(HODLR_Root->LR_Method == "PS_Sparse"){
+    PS_LowRankApprox_Sp(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    PS_LowRankApprox_Sp(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+
   }else{
     std::cout<<"Error!. Invalid low-rank approximation scheme."<<std::endl;
     exit(EXIT_FAILURE);
   }
-    
+  
   storeLRinTree(HODLR_Root->left);
   storeLRinTree(HODLR_Root->right);
- 
+  
 }
 
 
@@ -412,7 +464,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
 
 Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
   
-  assert(isSquareMatrix);
+  assert(isSquareMatrix == true);
   assert(input_RHS.rows() == matrixSize);
   if (indexTree.rootNode == NULL){
     indexTree.set_sizeThreshold(sizeThreshold);
@@ -877,16 +929,113 @@ void HODLR_Matrix::SVD_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, E
    
 }
 
+
+void HODLR_Matrix::PS_LowRankApprox_Sp(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank)const{
+	
+  int nRows = max_i-min_i+1;
+  int nCols = max_j-min_j+1;
+  //int maxRank = std::min(nRows,nCols);
+  //int numPoints;
+  std::set<int> rowIdxSet,colIdxSet;
+  /*
+  if (minRank > 0)
+    numPoints = minRank;
+  else
+    numPoints = maxRank/25 + 1;
+  
+
+  double absFrobNormDiff = 1;
+  double relFrobNormDiff = 1;
+  double approxError = 1;
+  */
+  
+  Eigen::SparseMatrix<double> lowRankMatrix_Sp = matrixData_Sp.block(min_i,min_j,nRows,nCols);
+  //find numPoints
+  if (lowRankMatrix_Sp.nonZeros() == 0){
+    calculatedRank = 1;
+    W = Eigen::MatrixXd::Zero(nRows,1);
+    K = Eigen::MatrixXd::Zero(1,1);
+    V = Eigen::MatrixXd::Zero(nCols,1);
+    return;
+  }
+  for (int k = 0; k < lowRankMatrix_Sp.outerSize(); ++k)
+    for (Eigen::SparseMatrix<double>::InnerIterator it(lowRankMatrix_Sp,k); it; ++it){
+      rowIdxSet.insert(it.row());
+      colIdxSet.insert(it.col());
+    }
+  std::vector<int> rowIndex(rowIdxSet.begin(),rowIdxSet.end());
+  std::vector<int> colIndex(colIdxSet.begin(),colIdxSet.end());
+  
+  //while ((approxError > tolerance) && (numPoints <= maxRank)){	
+    
+  //create row and col index using Chebyshev or uniform nodes
+  /*
+  Eigen::VectorXi rowIndex(numPoints),colIndex(numPoints);
+  if (pointChoosingMethod == "Chebyshev")
+    for (int i = 0 ; i < numPoints; i++){
+      rowIndex(i) = floor((nRows + nRows * cos(pi*(2*i+1)/(2*numPoints)))/2);
+      colIndex(i) = floor((nCols + nCols * cos(pi*(2*i+1)/(2*numPoints)))/2);
+    }
+  if (pointChoosingMethod == "Uniform" && numPoints > 1){
+    int rowStride = nRows/(numPoints-1);
+    int colStride = nCols/(numPoints-1);
+    if (rowStride == 0)
+      rowStride = 1;
+    if (colStride == 0)
+      colStride = 1;
+    for (int i=0 ; i<numPoints; i++){
+      rowIndex(i) = i * rowStride;
+      colIndex(i) = i * colStride;
+    }
+  }
+  */
+  
+  //choose rows and columns and do the low-rank approximation
+  Eigen::MatrixXd dummyW,dummyK,dummyV;
+  extractRowsCols(W,K,V,Eigen::MatrixXd(lowRankMatrix_Sp),rowIndex,colIndex);
+  calculatedRank = W.cols();
+  
+  //obtain stopping criterion
+  /*
+  Eigen::VectorXi rowIndexTest = (rowIndex.head(numPoints-1)+rowIndex.tail(numPoints-1))/2;
+  Eigen::VectorXi colIndexTest = (colIndex.head(numPoints-1)+colIndex.tail(numPoints-1))/2;
+  
+  Eigen::MatrixXd sampleColsTest(nRows,numPoints-1);
+  Eigen::MatrixXd approxColsTest(nRows,numPoints-1);
+  Eigen::MatrixXd sampleRowsTest(numPoints-1,nCols);
+  Eigen::MatrixXd approxRowsTest(numPoints-1,nCols);
+  
+  //fill KTempApprox
+  for (int i = 0; i < numPoints-1;i++){
+    sampleRowsTest.row(i) = lowRankMatrix.row(rowIndexTest(i));
+    approxRowsTest.row(i) = (W * K).row(rowIndexTest(i))*V.transpose();
+    sampleColsTest.col(i) = lowRankMatrix.col(colIndexTest(i));
+    approxColsTest.col(i) = (W * K)*(V.row(colIndexTest(i)).transpose());	
+  }
+  
+  Eigen::MatrixXd sampleColsTestBlock = sampleColsTest.block(numPoints-1,0,nRows-numPoints+1,numPoints-1);
+  Eigen::MatrixXd approxColsTestBlock = approxColsTest.block(numPoints-1,0,nRows-numPoints+1,numPoints-1);
+  absFrobNormDiff = (sampleRowsTest-approxRowsTest).norm()+(sampleColsTestBlock-approxColsTestBlock).norm();
+  relFrobNormDiff = absFrobNormDiff/(sampleRowsTest.norm()+sampleColsTestBlock.norm());
+  approxError = relFrobNormDiff*(sqrt((nRows*nCols)/((numPoints-1)*(nCols+nRows-numPoints+1))));
+  numPoints *= 1.5;
+  //}
+  calculatedRank = W.cols(); 
+  */
+}
+
 void HODLR_Matrix::PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank, const std::string pointChoosingMethod,const int minRank)const{
 	
   int nRows = max_i-min_i+1;
   int nCols = max_j-min_j+1;
   int maxRank = std::min(nRows,nCols);
   int numPoints;
+
   if (minRank > 0)
     numPoints = minRank;
   else
     numPoints = maxRank/25 + 1;
+
   double absFrobNormDiff = 1;
   double relFrobNormDiff = 1;
   double approxError = 1;
@@ -895,30 +1044,32 @@ void HODLR_Matrix::PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Ei
   while ((approxError > tolerance) && (numPoints <= maxRank)){	
     
     //create row and col index using Chebyshev or uniform nodes
-    Eigen::VectorXi rowIndex(numPoints),colIndex(numPoints);
+    std::vector<int> rowIndex_Vec(numPoints),colIndex_Vec(numPoints);
+    Eigen::VectorXi  rowIndex(numPoints),colIndex(numPoints);
     if (pointChoosingMethod == "Chebyshev")
-      for (int i=0 ; i<numPoints; i++){
-	rowIndex(i) = floor((nRows+nRows*cos(pi*(2*i+1)/(2*numPoints)))/2);
-	colIndex(i) = floor((nCols+nCols*cos(pi*(2*i+1)/(2*numPoints)))/2);
+      for (int i = 0 ; i < numPoints; i++){
+	rowIndex(i) = floor((nRows + nRows * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
+	colIndex(i) = floor((nCols + nCols * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
+	rowIndex_Vec[i] = rowIndex(i);
+	colIndex_Vec[i] = colIndex(i);
       }
     if (pointChoosingMethod == "Uniform" && numPoints > 1){
-      int rowStride = nRows/(numPoints-1);
-      int colStride = nCols/(numPoints-1);
+      int rowStride = nRows / (numPoints - 1);
+      int colStride = nCols / (numPoints - 1);
       if (rowStride == 0)
 	rowStride = 1;
       if (colStride == 0)
 	colStride = 1;
       for (int i=0 ; i<numPoints; i++){
-	rowIndex(i) = i*rowStride;
-	colIndex(i) = i*colStride;
+	rowIndex(i) = i * rowStride;
+	colIndex(i) = i * colStride;
+	rowIndex_Vec[i] = rowIndex(i);
+	colIndex_Vec[i] = colIndex(i);
       }
     }
 
     //choose rows and columns and do the low-rank approximation
-    Eigen::MatrixXd dummyW,dummyK,dummyV;
-    extractRowsCols(W,K,V,lowRankMatrix,rowIndex,colIndex);
-    //W = dummyW * dummyK;
-    //V = dummyV;
+    extractRowsCols(W,K,V,lowRankMatrix,rowIndex_Vec,colIndex_Vec);
     calculatedRank = W.cols();
 
     //obtain stopping criterion
@@ -932,10 +1083,10 @@ void HODLR_Matrix::PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Ei
     
     //fill KTempApprox
     for (int i = 0; i < numPoints-1;i++){
-      sampleRowsTest.row(i)=lowRankMatrix.row(rowIndexTest(i));
-      approxRowsTest.row(i)=(W * K).row(rowIndexTest(i))*V.transpose();
-      sampleColsTest.col(i)=lowRankMatrix.col(colIndexTest(i));
-      approxColsTest.col(i)=(W * K)*(V.row(colIndexTest(i)).transpose());						
+      sampleRowsTest.row(i) = lowRankMatrix.row(rowIndexTest(i));
+      approxRowsTest.row(i) = (W * K).row(rowIndexTest(i))*V.transpose();
+      sampleColsTest.col(i) = lowRankMatrix.col(colIndexTest(i));
+      approxColsTest.col(i) = (W * K)*(V.row(colIndexTest(i)).transpose());	
     }
     
     Eigen::MatrixXd sampleColsTestBlock = sampleColsTest.block(numPoints-1,0,nRows-numPoints+1,numPoints-1);
@@ -949,30 +1100,30 @@ void HODLR_Matrix::PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Ei
 }
 
 
-void HODLR_Matrix::extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const Eigen::VectorXi & rowIndex,const Eigen::VectorXi & colIndex)const{
+void HODLR_Matrix::extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex)const{
 	
-  int nRowsSelect = rowIndex.rows();
-  int nColsSelect = colIndex.rows();
+  int nRowsSelect = rowIndex.size();
+  int nColsSelect = colIndex.size();
   
   //double rankTolerance=max(inputMatrix.rows(),inputMatrix.cols())*1e-16;
-  double rankTolerance=1e-10;
+  double rankTolerance  = 1e-10;
   Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(inputMatrix.rows(),nColsSelect);
   Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(inputMatrix.cols(),nRowsSelect);
   Eigen::MatrixXd KTemp = Eigen::MatrixXd::Zero(nRowsSelect,nColsSelect);
   
   //fill W
   for (int i = 0; i < nColsSelect; i++)
-    WTemp.col(i) = inputMatrix.col(colIndex(i));
+    WTemp.col(i) = inputMatrix.col(colIndex[i]);
   
   //fill V
   for (int i = 0; i < nRowsSelect; i++)
-    VTemp.col(i) = inputMatrix.row(rowIndex(i)).transpose();
+    VTemp.col(i) = inputMatrix.row(rowIndex[i]).transpose();
   
   
   //fill K
   for (int i = 0; i < nRowsSelect; i++)
     for (int j = 0; j < nColsSelect; j++)
-      KTemp(i,j)=inputMatrix(rowIndex(i),colIndex(j));
+      KTemp(i,j) = inputMatrix(rowIndex[i],colIndex[j]);
   
 
   Eigen::MatrixXd svdW,svdV,svdK;
@@ -1263,7 +1414,7 @@ void HODLR_Matrix::reset_attributes(){
 }
 
 void HODLR_Matrix::set_LRTolerance(double input_tolerance){
-  if (matrixDataAvail == false){
+  if ((matrixDataAvail == false) && (matrixDataAvail_Sp == false)){
     std::cout<<"Error! Matrix data has been deleted from memory!"<<std::endl;
     exit(EXIT_FAILURE);
   }
@@ -1310,6 +1461,11 @@ void HODLR_Matrix::freeDenseMatMem(){
   matrixDataAvail = false;
 }
 
+void HODLR_Matrix::freeSparseMatMem(){
+  matrixData_Sp.resize(0,0);
+  matrixDataAvail_Sp = false;
+}
+
 double HODLR_Matrix::get_recLU_FactorizationTime() const{
   return recLU_FactorizationTime;
 }
@@ -1341,7 +1497,10 @@ double HODLR_Matrix::get_iter_SolveTime() const {
 Eigen::MatrixXd HODLR_Matrix::get_Block(int min_i,int min_j,int numRows,int numCols){
   if (matrixDataAvail == true){
     return matrixData.block(min_i,min_j,numRows,numCols);
-  }else  if (LRStoredInTree == true){
+  }else  if(matrixDataAvail_Sp == true){
+    Eigen::MatrixXd result(matrixData_Sp.block(min_i,min_j,numRows,numCols));
+    return result;
+  }else if (LRStoredInTree == true){
     int max_i = min_i + numRows - 1;
     int max_j = min_j + numCols - 1;
     Eigen::MatrixXd blkMatrix = Eigen::MatrixXd::Zero(numRows,numCols);
@@ -1410,212 +1569,3 @@ void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Mi
   blkMatrix.block(blk_Min_i,blk_Min_j,LR_numRows,LR_numCols) = LR_U.block(LR_Min_i,0,LR_numRows,LR_U.cols()) * LR_K * LR_V.block(LR_Min_j,0,LR_numCols,LR_V.cols()).transpose();
 }
 /**************************************Extend-Add Functions************************************/
-
-/* Function : extendAddUpdate(updateMatrix,nodeIDxVec,updateIdxVec)
- *-----------------------------------------------------------------
- * This function performs an extend add operation for a sparse solver in a situation where the parent is an HODLR matrix and the child is a regular dense matrix.
- * This function must be called on the parent HODLR matrix.
- * updateMatrix : Child update matrix in the form of Eigen MatrixXd.
- * parentIdxVec : Parent frontal matrix global index vector.
- * updateIdxVec : Child update matrix global index vector.
- */
-void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateMatrix,std::vector<int> &parentIdxVec,std::vector<int> &updateIdxVec){
-  updateLRinTree(indexTree.rootNode,updateMatrix,parentIdxVec,updateIdxVec);
-}
-
-Eigen::MatrixXd HODLR_Matrix::get_UpdatedBlock(int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
-  Eigen::MatrixXd result = get_Block(min_i,min_j,numRows,numCols);
-  for (int i = 0; i < numRows; i++)
-    for (int j = 0; j < numCols; j++){
-      std::vector<int>::iterator iter_i,iter_j;
-      iter_i = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),parentIdxVec[i]);
-      iter_j = std::lower_bound(updateIdxVec.begin(),updateIdxVec.end(),parentIdxVec[j]);
-      bool found_i = (iter_i != updateIdxVec.end());
-      bool found_j = (iter_j != updateIdxVec.end());
-      if ((found_i == true) && (found_j ==true)){
-	int pos_i = iter_i - updateIdxVec.begin();
-	int pos_j = iter_j - updateIdxVec.begin();
-	result(i,j) += updateMatrix(pos_i,pos_j);
-      }
-    } 
-  return result;
-}
-
-
-void HODLR_Matrix::updateLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
-  // Base cases;
-  if (HODLR_Root == NULL)
-    return;
-  if (HODLR_Root->isLeaf == true){
-    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
-    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;
-    HODLR_Root->leafMatrix = get_UpdatedBlock(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols,updateMatrix,parentIdxVec,updateIdxVec);
-    return;
-  }
-  // Calculate the LR factorizations
-  if (HODLR_Root->LR_Method == "partialPiv_ACA"){
-    Eigen::MatrixXd newU,newV;
-    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,updateMatrix,parentIdxVec,updateIdxVec);
-    HODLR_Root->topOffDiagU = newU;
-    HODLR_Root->topOffDiagV = newV;
-
-    extendAddACA_LowRankApprox(newU,newV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,updateMatrix,parentIdxVec,updateIdxVec);
-    HODLR_Root->bottOffDiagU = newU;
-    HODLR_Root->bottOffDiagV = newV;
-
-    HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
-    HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
-    
-  }else{
-    std::cout<<"Error!. Invalid low-rank approximation scheme."<<std::endl;
-    exit(EXIT_FAILURE);
-  }
-    
-  updateLRinTree(HODLR_Root->left,updateMatrix,parentIdxVec,updateIdxVec);
-  updateLRinTree(HODLR_Root->right,updateMatrix,parentIdxVec,updateIdxVec);
- 
-}
-
-
-double HODLR_Matrix::extendAddACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,Eigen::MatrixXd & updateMatrix,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
-  
-  int nRows = max_i - min_i + 1;
-  int nCols = max_j - min_j + 1;
-  int maxRank = std::min(nRows,nCols);
-  int numColsW = 2;
-  int numColsV = 2;
-
-  Eigen::MatrixXd tempW(nRows,numColsW);
-  Eigen::MatrixXd tempV(nCols,numColsV);
-
-  Eigen::VectorXd residualRow,residualCol;
-  std::vector<bool> chosenRows(nRows),chosenCols(nCols);
-  for (int i = 0; i < nRows; i++)
-    chosenRows[i] = false;
-  for (int i = 0; i < nCols; i++)
-    chosenCols[i] = false;
-  
-  double frobNormSq = 0;
-  double frobNorm   = 0;   
-  double epsilon    = 1;
-  int currRowIndex  = 0;
-  int currColIndex  = 0;
-  int nextRowIndex  = 0;
-  int k = 0;
-  
-  while (((epsilon > tolerance) || (k < minRank)) && (k < maxRank)){
-    
-    if ( k == numColsW - 1){
-      numColsW = 2 * numColsW;
-      numColsV = 2 * numColsV;
-      tempW.conservativeResize(Eigen::NoChange,numColsW);
-      tempV.conservativeResize(Eigen::NoChange,numColsV);
-    }
-
-    chosenRows[currRowIndex] = true;
-    int globalCurrRowIdx = currRowIndex + min_i;
-    //Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,nCols).transpose();
-    Eigen::VectorXd currRow = get_UpdatedBlock(globalCurrRowIdx,min_j,1,nCols,updateMatrix,parentIdxVec,updateIdxVec).transpose();
-
-    // Update row of Residual
-    Eigen::VectorXd sum = Eigen::VectorXd::Zero(nCols);
-    for (int l = 0; l < k; l++){
-      sum += tempW(currRowIndex,l) * tempV.col(l);
-    }
-    residualRow = (currRow - sum);
-    // Find Next Column
-    int maxInd;
-    Eigen::VectorXd absCurrRow = residualRow.cwiseAbs();
-    double maxValue = absCurrRow.maxCoeff(&maxInd);
-    if (maxValue <= minValueACA){
-      currRowIndex = chooseNNZRowIndex(chosenRows);
-      if (currRowIndex == -1)
-	break;
-      continue;
-      absCurrRow = residualRow.cwiseAbs();
-      maxValue = absCurrRow.maxCoeff(&maxInd);
-      currColIndex = maxInd;
-    }
-    if (chosenCols[maxInd] == false){
-      currColIndex = maxInd;
-    }else{
-      currColIndex = chooseNextRowCol(chosenCols,residualRow.cwiseAbs());
-      if (currColIndex == -1)
-	break;
-    }
-  
-    // Update column of Residual
-    chosenCols[currColIndex] = true;
-    int globalCurrColIdx = currColIndex + min_j;
-    double currPivot = 1/residualRow(currColIndex);
-    //Eigen::VectorXd currColumn = matrixData.block(min_i,globalCurrColIdx,nRows,1);
-    Eigen::VectorXd currColumn = get_UpdatedBlock(min_i,globalCurrColIdx,nRows,1,updateMatrix,parentIdxVec,updateIdxVec);
-
-    sum = Eigen::VectorXd::Zero(nRows);
-    for(int l = 0; l < k; l++){
-      sum += tempV(currColIndex,l) * tempW.col(l);
-    }
-    residualCol = currColumn - sum;
-    
-    // Find Next Row
-    Eigen::VectorXd absCurrCol = residualCol.cwiseAbs();
-    maxValue = absCurrCol.maxCoeff(&maxInd);
-    
-    if (chosenRows[maxInd] == false){
-      nextRowIndex = maxInd;
-    }else{
-      nextRowIndex = chooseNextRowCol(chosenRows,residualCol.cwiseAbs());
-    }
-    if (nextRowIndex == -1)
-      break;
-
-    // Write to W & V
-    tempW.col(k) = currPivot * residualCol;
-    tempV.col(k) = residualRow;
-       
-    // Update Frobenious Norm
-    double sumNorm = 0;
-    for(int j = 0; j < k; j++){
-      sumNorm += ((currPivot * residualCol.transpose()) * tempW.col(j)) * ((tempV.col(j).transpose()) * residualRow);
-    }
-    frobNormSq += 2 * sumNorm + ((currPivot * residualCol).squaredNorm()) * residualRow.squaredNorm();
-    frobNorm = sqrt(frobNormSq);
-    // Calculate epsilon
-    epsilon = (currPivot * residualCol).norm() * residualRow.norm()/frobNorm;
-    
-    // Set Values for next iteration
-    currRowIndex = nextRowIndex;
-    k++;
-  }
-  calculatedRank = k;
-  // Return zero for zero matrix
-  if ( k == 0){
-    W = Eigen::MatrixXd::Zero(nRows,1);
-    V = Eigen::MatrixXd::Zero(nCols,1);
-    calculatedRank = 1;
-    return epsilon;
-  }
-  
-  // Return the original matrix if rank is equal to matrix dimensions
-  if (k >= maxRank - 1){
-    // Return original matrix
-    // Skinny matrix
-    if (nCols <= nRows){
-      //  W = matrixData.block(min_i,min_j,nRows,nCols);
-      W = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,parentIdxVec,updateIdxVec);
-      V = Eigen::MatrixXd::Identity(nCols,nCols);
-      calculatedRank = nCols;
-    }// Fat matrix      
-    else {
-      W = Eigen::MatrixXd::Identity(nRows,nRows);
-      //V = matrixData.block(min_i,min_j,nRows,nCols).transpose();
-      V = get_UpdatedBlock(min_i,min_j,nRows,nCols,updateMatrix,parentIdxVec,updateIdxVec).transpose();
-      calculatedRank = nRows;
-    } 
-    return epsilon;
-  }
-  
-  W = tempW.leftCols(calculatedRank);
-  V = tempV.leftCols(calculatedRank);
-  return epsilon;
-}
