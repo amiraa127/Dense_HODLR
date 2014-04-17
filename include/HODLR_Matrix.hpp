@@ -86,6 +86,8 @@ private:
   int sizeThreshold;
   int extendedSp_Size;
   int matrixSize;
+  int matrixNumRows;
+  int matrixNumCols;
 
   double recLU_FactorizationTime;
   double recLU_SolveTime;
@@ -162,9 +164,9 @@ private:
   /***********************************Extend Add Functions *******************************/
   void extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_ptrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_ptrVec,std::vector<std::vector<int>* > &updateIdxPtrVec, int sumChildRanks);
 
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_V_PtrVec,int sumChildRanks);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,int sumChildRanks);
 
-  void add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
+  int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
 
 
 };

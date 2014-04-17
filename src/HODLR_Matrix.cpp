@@ -16,6 +16,9 @@ void HODLR_Matrix::setDefaultValues(){
   extendedSp_SolveTime         = 0;
   iter_SolveTime               = 0;
   matrixSize                   = 0; 
+  matrixNumRows                = 0;
+  matrixNumCols                = 0; 
+
 
   LRStoredInTree         = false;
   createdRecLUfactorTree = false;
@@ -45,7 +48,9 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix){
   sizeThreshold = 30;
   matrixDataAvail = true;
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  matrixSize = inputMatrix.rows();
+  matrixSize    = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix){
@@ -55,15 +60,19 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix){
   matrixDataAvail_Sp = true;
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   indexTree.set_def_LRMethod("PS_Sparse");
-  matrixSize = inputMatrix.rows();
+  matrixSize    = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
   setDefaultValues();
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  matrixData = inputMatrix;
-  matrixSize = inputMatrix.rows();
+  matrixData    = inputMatrix;
+  matrixSize    = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createDefaultTree(matrixSize);
@@ -75,7 +84,9 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSiz
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
   matrixData_Sp = inputMatrix;
-  matrixSize = inputMatrix.rows();
+  matrixSize    = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createDefaultTree(matrixSize);
@@ -88,8 +99,10 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
    setDefaultValues();
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  matrixData = inputMatrix;
-  matrixSize = inputMatrix.rows();
+  matrixData    = inputMatrix;
+  matrixSize    = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
@@ -102,7 +115,9 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSi
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
   matrixData_Sp = inputMatrix;
-  matrixSize = inputMatrix.rows();
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
+  matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
@@ -125,7 +140,9 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   sizeThreshold      = rhs.sizeThreshold;
   extendedSp_Size    = rhs.extendedSp_Size;
   matrixSize         = rhs.matrixSize;
-  
+  matrixNumRows      = rhs.matrixNumRows;
+  matrixNumCols      = rhs.matrixNumCols;
+
   recLU_FactorizationTime      = rhs.recLU_FactorizationTime;
   recLU_SolveTime              = rhs.recLU_SolveTime;
   LR_ComputationTime           = rhs.LR_ComputationTime;
@@ -896,7 +913,7 @@ int HODLR_Matrix::SVD_LowRankApprox(const Eigen::MatrixXd & inputMatrix, const d
   Eigen::VectorXd singularValues = svd.singularValues();
   int nSingularValues = singularValues.rows();
   int rank = nSingularValues;
-  for (int i=0; i < nSingularValues; i++)
+  for (int i = 0; i < nSingularValues; i++)
     if (singularValues(i) < accuracy){
       rank = i + 1;
       break;
@@ -1572,48 +1589,71 @@ void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Mi
 /**************************************Extend-Add Functions************************************/
 
 void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_PtrVec,std::vector<std::vector<int>* > &updateIdxPtrVec,int sumChildRanks){
-
-
-
-
-
+  int numChildren = LR_Update_U_PtrVec.size();
+  Eigen::MatrixXd updateExtendU = Eigen::MatrixXd::Zero(matrixNumRows,sumChildRanks);
+  Eigen::MatrixXd updateExtendV = Eigen::MatrixXd::Zero(matrixNumCols,sumChildRanks);
+  int j_ind = 0;  
+  for (int i = 0; i < numChildren; i++){
+    //create extended U and V
+    int currRank = (LR_Update_U_PtrVec[i])->cols(); 
+    int updateMatrixSize = (updateIdxPtrVec[i])->size();
+    // Find update matrix extend add indices
+    std::vector<int> childUpdateExtendVec(updateMatrixSize);
+    for (int j = 0; j < updateMatrixSize; j++){
+      std::vector<int>::iterator iter;
+      iter = std::lower_bound(parentIdxVec.begin(),parentIdxVec.end(),(*(updateIdxPtrVec[i]))[j]);
+      int extendPos = iter - parentIdxVec.begin();
+      childUpdateExtendVec[j] = extendPos;
+    }
+     // Go over all rows and columns in the update matrix
+    for (int j = 0; j < updateMatrixSize; j++){
+      for (int k = 0; k < currRank; k++){
+	int rowIdx = childUpdateExtendVec[j];
+	updateExtendU(rowIdx,k + j_ind) = (*(LR_Update_U_PtrVec[i]))(j,k);	
+	updateExtendV(rowIdx,k + j_ind) = (*(LR_Update_V_PtrVec[i]))(j,k);	
+      }
+    }
+    j_ind += currRank;
+  }
+  extendAddLRinTree(indexTree.rootNode,updateExtendU,updateExtendV,sumChildRanks);
+  
 }
-void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_UpdateExtend_V_PtrVec,int sumChildRanks){
-  int numChildren = LR_UpdateExtend_V_PtrVec.size();
+
+void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,int sumChildRanks){
+  if (HODLR_Root->isLeaf == true){
+    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
+    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
+    HODLR_Root->leafMatrix += (updateExtendU).block(HODLR_Root->min_i,0,numRows,sumChildRanks) * (updateExtendV).block(HODLR_Root->min_j,0,numCols,sumChildRanks).transpose();       
+    return;
+  }
+
   int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
   int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
   int numCols_TopOffDiag  = numRows_BottOffDiag;
   int numCols_BottOffDiag = numRows_TopOffDiag; 
-  Eigen::MatrixXd U2_TopOffDiag(numRows_TopOffDiag,sumChildRanks),U2_BottOffDiag(numRows_BottOffDiag,sumChildRanks);
-  Eigen::MatrixXd V2_TopOffDiag(numCols_TopOffDiag,sumChildRanks),V2_BottOffDiag(numCols_BottOffDiag,sumChildRanks);
-  int U2_j = 0;
-  int V2_j = 0;
-  for (int i = 0; i < numChildren; i++){ 
-    int currRank = (LR_UpdateExtend_U_PtrVec[i])->cols();
-    // Update topDiag U2s
-    U2_TopOffDiag.block(0,U2_j,numRows_TopOffDiag,currRank) = (*(LR_UpdateExtend_U_PtrVec[i])).block(HODLR_Root->min_i,0,numRows_TopOffDiag,currRank);
-    U2_BottOffDiag.block(0,U2_j,numRows_BottOffDiag,currRank) = (*(LR_UpdateExtend_U_PtrVec[i])).block(HODLR_Root->min_i + numRows_TopOffDiag,0,numRows_BottOffDiag,currRank);
+  Eigen::MatrixXd U2_TopOffDiag,U2_BottOffDiag;
+  Eigen::MatrixXd V2_TopOffDiag,V2_BottOffDiag;
 
-    // Update V2s
-    V2_TopOffDiag.block(0,V2_j,numCols_TopOffDiag,currRank) = (*(LR_UpdateExtend_V_PtrVec[i])).block(HODLR_Root->min_j,0,numCols_TopOffDiag,currRank);
-    V2_BottOffDiag.block(0,V2_j,numCols_BottOffDiag,currRank) = (*(LR_UpdateExtend_V_PtrVec[i])).block(HODLR_Root->min_j + numCols_TopOffDiag,0,numCols_BottOffDiag,currRank);
+  // Create topDiag U2s
+  U2_TopOffDiag  = (updateExtendU).block(HODLR_Root->min_i,0,numRows_TopOffDiag,sumChildRanks);
+  U2_BottOffDiag = (updateExtendU).block(HODLR_Root->min_i + numRows_TopOffDiag,0,numRows_BottOffDiag,sumChildRanks);
 
-    U2_j += currRank;
-    V2_j += currRank;
-  }
+  // Create V2s
+  V2_TopOffDiag  = (updateExtendV).block(HODLR_Root->min_j,0,numCols_TopOffDiag,sumChildRanks);
+  V2_BottOffDiag = (updateExtendV).block(HODLR_Root->min_j + numCols_TopOffDiag,0,numCols_BottOffDiag,sumChildRanks);
+
   // Update current LR
-  add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag);
-  add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag);
-
+  HODLR_Root->topOffDiagRank  = add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag);
+  HODLR_Root->bottOffDiagRank = add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag);
+   
   // Do the same for children
-  extendAddLRinTree(HODLR_Root->left,LR_UpdateExtend_U_PtrVec,LR_UpdateExtend_V_PtrVec,sumChildRanks);
-  extendAddLRinTree(HODLR_Root->right,LR_UpdateExtend_U_PtrVec,LR_UpdateExtend_V_PtrVec,sumChildRanks);
-
+  extendAddLRinTree(HODLR_Root->left ,updateExtendU,updateExtendV,sumChildRanks);
+  extendAddLRinTree(HODLR_Root->right,updateExtendU,updateExtendV,sumChildRanks);
 
 }
 
 
-void HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2){
+int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2){
   assert(U1.rows() == U2.rows());
   assert(V1.rows() == V2.rows());
   Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
@@ -1626,14 +1666,13 @@ void HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,
   Eigen::MatrixXd thinQ;
   thinQ.setIdentity(Utot.rows(),Utot.cols());
   qr.householderQ().applyThisOnTheLeft(thinQ);
-
-
-
-
-
-
-
-
-
-
+  int rank = qr.rank();
+  Eigen::MatrixXd Q = thinQ.leftCols(rank);
+  Eigen::MatrixXd sigma = (Q.transpose() * Utot) * (Vtot.transpose() * Q);
+  Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
+  SVD_LowRankApprox(sigma,LR_Tolerance,&sigma_W,&sigma_K,&sigma_V);
+  result_U = Q * sigma_W;
+  result_K = sigma_K;
+  result_V = Q * sigma_V;
+  return sigma_K.rows();
 }
