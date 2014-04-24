@@ -89,14 +89,14 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSiz
   matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.createDefaultTree(matrixSize);
   indexTree.set_def_LRMethod("PS_Sparse");
+  indexTree.createDefaultTree(matrixSize);
   matrixDataAvail_Sp = true;
 }
 
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
-   setDefaultValues();
+  setDefaultValues();
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
   matrixData    = inputMatrix;
@@ -120,12 +120,13 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSi
   matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   indexTree.set_def_LRMethod("PS_Sparse");
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   matrixDataAvail_Sp = true;
 }
 
 HODLR_Matrix::~HODLR_Matrix(){
+ 
 }
 
 HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
@@ -218,12 +219,12 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     SVD_LowRankApprox(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK, HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
     SVD_LowRankApprox(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK, HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
 
-  }else if(HODLR_Root->LR_Method == "PS_Sparse"){
+  }else if (HODLR_Root->LR_Method == "PS_Sparse"){
     PS_LowRankApprox_Sp(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank);
     PS_LowRankApprox_Sp(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank);
 
   }else{
-    std::cout<<"Error!. Invalid low-rank approximation scheme."<<std::endl;
+    std::cout<<"Error!. Invalid low-rank approximation scheme ( "<<HODLR_Root->LR_Method<<")."<<std::endl;
     exit(EXIT_FAILURE);
   }
   
@@ -1589,6 +1590,14 @@ void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Mi
 /**************************************Extend-Add Functions************************************/
 
 void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_PtrVec,std::vector<std::vector<int>* > &updateIdxPtrVec,int sumChildRanks){
+  if (LRStoredInTree == false){
+    double startTime = clock();
+    storeLRinTree();
+    double endTime = clock();
+    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    LRStoredInTree = true;
+  }
+  
   int numChildren = LR_Update_U_PtrVec.size();
   Eigen::MatrixXd updateExtendU = Eigen::MatrixXd::Zero(matrixNumRows,sumChildRanks);
   Eigen::MatrixXd updateExtendV = Eigen::MatrixXd::Zero(matrixNumCols,sumChildRanks);
@@ -1605,7 +1614,7 @@ void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<E
       int extendPos = iter - parentIdxVec.begin();
       childUpdateExtendVec[j] = extendPos;
     }
-     // Go over all rows and columns in the update matrix
+    // Go over all rows and columns in the update matrix
     for (int j = 0; j < updateMatrixSize; j++){
       for (int k = 0; k < currRank; k++){
 	int rowIdx = childUpdateExtendVec[j];
@@ -1626,26 +1635,21 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::M
     HODLR_Root->leafMatrix += (updateExtendU).block(HODLR_Root->min_i,0,numRows,sumChildRanks) * (updateExtendV).block(HODLR_Root->min_j,0,numCols,sumChildRanks).transpose();       
     return;
   }
-
   int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
   int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
   int numCols_TopOffDiag  = numRows_BottOffDiag;
   int numCols_BottOffDiag = numRows_TopOffDiag; 
   Eigen::MatrixXd U2_TopOffDiag,U2_BottOffDiag;
   Eigen::MatrixXd V2_TopOffDiag,V2_BottOffDiag;
-
   // Create topDiag U2s
   U2_TopOffDiag  = (updateExtendU).block(HODLR_Root->min_i,0,numRows_TopOffDiag,sumChildRanks);
   U2_BottOffDiag = (updateExtendU).block(HODLR_Root->min_i + numRows_TopOffDiag,0,numRows_BottOffDiag,sumChildRanks);
-
   // Create V2s
   V2_TopOffDiag  = (updateExtendV).block(HODLR_Root->min_j,0,numCols_TopOffDiag,sumChildRanks);
   V2_BottOffDiag = (updateExtendV).block(HODLR_Root->min_j + numCols_TopOffDiag,0,numCols_BottOffDiag,sumChildRanks);
-
   // Update current LR
   HODLR_Root->topOffDiagRank  = add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag);
   HODLR_Root->bottOffDiagRank = add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag);
-   
   // Do the same for children
   extendAddLRinTree(HODLR_Root->left ,updateExtendU,updateExtendV,sumChildRanks);
   extendAddLRinTree(HODLR_Root->right,updateExtendU,updateExtendV,sumChildRanks);
@@ -1653,7 +1657,7 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::M
 }
 
 
-int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2){
+int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2){
   assert(U1.rows() == U2.rows());
   assert(V1.rows() == V2.rows());
   Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
@@ -1662,17 +1666,66 @@ int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,E
   Utot.topRightCorner(U2.rows(),U2.cols()) = U2;
   Vtot.topLeftCorner(V1.rows(),V1.cols())  = V1;
   Vtot.topRightCorner(V2.rows(),V2.cols()) = V2;
-  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(Utot);
-  Eigen::MatrixXd thinQ;
-  thinQ.setIdentity(Utot.rows(),Utot.cols());
-  qr.householderQ().applyThisOnTheLeft(thinQ);
-  int rank = qr.rank();
-  Eigen::MatrixXd Q = thinQ.leftCols(rank);
-  Eigen::MatrixXd sigma = (Q.transpose() * Utot) * (Vtot.transpose() * Q);
+  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_U(Utot);
+  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_V(Vtot);
+  Eigen::MatrixXd thinQ_U,thinQ_V;
+  thinQ_U.setIdentity(Utot.rows(),Utot.cols());
+  thinQ_V.setIdentity(Vtot.rows(),Vtot.cols());
+  qr_U.householderQ().applyThisOnTheLeft(thinQ_U);
+  qr_V.householderQ().applyThisOnTheLeft(thinQ_V);
+  int rank_U = qr_U.rank();
+  int rank_V = qr_V.rank();
+  rank_U = std::max(rank_U,1);
+  rank_V = std::max(rank_V,1);
+  
+  Eigen::MatrixXd Q_U = thinQ_U.leftCols(rank_U);
+  Eigen::MatrixXd Q_V = thinQ_V.leftCols(rank_V);
+  Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_U = qr_U.colsPermutation();
+  Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_V = qr_V.colsPermutation();
+  Eigen::MatrixXd sigma = (Q_U.transpose() * Utot * permMatrix_U.transpose()) *(permMatrix_V * Vtot.transpose() * Q_V);
   Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
-  SVD_LowRankApprox(sigma,LR_Tolerance,&sigma_W,&sigma_K,&sigma_V);
-  result_U = Q * sigma_W;
+  assert(sigma.rows() * sigma.cols() > 0);
+  SVD_LowRankApprox(sigma,LR_Tolerance,&sigma_W,&sigma_V,&sigma_K);
+  
+  
+  result_U = Q_U * sigma_W;
   result_K = sigma_K;
-  result_V = Q * sigma_V;
+  result_V = Q_V * sigma_V;
   return sigma_K.rows();
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagU(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagU;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagV(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagV;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagK(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagK;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagU(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagU;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagV(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagV;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagK(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagK;
 }
