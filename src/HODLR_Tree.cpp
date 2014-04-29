@@ -325,6 +325,24 @@ void HODLR_Tree::createFromUsrTree(const int matrixSize,const user_IndexTree &us
 }
 
 
+void HODLR_Tree::correctIndices(){
+  assert(rootNode != NULL);
+  int offset_i,offset_j;
+  offset_i = rootNode->min_i;
+  offset_j = rootNode->min_j;
+  correctIndices(rootNode,offset_i,offset_j);
+}
+
+void HODLR_Tree::correctIndices(node* root,int offset_i,int offset_j){
+  root->min_i = root->min_i - offset_i;
+  root->min_j = root->min_j - offset_j;
+  if (root->isLeaf == true)
+    return;
+  correctIndices(root->left,offset_i,offset_j);
+  correctIndices(root->right,offset_i,offset_j);
+}
+  
+
 void HODLR_Tree::set_sizeThreshold(const int input_sizeThreshold){
   if (rootNode == NULL)
     sizeThreshold = input_sizeThreshold;

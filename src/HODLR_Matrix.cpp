@@ -34,7 +34,7 @@ void HODLR_Matrix::setDefaultValues(){
   printLevelAccuracy     = false;
   printLevelInfo         = false;
   printResultInfo        = false;  
- 
+  extendedSp_SavePath    = "/extendedSp_Data";
 }
 
 
@@ -1511,7 +1511,7 @@ double HODLR_Matrix::get_LR_ComputationTime() const{
 double HODLR_Matrix::get_iter_SolveTime() const {
   return iter_SolveTime;
 }
-
+/************************************ Acessing HODLR Entries *******************************/
 Eigen::MatrixXd HODLR_Matrix::get_Block(int min_i,int min_j,int numRows,int numCols){
   if (matrixDataAvail == true){
     return matrixData.block(min_i,min_j,numRows,numCols);
@@ -1587,9 +1587,92 @@ void HODLR_Matrix::fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Mi
   blkMatrix.block(blk_Min_i,blk_Min_j,LR_numRows,LR_numCols) = LR_U.block(LR_Min_i,0,LR_numRows,LR_U.cols()) * LR_K * LR_V.block(LR_Min_j,0,LR_numCols,LR_V.cols()).transpose();
 }
 
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagU(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagU;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagV(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagV;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagK(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->topOffDiagK;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagU(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagU;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagV(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagV;
+}
+
+Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagK(){
+  assert(indexTree.rootNode != NULL);
+  assert(LRStoredInTree     == true);
+  return indexTree.rootNode->bottOffDiagK;
+}
+
+HODLR_Matrix* HODLR_Matrix::topDiag(){
+  assert(indexTree.rootNode != NULL);
+  HODLR_Matrix* topDiagMatrixPtr = new HODLR_Matrix;
+  *(topDiagMatrixPtr) = *this;
+  (*(topDiagMatrixPtr)).keepTopDiag();
+  return topDiagMatrixPtr;
+}
+
+HODLR_Matrix* HODLR_Matrix::bottDiag(){
+  assert(indexTree.rootNode != NULL);
+  HODLR_Matrix* bottDiagMatrixPtr = new HODLR_Matrix;
+  *(bottDiagMatrixPtr) = *this;
+  (*(bottDiagMatrixPtr)).keepBottDiag();
+  return bottDiagMatrixPtr;
+}
+
+void HODLR_Matrix::keepTopDiag(){
+  assert(indexTree.rootNode != NULL);
+  int topDiagSize = indexTree.rootNode->splitIndex_i - indexTree.rootNode->min_i + 1;
+  matrixSize = topDiagSize;
+  if (matrixDataAvail == true)
+    matrixData = matrixData.topLeftCorner(topDiagSize,topDiagSize);
+  if (matrixDataAvail_Sp == true)
+    matrixData_Sp = matrixData_Sp.topLeftCorner(topDiagSize,topDiagSize);
+  HODLR_Tree::node* topDiagPtr = indexTree.rootNode->left;
+  indexTree.freeTree(indexTree.rootNode->right);
+  delete indexTree.rootNode;
+  indexTree.rootNode = topDiagPtr;
+}
+
+void HODLR_Matrix::keepBottDiag(){
+  assert(indexTree.rootNode != NULL);
+  int bottDiagSize = indexTree.rootNode->max_i - indexTree.rootNode->splitIndex_i;
+  matrixSize = bottDiagSize;
+  if (matrixDataAvail == true)
+    matrixData = matrixData.bottomRightCorner(bottDiagSize,bottDiagSize);
+  if (matrixDataAvail_Sp == true)
+    matrixData_Sp = matrixData_Sp.bottomRightCorner(bottDiagSize,bottDiagSize);
+  HODLR_Tree::node* bottDiagPtr = indexTree.rootNode->right;
+  indexTree.freeTree(indexTree.rootNode->left);
+  delete indexTree.rootNode;
+  indexTree.rootNode = bottDiagPtr;
+  indexTree.correctIndices();
+  
+}
 /**************************************Extend-Add Functions************************************/
 
-void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_PtrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_PtrVec,std::vector<std::vector<int>* > &updateIdxPtrVec,int sumChildRanks){
+
+void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV){
   if (LRStoredInTree == false){
     double startTime = clock();
     storeLRinTree();
@@ -1597,33 +1680,7 @@ void HODLR_Matrix::extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<E
     LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
     LRStoredInTree = true;
   }
-  
-  int numChildren = LR_Update_U_PtrVec.size();
-  Eigen::MatrixXd updateExtendU = Eigen::MatrixXd::Zero(matrixNumRows,sumChildRanks);
-  Eigen::MatrixXd updateExtendV = Eigen::MatrixXd::Zero(matrixNumCols,sumChildRanks);
-  int j_ind = 0;  
-  for (int i = 0; i < numChildren; i++){
-    //create extended U and V
-    int currRank = (LR_Update_U_PtrVec[i])->cols(); 
-    int updateMatrixSize = (updateIdxPtrVec[i])->size();
-    // Find update matrix extend add indices
-    std::vector<int> childUpdateExtendVec(updateMatrixSize);
-    for (int j = 0; j < updateMatrixSize; j++){
-      std::vector<int>::iterator iter;
-      iter = std::lower_bound(parentIdxVec.begin(),parentIdxVec.end(),(*(updateIdxPtrVec[i]))[j]);
-      int extendPos = iter - parentIdxVec.begin();
-      childUpdateExtendVec[j] = extendPos;
-    }
-    // Go over all rows and columns in the update matrix
-    for (int j = 0; j < updateMatrixSize; j++){
-      for (int k = 0; k < currRank; k++){
-	int rowIdx = childUpdateExtendVec[j];
-	updateExtendU(rowIdx,k + j_ind) = (*(LR_Update_U_PtrVec[i]))(j,k);	
-	updateExtendV(rowIdx,k + j_ind) = (*(LR_Update_V_PtrVec[i]))(j,k);	
-      }
-    }
-    j_ind += currRank;
-  }
+  int sumChildRanks = updateExtendU.cols();
   extendAddLRinTree(indexTree.rootNode,updateExtendU,updateExtendV,sumChildRanks);
   
 }
@@ -1686,46 +1743,8 @@ int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,E
   Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
   assert(sigma.rows() * sigma.cols() > 0);
   SVD_LowRankApprox(sigma,LR_Tolerance,&sigma_W,&sigma_V,&sigma_K);
-  
-  
   result_U = Q_U * sigma_W;
   result_K = sigma_K;
   result_V = Q_V * sigma_V;
   return sigma_K.rows();
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagU(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->topOffDiagU;
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagV(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->topOffDiagV;
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnTopOffDiagK(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->topOffDiagK;
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagU(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->bottOffDiagU;
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagV(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->bottOffDiagV;
-}
-
-Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagK(){
-  assert(indexTree.rootNode != NULL);
-  assert(LRStoredInTree     == true);
-  return indexTree.rootNode->bottOffDiagK;
 }

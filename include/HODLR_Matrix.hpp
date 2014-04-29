@@ -76,11 +76,16 @@ public:
   double get_LR_ComputationTime() const;
   double get_iter_SolveTime() const;
 
-  /************************************ Acessing Matrix Entries *******************************/
+  /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
-
+  HODLR_Matrix* topDiag();
+  HODLR_Matrix* bottDiag();
+  void keepTopDiag();
+  void keepBottDiag();
   /**********************************Extend Add Functions **************************************/
-  void extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_ptrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_ptrVec,std::vector<std::vector<int>* > &updateIdxPtrVec, int sumChildRanks);
+  //void extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_ptrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_ptrVec,std::vector<std::vector<int>* > &updateIdxPtrVec, int sumChildRanks);
+  void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
+
 
   Eigen::MatrixXd& returnTopOffDiagU();
   Eigen::MatrixXd& returnTopOffDiagV();

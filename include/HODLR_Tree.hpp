@@ -56,8 +56,13 @@ public:
 
   node* rootNode;
   node* copyTree(std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec) const;
+  void freeTree(node* root);
+  void correctIndices();
+  void correctIndices(node *root,int offset_i,int offset_j);
+  
   std::vector<std::vector<node*> > nodeLevelVec;
   std::vector<node*> leafNodesVec;
+
 private: 
   
   int sizeThreshold;
@@ -67,7 +72,6 @@ private:
   void copyNode(const node* oldNode, node* newNode,std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec)const;
   void createDefaultTree(node* root);
   void printTree(const node* root) const;
-  void freeTree(node* root);
   void userTree_To_HODLRTree(const int currLevel,const int min_i,const int max_i,const int min_j,const int max_j,const user_IndexTree::node* user_IndexRoot, node* HODLR_IndexRoot);
   
   void nodeLevelVec_Assign(unsigned int level,node* root);
