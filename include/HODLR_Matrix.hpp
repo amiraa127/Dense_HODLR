@@ -83,7 +83,8 @@ public:
   void keepTopDiag();
   void keepBottDiag();
   /**********************************Extend Add Functions **************************************/
-  //void extendAddUpdate(std::vector<int> & parentIdxVec,std::vector<Eigen::MatrixXd*> & LR_Update_U_ptrVec,std::vector<Eigen::MatrixXd*> & LR_Update_V_ptrVec,std::vector<std::vector<int>* > &updateIdxPtrVec, int sumChildRanks);
+  void extend(std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+  void extendAddUpdate(Eigen::MatrixXd & extendD);
   void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
 
 
@@ -175,8 +176,8 @@ private:
 
 
   /***********************************Extend Add Functions *******************************/
-
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,int sumChildRanks);
+  void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV);
 
   int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
 

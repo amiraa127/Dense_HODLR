@@ -1642,6 +1642,8 @@ HODLR_Matrix* HODLR_Matrix::bottDiag(){
 
 void HODLR_Matrix::keepTopDiag(){
   assert(indexTree.rootNode != NULL);
+  if (indexTree.rootNode->isLeaf == true)
+    return;
   int topDiagSize = indexTree.rootNode->splitIndex_i - indexTree.rootNode->min_i + 1;
   matrixSize = topDiagSize;
   if (matrixDataAvail == true)
@@ -1656,6 +1658,14 @@ void HODLR_Matrix::keepTopDiag(){
 
 void HODLR_Matrix::keepBottDiag(){
   assert(indexTree.rootNode != NULL);
+  if (indexTree.rootNode->isLeaf == true){
+    matrixData.resize(0,0);
+    matrixDataAvail = false;
+    matrixDataAvail_Sp = false;
+    indexTree.rootNode = NULL;
+    std::cout<<"Warning! Matrix too small for splitting!"<<std::endl;
+    return;
+  }
   int bottDiagSize = indexTree.rootNode->max_i - indexTree.rootNode->splitIndex_i;
   matrixSize = bottDiagSize;
   if (matrixDataAvail == true)
@@ -1670,7 +1680,37 @@ void HODLR_Matrix::keepBottDiag(){
   
 }
 /**************************************Extend-Add Functions************************************/
+void HODLR_Matrix::extend(std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
+   if (LRStoredInTree == false){
+    double startTime = clock();
+    storeLRinTree();
+    double endTime = clock();
+    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    LRStoredInTree = true;
+  }
 
+
+
+}
+
+void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
+
+
+
+
+}
+
+void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & extendD){
+   if (LRStoredInTree == false){
+    double startTime = clock();
+    storeLRinTree();
+    double endTime = clock();
+    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    LRStoredInTree = true;
+  }
+   int DSize = extendD.rows();
+   extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(DSize,DSize));
+}
 
 void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV){
   if (LRStoredInTree == false){
@@ -1680,12 +1720,13 @@ void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::Matrix
     LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
     LRStoredInTree = true;
   }
-  int sumChildRanks = updateExtendU.cols();
-  extendAddLRinTree(indexTree.rootNode,updateExtendU,updateExtendV,sumChildRanks);
+  extendAddLRinTree(indexTree.rootNode,updateExtendU,updateExtendV);
   
 }
 
-void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,int sumChildRanks){
+void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV){
+  assert(updateExtendV.cols() == updateExtendU.cols());
+  int sumChildRanks = updateExtendV.cols();
   if (HODLR_Root->isLeaf == true){
     int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
     int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
@@ -1708,8 +1749,8 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::M
   HODLR_Root->topOffDiagRank  = add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag);
   HODLR_Root->bottOffDiagRank = add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag);
   // Do the same for children
-  extendAddLRinTree(HODLR_Root->left ,updateExtendU,updateExtendV,sumChildRanks);
-  extendAddLRinTree(HODLR_Root->right,updateExtendU,updateExtendV,sumChildRanks);
+  extendAddLRinTree(HODLR_Root->left ,updateExtendU,updateExtendV);
+  extendAddLRinTree(HODLR_Root->right,updateExtendU,updateExtendV);
 
 }
 
