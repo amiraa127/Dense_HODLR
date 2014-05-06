@@ -1511,6 +1511,11 @@ double HODLR_Matrix::get_LR_ComputationTime() const{
 double HODLR_Matrix::get_iter_SolveTime() const {
   return iter_SolveTime;
 }
+double HODLR_Matrix::get_MatrixSize() const{
+  return matrixSize;
+}
+
+
 /************************************ Acessing HODLR Entries *******************************/
 Eigen::MatrixXd HODLR_Matrix::get_Block(int min_i,int min_j,int numRows,int numCols){
   if (matrixDataAvail == true){
@@ -1624,20 +1629,21 @@ Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagK(){
   return indexTree.rootNode->bottOffDiagK;
 }
 
-HODLR_Matrix* HODLR_Matrix::topDiag(){
+//HODLR_Matrix* HODLR_Matrix::topDiag(){
+HODLR_Matrix  HODLR_Matrix::topDiag(){
   assert(indexTree.rootNode != NULL);
   HODLR_Matrix* topDiagMatrixPtr = new HODLR_Matrix;
   *(topDiagMatrixPtr) = *this;
   (*(topDiagMatrixPtr)).keepTopDiag();
-  return topDiagMatrixPtr;
+  return *topDiagMatrixPtr;
 }
 
-HODLR_Matrix* HODLR_Matrix::bottDiag(){
+HODLR_Matrix HODLR_Matrix::bottDiag(){
   assert(indexTree.rootNode != NULL);
   HODLR_Matrix* bottDiagMatrixPtr = new HODLR_Matrix;
   *(bottDiagMatrixPtr) = *this;
   (*(bottDiagMatrixPtr)).keepBottDiag();
-  return bottDiagMatrixPtr;
+  return *bottDiagMatrixPtr;
 }
 
 void HODLR_Matrix::keepTopDiag(){
@@ -1654,14 +1660,14 @@ void HODLR_Matrix::keepTopDiag(){
   indexTree.freeTree(indexTree.rootNode->right);
   delete indexTree.rootNode;
   indexTree.rootNode = topDiagPtr;
+  return;
 }
 
 void HODLR_Matrix::keepBottDiag(){
   assert(indexTree.rootNode != NULL);
   if (indexTree.rootNode->isLeaf == true){
-    matrixData.resize(0,0);
-    matrixDataAvail = false;
-    matrixDataAvail_Sp = false;
+    freeDenseMatMem();
+    freeSparseMatMem();
     indexTree.rootNode = NULL;
     std::cout<<"Warning! Matrix too small for splitting!"<<std::endl;
     return;
@@ -1680,23 +1686,130 @@ void HODLR_Matrix::keepBottDiag(){
   
 }
 /**************************************Extend-Add Functions************************************/
-void HODLR_Matrix::extend(std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
-   if (LRStoredInTree == false){
+void HODLR_Matrix::extend(std::vector<int> & extendIdxVec, int parentSize){
+  std::cout<<"matrixSize "<<matrixSize<<std::endl;
+  std::cout<<"extendVecSize "<<extendIdxVec.size()<<std::endl;
+  assert(matrixSize == (int)extendIdxVec.size()); 
+  if (LRStoredInTree == false){
     double startTime = clock();
     storeLRinTree();
     double endTime = clock();
     LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
     LRStoredInTree = true;
   }
-
-
-
+   freeDenseMatMem();
+   freeSparseMatMem();
+   extend(indexTree.rootNode,extendIdxVec,parentSize);
+   matrixSize = parentSize;
 }
 
-void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec){
+void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize){
+  int min_i,min_j,max_i,max_j;
+  assert(HODLR_Root->max_i < matrixSize);
+  assert(HODLR_Root->max_j < matrixSize);
+  // Modify Indices
+  if (HODLR_Root->min_i == 0)
+    min_i = 0;
+  else{
+    min_i = extendIdxVec[HODLR_Root->min_i - 1] + 1;
+  }
+  if (HODLR_Root->min_j == 0)
+    min_j = 0;
+  else{
+    min_j = extendIdxVec[HODLR_Root->min_j - 1] + 1;
+  }
+  
+  if (HODLR_Root->max_i == matrixSize - 1)
+    max_i = parentSize - 1;
+  else{
+    max_i = extendIdxVec[HODLR_Root->max_i];
+  }
 
+  if (HODLR_Root->max_j == matrixSize - 1)
+    max_j = parentSize - 1;
+  else{
+    max_j = extendIdxVec[HODLR_Root->max_j];
+  }
+  std::cout<<HODLR_Root->currLevel<<std::endl;
+  std::cout<<extendIdxVec.size()<<" "<<parentSize<<" "<<matrixSize<<std::endl;;
+  std::cout<<extendIdxVec[HODLR_Root->min_i - 1]<<std::endl;
+  std::cout<<extendIdxVec[HODLR_Root->max_j]<<std::endl;
+  std::cout<<min_i<<" "<<max_i<<std::endl;
+  std::cout<<min_j<<" "<<max_j<<std::endl;
+  std::cout<<HODLR_Root->min_i<<" "<<HODLR_Root->max_i<<std::endl;
+  std::cout<<HODLR_Root->min_j<<" "<<HODLR_Root->max_j<<std::endl;
+  
+  std::cout<<"Assignment"<<std::endl;
+  int numRows = max_i - min_i + 1;
+  int numCols = max_j - min_j + 1;
+  std::cout<<numRows<<" "<<numCols<<std::endl;
+  Eigen::MatrixXd leafMatrix = Eigen::MatrixXd::Zero(numRows,numCols);
+  std::cout<<"Done Assignment"<<std::endl;
+  if (HODLR_Root->isLeaf == true){
+    std::cout << "leaf"<<std::endl;
+    for (int i = 0; i < (HODLR_Root->leafMatrix).rows(); i++){
+      for (int j = 0; j < (HODLR_Root->leafMatrix).cols(); j++){
+	int rowIdx = extendIdxVec[i + HODLR_Root->min_i] - min_i;
+	int colIdx = extendIdxVec[j + HODLR_Root->min_j] - min_j;
+	leafMatrix(rowIdx,colIdx) = (HODLR_Root->leafMatrix)(i,j);
+      } 
+    }
+    HODLR_Root->min_i         = min_i;
+    HODLR_Root->min_j         = min_j;
+    HODLR_Root->max_i         = max_i;
+    HODLR_Root->max_j         = max_j;
+    HODLR_Root->leafMatrix    = leafMatrix;
+    return;
+  }
 
-
+  int splitIndex_i  = extendIdxVec[HODLR_Root->splitIndex_i];
+  int splitIndex_j  = extendIdxVec[HODLR_Root->splitIndex_j];
+  
+  // Modify Matrices
+  int numRows_TopOffDiag  = splitIndex_i - min_i + 1; 
+  int numRows_BottOffDiag = max_i - splitIndex_i;
+  int numCols_TopOffDiag  = numRows_BottOffDiag;
+  int numCols_BottOffDiag = numRows_TopOffDiag; 
+  int topRank             = (HODLR_Root->topOffDiagU).cols();
+  int bottRank            = (HODLR_Root->bottOffDiagU).cols();
+  Eigen::MatrixXd topOffDiagU  = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topRank);
+  Eigen::MatrixXd topOffDiagV  = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topRank);
+  Eigen::MatrixXd bottOffDiagU = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottRank);
+  Eigen::MatrixXd bottOffDiagV = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottRank);
+  std::cout<<"top U"<<std::endl;
+  for (int i = 0; i < (HODLR_Root->topOffDiagU).rows(); i++){
+    int rowIdx = extendIdxVec[i + HODLR_Root->min_i] - min_i;
+    topOffDiagU.row(rowIdx) = (HODLR_Root->topOffDiagU).row(i);
+  } 
+  std::cout<<"top V"<<std::endl; 
+  for (int i = 0; i < (HODLR_Root->topOffDiagV).rows(); i++){
+    int rowIdx = extendIdxVec[i + HODLR_Root->splitIndex_j + 1] - splitIndex_j - 1;
+    topOffDiagV.row(rowIdx) = (HODLR_Root->topOffDiagV).row(i);
+  } 
+  std::cout<<"bott U"<<std::endl;
+  for (int i = 0; i < (HODLR_Root->bottOffDiagU).rows(); i++){
+    int rowIdx = extendIdxVec[i + HODLR_Root->splitIndex_i + 1] - splitIndex_i - 1;
+    bottOffDiagU.row(rowIdx) = (HODLR_Root->bottOffDiagU).row(i);
+  } 
+  std::cout<<"bott V"<<std::endl;
+  for (int i = 0; i < (HODLR_Root->bottOffDiagV).rows(); i++){
+    int rowIdx = extendIdxVec[i + HODLR_Root->min_j] - min_j;
+    bottOffDiagV.row(rowIdx) = (HODLR_Root->bottOffDiagV).row(i);
+  } 
+  std::cout<<"assign"<<std::endl;
+  HODLR_Root->min_i         = min_i;
+  HODLR_Root->min_j         = min_j;
+  HODLR_Root->max_i         = max_i;
+  HODLR_Root->max_j         = max_j;
+  HODLR_Root->splitIndex_i  = splitIndex_i;
+  HODLR_Root->splitIndex_j  = splitIndex_j;
+  HODLR_Root->topOffDiagU   = topOffDiagU;
+  HODLR_Root->topOffDiagV   = topOffDiagV;
+  HODLR_Root->bottOffDiagU  = bottOffDiagU;
+  HODLR_Root->bottOffDiagV  = bottOffDiagV;
+  std::cout<<"children"<<std::endl;
+  extend( HODLR_Root->left ,extendIdxVec,parentSize);
+  extend( HODLR_Root->right,extendIdxVec,parentSize);
 
 }
 

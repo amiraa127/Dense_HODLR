@@ -75,15 +75,19 @@ public:
   double get_extendedSp_SolveTime() const;
   double get_LR_ComputationTime() const;
   double get_iter_SolveTime() const;
+  double get_MatrixSize() const;
 
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
-  HODLR_Matrix* topDiag();
-  HODLR_Matrix* bottDiag();
+  // HODLR_Matrix* topDiag();
+  HODLR_Matrix  topDiag();
+  //HODLR_Matrix* bottDiag();
+  HODLR_Matrix bottDiag();
+
   void keepTopDiag();
   void keepBottDiag();
   /**********************************Extend Add Functions **************************************/
-  void extend(std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+  void extend(std::vector<int> & extendIdxVec,int parentSize);
   void extendAddUpdate(Eigen::MatrixXd & extendD);
   void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
 
@@ -176,7 +180,7 @@ private:
 
 
   /***********************************Extend Add Functions *******************************/
-  void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & parentIdxVec,std::vector<int> & updateIdxVec);
+  void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV);
 
   int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);

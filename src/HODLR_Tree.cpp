@@ -334,10 +334,14 @@ void HODLR_Tree::correctIndices(){
 }
 
 void HODLR_Tree::correctIndices(node* root,int offset_i,int offset_j){
-  root->min_i = root->min_i - offset_i;
-  root->min_j = root->min_j - offset_j;
+  root->min_i -=  offset_i;
+  root->min_j -=  offset_j;
+  root->max_i -=  offset_i;
+  root->max_j -=  offset_j;
   if (root->isLeaf == true)
     return;
+  root->splitIndex_i -=  offset_i;
+  root->splitIndex_j -=  offset_j;
   correctIndices(root->left,offset_i,offset_j);
   correctIndices(root->right,offset_i,offset_j);
 }
