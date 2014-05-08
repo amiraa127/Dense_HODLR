@@ -14,7 +14,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-
+#include <chrono>
 /* Author : Amir Aminfar ---> aminfar@stanford.edu */
 class HODLR_Matrix{
 
@@ -79,18 +79,19 @@ public:
 
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
-  // HODLR_Matrix* topDiag();
+  Eigen::MatrixXd get_Row(int row);
+  Eigen::MatrixXd get_Col(int col);
+ 
+  
   HODLR_Matrix  topDiag();
-  //HODLR_Matrix* bottDiag();
   HODLR_Matrix bottDiag();
 
   void keepTopDiag();
   void keepBottDiag();
   /**********************************Extend Add Functions **************************************/
   void extend(std::vector<int> & extendIdxVec,int parentSize);
-  void extendAddUpdate(Eigen::MatrixXd & extendD);
+  void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
   void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
-
 
   Eigen::MatrixXd& returnTopOffDiagU();
   Eigen::MatrixXd& returnTopOffDiagV();
@@ -182,10 +183,15 @@ private:
   /***********************************Extend Add Functions *******************************/
   void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec);
 
   int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
 
 
 };
+
+Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::MatrixXd & child,int min_i,int min_j,int numRows,int numCols,std::string mode);
+
 
 #endif
