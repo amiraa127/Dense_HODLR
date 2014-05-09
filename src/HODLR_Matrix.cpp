@@ -176,8 +176,14 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
 
 void HODLR_Matrix::storeLRinTree(){
   assert(indexTree.rootNode != NULL);
-  assert((matrixDataAvail == true) || (matrixDataAvail_Sp == true));
-  storeLRinTree(indexTree.rootNode);
+  if (LRStoredInTree == false){
+    double startTime = clock();
+    assert((matrixDataAvail == true) || (matrixDataAvail_Sp == true));
+    storeLRinTree(indexTree.rootNode);
+    double endTime = clock();
+    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    LRStoredInTree = true;
+  }
   if (freeMatrixMemory == true)
     freeDenseMatMem();
   if (freeMatrixMemory_Sp == true)
@@ -246,10 +252,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   if (HODLR_Root->isLeaf == true){
     factorRoot->isLeaf = true;
     factorRoot->left = NULL;
-    factorRoot->right = NULL;
-    //int leafMatrixSize = HODLR_Root->max_i - HODLR_Root->min_i + 1;
-    //Eigen::MatrixXd leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,leafMatrixSize,leafMatrixSize);
-    
+    factorRoot->right = NULL;  
     LUDecompose(HODLR_Root->leafMatrix,factorRoot->LU_leaf,factorRoot->P_leaf);
     Eigen::MatrixXd y = (factorRoot->LU_leaf).triangularView<Eigen::UnitLower>().solve(factorRoot->P_leaf * input_RHS);
     return (factorRoot->LU_leaf).triangularView<Eigen::Upper>().solve(y);
@@ -489,14 +492,8 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
     indexTree.set_sizeThreshold(sizeThreshold);
     indexTree.createDefaultTree(matrixSize);
   }
-  
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
+
+  storeLRinTree();
 
   if (createdRecLUfactorTree == false){
     double startTime = clock();
@@ -531,13 +528,7 @@ void HODLR_Matrix::recLU_Compute(){
     indexTree.set_sizeThreshold(sizeThreshold);
     indexTree.createDefaultTree(matrixSize);
   }
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
+  storeLRinTree();
   if (createdRecLUfactorTree == false){
     double startTime = clock();
     recLU_Factorize();
@@ -751,14 +742,7 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     indexTree.createDefaultTree(matrixSize);
   }
   
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
-
+  storeLRinTree();
     
   if (assembled_ExtendedSp == false){
     double startTime = clock();
@@ -852,13 +836,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
     indexTree.createDefaultTree(matrixSize);
   }
   
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
+  storeLRinTree();
 
   double startTime = clock();
   Eigen::MatrixXd init_Guess;
@@ -989,7 +967,7 @@ void HODLR_Matrix::PS_LowRankApprox_Sp(Eigen::MatrixXd & W, Eigen::MatrixXd & V,
   Eigen::MatrixXd dummyW,dummyK,dummyV;
   extractRowsCols(W,K,V,Eigen::MatrixXd(lowRankMatrix_Sp),rowIndex,colIndex);
   calculatedRank = W.cols();
-  
+
 }
 
 void HODLR_Matrix::PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank, const std::string pointChoosingMethod,const int minRank)const{
@@ -1589,14 +1567,7 @@ Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagK(){
 
 
 HODLR_Matrix  HODLR_Matrix::topDiag(){
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
-
+  storeLRinTree();
   HODLR_Matrix* topDiagMatrixPtr = new HODLR_Matrix;
   *(topDiagMatrixPtr) = *this;
   (*(topDiagMatrixPtr)).keepTopDiag();
@@ -1604,14 +1575,7 @@ HODLR_Matrix  HODLR_Matrix::topDiag(){
 }
 
 HODLR_Matrix HODLR_Matrix::bottDiag(){
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
-  
+  storeLRinTree();
   HODLR_Matrix* bottDiagMatrixPtr = new HODLR_Matrix;
   *(bottDiagMatrixPtr) = *this;
   (*(bottDiagMatrixPtr)).keepBottDiag();
@@ -1696,17 +1660,11 @@ void HODLR_Matrix::check_Structure(HODLR_Tree::node* HODLR_Root){
 /**************************************Extend-Add Functions************************************/
 void HODLR_Matrix::extend(std::vector<int> & extendIdxVec, int parentSize){
   assert(matrixSize == (int)extendIdxVec.size()); 
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
-   freeDenseMatMem();
-   freeSparseMatMem();
-   extend(indexTree.rootNode,extendIdxVec,parentSize);
-   matrixSize = parentSize;
+  storeLRinTree();
+  freeDenseMatMem();
+  freeSparseMatMem();
+  extend(indexTree.rootNode,extendIdxVec,parentSize);
+  matrixSize = parentSize;
 }
 
 void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize){
@@ -1803,58 +1761,32 @@ void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extend
 }
 
 void HODLR_Matrix::extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec){
-   if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }    
-   //Eigen::MatrixXd extendD = ::extend(updateIdxVec,matrixSize,D,0,0,D.rows(),D.cols(),"RowsCols");
-   D_HODLR.extend(updateIdxVec,matrixSize);
-   assert(D_HODLR.get_MatrixSize() == matrixSize);
-   /* if (mode == "Exact"){
-     extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(matrixSize,matrixSize));
-   }else if (mode == "PS_Random"){
-     extendAddLRinTree(indexTree.rootNode,extendD,updateIdxVec);
-   }else{
-     std::cout<<"Error! Unknown calculation mode!"<<std::endl;
-     exit(EXIT_FAILURE);
-   }
-   */
-    extendAddLRinTree(indexTree.rootNode,D_HODLR,updateIdxVec);
+  storeLRinTree();
+  D_HODLR.extend(updateIdxVec,matrixSize);
+  assert(D_HODLR.get_MatrixSize() == matrixSize);
+  extendAddLRinTree(indexTree.rootNode,D_HODLR,updateIdxVec);
 }
 
 
 void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode){
-   if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }    
-   Eigen::MatrixXd extendD = ::extend(updateIdxVec,matrixSize,D,0,0,D.rows(),D.cols(),"RowsCols");
-   assert(extendD.rows() == matrixSize);
-   if (mode == "Exact"){
-     extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(matrixSize,matrixSize));
-   }else if (mode == "PS_Random"){
-     extendAddLRinTree(indexTree.rootNode,extendD,updateIdxVec);
-   }else{
-     std::cout<<"Error! Unknown calculation mode!"<<std::endl;
-     exit(EXIT_FAILURE);
-   }
-   
+  storeLRinTree();
+  Eigen::MatrixXd extendD = ::extend(updateIdxVec,matrixSize,D,0,0,D.rows(),D.cols(),"RowsCols");
+  assert(extendD.rows() == matrixSize);
+  if (mode == "Exact"){
+    extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(matrixSize,matrixSize));
+  }else if (mode == "PS_Random"){
+    extendAddLRinTree(indexTree.rootNode,extendD,updateIdxVec);
+  }else{
+    std::cout<<"Error! Unknown calculation mode!"<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  
 }
 
-void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV){
-  if (LRStoredInTree == false){
-    double startTime = clock();
-    storeLRinTree();
-    double endTime = clock();
-    LR_ComputationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    LRStoredInTree = true;
-  }
+void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int>& updateIdxVec){
+  storeLRinTree();
+  Eigen::MatrixXd updateExtendU = ::extend(updateIdxVec,matrixSize,updateU,0,0,updateU.rows(),updateU.cols(),"Rows");
+  Eigen::MatrixXd updateExtendV = ::extend(updateIdxVec,matrixSize,updateV,0,0,updateV.rows(),updateV.cols(),"Rows");
   extendAddLRinTree(indexTree.rootNode,updateExtendU,updateExtendV);
   
 }
@@ -2197,11 +2129,13 @@ Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::Mat
        }
      }
   }else if (mode == "Cols"){
+    result = Eigen::MatrixXd::Zero(child.rows(),parentSize);
     for (int j = min_j; j <= max_j; j++){
       int colIdx = extendIdxVec[j];
       result.col(colIdx) = child.col(j);		
     }
   }else if (mode == "Rows"){
+    result = Eigen::MatrixXd::Zero(parentSize,child.cols());
     for (int i = min_i; i <= max_i; i++){
       int rowIdx = extendIdxVec[i];
       result.row(rowIdx) = child.row(i);		    

@@ -99,7 +99,7 @@ public:
   /**********************************Extend Add Functions **************************************/
   void extend(std::vector<int> & extendIdxVec,int parentSize);
   void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
-  void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
+  void extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int> & updateIdxVec);
   void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec);
 
   /******************************** Check ******************************************************/
