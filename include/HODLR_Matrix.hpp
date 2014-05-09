@@ -88,10 +88,6 @@ public:
 
   void keepTopDiag();
   void keepBottDiag();
-  /**********************************Extend Add Functions **************************************/
-  void extend(std::vector<int> & extendIdxVec,int parentSize);
-  void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
-  void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
 
   Eigen::MatrixXd& returnTopOffDiagU();
   Eigen::MatrixXd& returnTopOffDiagV();
@@ -100,6 +96,14 @@ public:
   Eigen::MatrixXd& returnBottOffDiagV();
   Eigen::MatrixXd& returnBottOffDiagK();
 
+  /**********************************Extend Add Functions **************************************/
+  void extend(std::vector<int> & extendIdxVec,int parentSize);
+  void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
+  void extendAddUpdate(Eigen::MatrixXd & updateExtendU,Eigen::MatrixXd & updateExtendV);
+  void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec);
+
+  /******************************** Check ******************************************************/
+  void check_Structure();
 private:
 
   int sizeThreshold;
@@ -187,7 +191,8 @@ private:
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec);
 
   int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
-
+  /******************************** Check ******************************************************/
+  void check_Structure(HODLR_Tree::node* HODLR_Root);
 
 };
 
