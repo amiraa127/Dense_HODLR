@@ -99,11 +99,14 @@ public:
   /**********************************Extend Add Functions **************************************/
   void extend(std::vector<int> & extendIdxVec,int parentSize);
   void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
+  void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,std::string mode);
   void extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int> & updateIdxVec);
-  void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec);
 
   /******************************** Check ******************************************************/
   void check_Structure();
+  Eigen::MatrixXd createExactHODLR(const int rank,int input_MatrixSize,const int inpt_SizeThreshold);
+
+
 private:
 
   int sizeThreshold;
@@ -187,12 +190,13 @@ private:
   /***********************************Extend Add Functions *******************************/
   void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV);
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec,std::string mode);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec);
 
   int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
+  void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
 
 };
 

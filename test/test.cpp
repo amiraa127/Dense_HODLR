@@ -12,6 +12,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
+  /*
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -21,8 +22,9 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
   CPPUNIT_TEST(iterative_Solve_Test);
   CPPUNIT_TEST(assignment_Test_Simple);
-  CPPUNIT_TEST(assignment_Test_ExtendedSp);
-
+  CPPUNIT_TEST(assignment_Test_ExtendedSp);*/
+  CPPUNIT_TEST(blockExtraction_Test);
+  
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -428,11 +430,12 @@ public:
     Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","extendedSp");
     Eigen::VectorXd difference = solverSoln-exactSoln;
     double relError = difference.norm()/exactSoln.norm();
-    std::cout<<relError<<std::endl;
+    //std::cout<<relError<<std::endl;
     CPPUNIT_ASSERT(relError < 1e-6);
   }
 
   void assignment_Test_Simple(){
+    std::cout<<"Testing assignment operator with recLU solver....."<<std::endl;
     int matrixSize = 12936;
     Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
 
@@ -446,14 +449,15 @@ public:
     Eigen::VectorXd solverSoln = copy_sampleHODLR.recLU_Solve(inputF);
     Eigen::VectorXd difference = solverSoln - exactSoln;
     double relError = difference.norm()/exactSoln.norm();
-    std::cout<<relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-6);    
+    //std::cout<<relError<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-7);    
   }
 
-    void assignment_Test_ExtendedSp(){
+  void assignment_Test_ExtendedSp(){
+    std::cout<<"Testing assignment operator with extended sparsification solver....."<<std::endl;
     int matrixSize = 12936;
     Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
-
+    
     // Initialize Solver
     HODLR_Matrix sampleHODLR(sampleMatrix,30);
     sampleHODLR.set_LRTolerance(1e-8);
@@ -464,8 +468,24 @@ public:
     Eigen::VectorXd solverSoln = copy_sampleHODLR.extendedSp_Solve(inputF);
     Eigen::VectorXd difference = solverSoln - exactSoln;
     double relError = difference.norm()/exactSoln.norm();
-    std::cout<<relError<<std::endl;
+    //std::cout<<relError<<std::endl;
     CPPUNIT_ASSERT(relError < 1e-6);    
+  }
+
+  void blockExtraction_Test(){
+    HODLR_Matrix sampleMatrix;
+    int matrixSize = 10000;
+    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(2,matrixSize,30);
+    Eigen::MatrixXd extract_Full  = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd extract_Part  = sampleMatrix.get_Block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2);
+    Eigen::MatrixXd extract_Row   = sampleMatrix.get_Row(50);
+    Eigen::MatrixXd extract_Col   = sampleMatrix.get_Col(6532);
+    CPPUNIT_ASSERT((extract_Full - exact_Matrix).norm() < 1e-16);
+    CPPUNIT_ASSERT((extract_Part - exact_Matrix.block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2)).norm() < 1e-16);
+    CPPUNIT_ASSERT((extract_Row - exact_Matrix.row(50)).norm() < 1e-16);
+    CPPUNIT_ASSERT((extract_Col - exact_Matrix.col(6532)).norm() < 1e-16);
+
+
   }
 
 };
