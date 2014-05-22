@@ -41,7 +41,8 @@ public:
 
   ~HODLR_Matrix();
   
-
+  /************************************* Create HODLR Structure ***************************************/
+  void storeLRinTree();
 
   /************************************* Solve Methods **********************************/
   Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS);
@@ -52,7 +53,7 @@ public:
   /**************************** Low-Rank Approximation Methods **************************/
   double partialPivACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank = -1);
 
-  double fullPivACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank = -1);
+ 
   
   void PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank, const std::string pointChoosingMethod = "Chebyshev",const int minRank = -1) const;
   
@@ -100,7 +101,7 @@ public:
   void extend(std::vector<int> & extendIdxVec,int parentSize);
   void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,std::string mode);
   void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,std::string mode);
-  void extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int> & updateIdxVec);
+  void extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int> & updateIdxVec,double tol,std::string mode);
 
   /******************************** Check ******************************************************/
   void check_Structure();
@@ -148,7 +149,7 @@ private:
   void reset_attributes();
 
   /****************************recLU Solver Functions*******************************/
-  void storeLRinTree();
+ 
   void storeLRinTree(HODLR_Tree::node* HODLR_Root);
   void recLU_Factorize();
   Eigen::MatrixXd recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot);
@@ -189,18 +190,21 @@ private:
 
   /***********************************Extend Add Functions *******************************/
   void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV);
+  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,double tol,std::string mode);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec,std::string mode);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec);
 
-  int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2);
+  int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode);
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
 
 };
 
+/****************************************Extend-Add external functions**************************/
 Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::MatrixXd & child,int min_i,int min_j,int numRows,int numCols,std::string mode);
 
+/****************************************LR_Approximation external funcions*************************/
+double fullPivACA_LowRankApprox(Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minPivot = 0,const int minRank = -1);
 
 #endif

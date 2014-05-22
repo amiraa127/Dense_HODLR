@@ -24,7 +24,8 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(assignment_Test_Simple);
   CPPUNIT_TEST(assignment_Test_ExtendedSp);*/
   CPPUNIT_TEST(blockExtraction_Test);
-  
+  CPPUNIT_TEST(extendAdd_LowRank_Test);
+
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -473,9 +474,10 @@ public:
   }
 
   void blockExtraction_Test(){
+    std::cout<<"Testing HODLR get_block function....."<<std::endl;
     HODLR_Matrix sampleMatrix;
     int matrixSize = 10000;
-    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(2,matrixSize,30);
+    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
     Eigen::MatrixXd extract_Full  = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd extract_Part  = sampleMatrix.get_Block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2);
     Eigen::MatrixXd extract_Row   = sampleMatrix.get_Row(50);
@@ -484,11 +486,47 @@ public:
     CPPUNIT_ASSERT((extract_Part - exact_Matrix.block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2)).norm() < 1e-16);
     CPPUNIT_ASSERT((extract_Row - exact_Matrix.row(50)).norm() < 1e-16);
     CPPUNIT_ASSERT((extract_Col - exact_Matrix.col(6532)).norm() < 1e-16);
-
-
   }
 
-};
+  void extendAdd_LowRank_Test(){
+    std::cout<<"Testing low-rank to HODLR extend-add..."<<std::endl;
+    int matrixSize = 10000;
+    /*********************************Exact Compression**************************/
+    std::cout<<"         Testing Exact Compression...."<<std::endl;
+    HODLR_Matrix sampleMatrix;
+    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
+    std::vector<int> idxVec;
+    for (int i = 0; i < matrixSize; i++)
+      idxVec.push_back(i);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+    int updateSize = matrixSize/2;
+    std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + updateSize);
+    int rank = 10;
+    Eigen::MatrixXd U = Eigen::MatrixXd::Random(updateSize,rank);
+    Eigen::MatrixXd V = Eigen::MatrixXd::Random(updateSize,rank);
+    sampleMatrix.extendAddUpdate(U,V,extendIdxVec,1e-16,"Exact");
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd exact_Update = U * V.transpose();
+    Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
+    double error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-11);
+    /*********************************Exact Compression**************************/
+    std::cout<<"         Testing LU Compression...."<<std::endl;
+    HODLR_Matrix sampleMatrix2;
+    exact_Matrix  = sampleMatrix2.createExactHODLR(10,matrixSize,30);
+    sampleMatrix2.extendAddUpdate(U,V,extendIdxVec,1e-6,"Compress_LU");
+    HODLR_Result = sampleMatrix2.get_Block(0,0,matrixSize,matrixSize);
+    exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
+    error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-5);
+
+
+    
+  }
+};   
 
 
 int main(int argc, char* argv[]){
