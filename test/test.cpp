@@ -24,7 +24,10 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(assignment_Test_Simple);
   CPPUNIT_TEST(assignment_Test_ExtendedSp);*/
   CPPUNIT_TEST(blockExtraction_Test);
-  CPPUNIT_TEST(extendAdd_LowRank_Test);
+  CPPUNIT_TEST(extendAdd_LowRankToHODLR_Test);
+  CPPUNIT_TEST(extendAdd_DenseToHODLR_Test);
+  CPPUNIT_TEST(extend_HODLRtoHODLR_Test);
+  CPPUNIT_TEST(extendAdd_HODLRtoHODLR_Test);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -488,7 +491,7 @@ public:
     CPPUNIT_ASSERT((extract_Col - exact_Matrix.col(6532)).norm() < 1e-16);
   }
 
-  void extendAdd_LowRank_Test(){
+  void extendAdd_LowRankToHODLR_Test(){
     std::cout<<"Testing low-rank to HODLR extend-add..."<<std::endl;
     int matrixSize = 10000;
     /*********************************Exact Compression**************************/
@@ -502,6 +505,7 @@ public:
     std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
     int updateSize = matrixSize/2;
     std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + updateSize);
+    std::sort(extendIdxVec.begin(),extendIdxVec.end());
     int rank = 10;
     Eigen::MatrixXd U = Eigen::MatrixXd::Random(updateSize,rank);
     Eigen::MatrixXd V = Eigen::MatrixXd::Random(updateSize,rank);
@@ -510,9 +514,9 @@ public:
     Eigen::MatrixXd exact_Update = U * V.transpose();
     Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
-    //std::cout<<error<<std::endl;
+    // std::cout<<error<<std::endl;
     CPPUNIT_ASSERT(error < 1e-11);
-    /*********************************Exact Compression**************************/
+    /*********************************LU Compression**************************/
     std::cout<<"         Testing LU Compression...."<<std::endl;
     HODLR_Matrix sampleMatrix2;
     exact_Matrix  = sampleMatrix2.createExactHODLR(10,matrixSize,30);
@@ -522,10 +526,84 @@ public:
     error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;
     CPPUNIT_ASSERT(error < 1e-5);
-
-
-    
+    /**********************************QR Compression**************************/
+    std::cout<<"         Testing QR Compression...."<<std::endl;
+    HODLR_Matrix sampleMatrix3;
+    exact_Matrix  = sampleMatrix3.createExactHODLR(10,matrixSize,30);
+    sampleMatrix3.extendAddUpdate(U,V,extendIdxVec,1e-6,"Compress_QR");
+    HODLR_Result = sampleMatrix3.get_Block(0,0,matrixSize,matrixSize);
+    exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
+    error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-5);
   }
+
+  void extendAdd_DenseToHODLR_Test(){
+    std::cout<<"Testing Dense to HODLR extend-add..."<<std::endl;
+    int matrixSize = 1000;
+    HODLR_Matrix sampleMatrix;
+    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
+    std::vector<int> idxVec;
+    for (int i = 0; i < matrixSize; i++)
+      idxVec.push_back(i);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+    int updateSize = matrixSize/2;
+    std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + updateSize);
+    std::sort(extendIdxVec.begin(),extendIdxVec.end());
+    Eigen::MatrixXd D = Eigen::MatrixXd::Random(updateSize,updateSize);
+    sampleMatrix.extendAddUpdate(D,extendIdxVec,1e-6,"Compress_LU");
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
+    double error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-5);
+  }
+  
+  void extend_HODLRtoHODLR_Test(){
+    std::cout<<"Testing HODLR to HODLR extend..."<<std::endl;
+    int matrixSize = 10000;
+    std::vector<int> idxVec;
+    for (int i = 0; i < matrixSize; i++)
+      idxVec.push_back(i);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+    int updateSize = matrixSize/2;
+    std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + updateSize);
+     std::sort(extendIdxVec.begin(),extendIdxVec.end());
+    HODLR_Matrix D_HODLR;
+    Eigen::MatrixXd D = D_HODLR.createExactHODLR(10,updateSize,30);
+    D_HODLR.extend(extendIdxVec,matrixSize);
+    Eigen::MatrixXd HODLR_Result = D_HODLR.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd exact_Result = extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
+    double error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-16);
+  } 
+
+  void extendAdd_HODLRtoHODLR_Test(){
+    std::cout<<"Testing HODLR to HODLR extend-add..."<<std::endl;
+    int matrixSize = 10000;
+    HODLR_Matrix sampleMatrix;
+    Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
+    std::vector<int> idxVec;
+    for (int i = 0; i < matrixSize; i++)
+      idxVec.push_back(i);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+    int updateSize = matrixSize/2;
+    std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + updateSize);
+    std::sort(extendIdxVec.begin(),extendIdxVec.end());
+    HODLR_Matrix D_HODLR;
+    Eigen::MatrixXd D = D_HODLR.createExactHODLR(10,updateSize,30);
+    sampleMatrix.extendAddUpdate(D_HODLR,extendIdxVec,1e-6,"Compress_LU");
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
+    double error =(HODLR_Result - exact_Result).norm();
+    //std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-5);
+  } 
+
 };   
 
 
