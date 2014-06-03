@@ -204,30 +204,39 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
       HODLR_Root->leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
     return;
   }
+  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
+  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
+  int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
+  int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1;
   // Calculate the LR factorizations
   if (HODLR_Root->LR_Method == "partialPiv_ACA"){
-    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
-    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
+    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
+    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
+
     HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
     HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
     
   }else if (HODLR_Root->LR_Method == "fullPiv_ACA"){
-    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
-    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
+
+    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
+    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
     HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
     HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
 
   }else if (HODLR_Root->LR_Method == "PS_Cheby"){
-    ::PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
-    ::PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
+    ::PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
+    
+    ::PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
 
   }else if (HODLR_Root->LR_Method == "SVD"){ 
-    ::SVD_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK, HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
-    ::SVD_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK, HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
+    ::SVD_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
+    
+    ::SVD_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
 
   }else if (HODLR_Root->LR_Method == "PS_Sparse"){
-    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_i,HODLR_Root->splitIndex_j + 1,HODLR_Root->max_j,LR_Tolerance,HODLR_Root->topOffDiagRank);
-    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->max_i,HODLR_Root->min_j,HODLR_Root->splitIndex_j,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    
+    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
 
   }else{
     std::cout<<"Error!. Invalid low-rank approximation scheme ( "<<HODLR_Root->LR_Method<<")."<<std::endl;
@@ -934,15 +943,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   //set_def_LRMethod(prev_LRMethod);
   return solution;
 }
-/*
-void HODLR_Matrix::LUDecompose(const Eigen::MatrixXd &inputMatrix,Eigen::MatrixXd &LU,Eigen::MatrixXd &P) const{
-    
-  Eigen::PartialPivLU<Eigen::MatrixXd> lu(inputMatrix);
-  LU = lu.matrixLU();
-  P = lu.permutationP();
-  return;	  
-}
-*/
+  
 void HODLR_Matrix::reset_attributes(){
   LRStoredInTree = false;
   createdRecLUfactorTree = false;
@@ -1383,7 +1384,8 @@ void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & update
   //if (mode == "Compress_LU"){
     Eigen::MatrixXd U_D,V_D;
     int D_Rank;
-    ::fullPivACA_LowRankApprox(D,U_D,V_D,0,D.rows() - 1,0,D.cols() - 1,tol,D_Rank);
+    //::fullPivACA_LowRankApprox(D,U_D,V_D,0,D.rows() - 1,0,D.cols() - 1,tol,D_Rank);
+    ::fullPivACA_LowRankApprox(D,U_D,V_D,0,0,D.rows(),D.cols(),tol,D_Rank);
     extendAddUpdate(U_D,V_D,updateIdxVec,tol,"Compress_LU");
     //extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(matrixSize,matrixSize),1e-16,"Exact");
     /*
@@ -1554,10 +1556,8 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix &
     int min_i_Bott = HODLR_Root->splitIndex_i + 1;
     int min_j_Bott = HODLR_Root->min_j;
     Eigen::MatrixXd addedMatrix_Bott = block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag) + extendD_HODLR.block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag);
-    //topRank  = SVD_LowRankApprox(addedMatrix_Top ,LR_Tolerance, &U_TopOffDiag, &V_TopOffDiag, &K_TopOffDiag);
-    //bottRank = SVD_LowRankApprox(addedMatrix_Bott ,LR_Tolerance, &U_BottOffDiag, &V_BottOffDiag, &K_BottOffDiag);
-    ::fullPivACA_LowRankApprox(addedMatrix_Top ,U_TopOffDiag ,V_TopOffDiag ,0,addedMatrix_Top.rows() - 1 ,0,addedMatrix_Top.cols() - 1 ,tol,topRank); 
-    ::fullPivACA_LowRankApprox(addedMatrix_Bott,U_BottOffDiag,V_BottOffDiag,0,addedMatrix_Bott.rows() - 1,0,addedMatrix_Bott.cols() - 1,tol,bottRank);
+    ::fullPivACA_LowRankApprox(addedMatrix_Top ,U_TopOffDiag ,V_TopOffDiag ,0,0,addedMatrix_Top.rows(),addedMatrix_Top.cols(),tol,topRank); 
+    ::fullPivACA_LowRankApprox(addedMatrix_Bott,U_BottOffDiag,V_BottOffDiag,0,0,addedMatrix_Bott.rows(),addedMatrix_Bott.cols(),tol,bottRank);
     K_TopOffDiag  = Eigen::MatrixXd::Identity(topRank,topRank);
     K_BottOffDiag = Eigen::MatrixXd::Identity(bottRank,bottRank);
 	
@@ -1750,10 +1750,10 @@ int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,E
   }else if (mode == "Compress_LU"){
     Eigen::MatrixXd U_U,V_U;
     int rank_U;
-    ::fullPivACA_LowRankApprox(Utot,U_U,V_U,0,Utot.rows() - 1,0,Utot.cols() - 1,tol,rank_U);
+    ::fullPivACA_LowRankApprox(Utot,U_U,V_U,0,0,Utot.rows(),Utot.cols(),tol,rank_U);
     Eigen::MatrixXd U_V,V_V;
     int rank_V;
-    ::fullPivACA_LowRankApprox(Vtot,U_V,V_V,0,Vtot.rows() - 1,0,Vtot.cols() - 1,tol,rank_V);
+    ::fullPivACA_LowRankApprox(Vtot,U_V,V_V,0,0,Vtot.rows(),Vtot.cols(),tol,rank_V);
     Eigen::MatrixXd sigma = V_U.transpose() * V_V;
     Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
     ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);

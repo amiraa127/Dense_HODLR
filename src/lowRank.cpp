@@ -2,19 +2,17 @@
 
 const double pi = 3.14159265359;
 
-double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,const int minPivot){
-  
-  int nRows = max_i - min_i + 1;
-  int nCols = max_j - min_j + 1;
-  int maxRank = std::min(nRows,nCols);
+double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int minPivot){
+
+  int maxRank = std::min(numRows,numCols);
   int numColsW = 2;
   int numColsV = 2;
 
-  Eigen::MatrixXd tempW(nRows,numColsW);
-  Eigen::MatrixXd tempV(nCols,numColsV);
-  Eigen::VectorXd colMaxValues(nCols);
-  Eigen::VectorXi colMaxIdx(nCols);
-  Eigen::MatrixXd residualMatrix = matrixData.block(min_i,min_j,nRows,nCols);
+  Eigen::MatrixXd tempW(numRows,numColsW);
+  Eigen::MatrixXd tempV(numCols,numColsV);
+  Eigen::VectorXd colMaxValues(numCols);
+  Eigen::VectorXi colMaxIdx(numCols);
+  Eigen::MatrixXd residualMatrix = matrixData.block(min_i,min_j,numRows,numCols);
   double origMatrixNorm = residualMatrix.norm();
 
   double epsilon = 1;
@@ -30,7 +28,7 @@ double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Matrix
 
     // Find largest pivot in the residual matrix
    
-    for (int i = 0; i < nCols; i++)
+    for (int i = 0; i < numCols; i++)
       colMaxValues(i) = residualMatrix.col(i).cwiseAbs().maxCoeff(&colMaxIdx(i));
     int currRowIdx,currColIdx;
     double absMaxValue = colMaxValues.maxCoeff(&currColIdx);
@@ -56,8 +54,8 @@ double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Matrix
   calculatedRank = k;
   // Return zero for zero matrix
   if ( k == 0){
-    W = Eigen::MatrixXd::Zero(nRows,1);
-    V = Eigen::MatrixXd::Zero(nCols,1);
+    W = Eigen::MatrixXd::Zero(numRows,1);
+    V = Eigen::MatrixXd::Zero(numCols,1);
     calculatedRank = 1;
     return epsilon;
   }
@@ -66,15 +64,15 @@ double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Matrix
   if (k >= maxRank - 1){
     // Return original matrix
     // Skinny matrix
-    if (nCols <= nRows){
-      W = matrixData.block(min_i,min_j,nRows,nCols);
-      V = Eigen::MatrixXd::Identity(nCols,nCols);
-      calculatedRank = nCols;
+    if (numCols <= numRows){
+      W = matrixData.block(min_i,min_j,numRows,numCols);
+      V = Eigen::MatrixXd::Identity(numCols,numCols);
+      calculatedRank = numCols;
     }// Fat matrix      
     else {
-      W = Eigen::MatrixXd::Identity(nRows,nRows);
-      V = matrixData.block(min_i,min_j,nRows,nCols).transpose();
-      calculatedRank = nRows;
+      W = Eigen::MatrixXd::Identity(numRows,numRows);
+      V = matrixData.block(min_i,min_j,numRows,numCols).transpose();
+      calculatedRank = numRows;
     } 
     return epsilon;
   }
@@ -88,22 +86,20 @@ double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Matrix
 
 int chooseNNZRowIndex(const std::vector<bool> &chosenRows);
 int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
-double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank,const int minPivot)  {
+double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int minPivot)  {
   
-  int nRows = max_i - min_i + 1;
-  int nCols = max_j - min_j + 1;
-  int maxRank = std::min(nRows,nCols);
+  int maxRank = std::min(numRows,numCols);
   int numColsW = 2;
   int numColsV = 2;
 
-  Eigen::MatrixXd tempW(nRows,numColsW);
-  Eigen::MatrixXd tempV(nCols,numColsV);
+  Eigen::MatrixXd tempW(numRows,numColsW);
+  Eigen::MatrixXd tempV(numCols,numColsV);
 
   Eigen::VectorXd residualRow,residualCol;
-  std::vector<bool> chosenRows(nRows),chosenCols(nCols);
-  for (int i = 0; i < nRows; i++)
+  std::vector<bool> chosenRows(numRows),chosenCols(numCols);
+  for (int i = 0; i < numRows; i++)
     chosenRows[i] = false;
-  for (int i = 0; i < nCols; i++)
+  for (int i = 0; i < numCols; i++)
     chosenCols[i] = false;
   
   double frobNormSq = 0;
@@ -125,10 +121,10 @@ double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Mat
 
     chosenRows[currRowIndex] = true;
     int globalCurrRowIdx = currRowIndex + min_i;
-    Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,nCols).transpose();
+    Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,numCols).transpose();
 
     // Update row of Residual
-    Eigen::VectorXd sum = Eigen::VectorXd::Zero(nCols);
+    Eigen::VectorXd sum = Eigen::VectorXd::Zero(numCols);
     for (int l = 0; l < k; l++){
       sum += tempW(currRowIndex,l) * tempV.col(l);
     }
@@ -158,9 +154,9 @@ double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Mat
     chosenCols[currColIndex] = true;
     int globalCurrColIdx = currColIndex + min_j;
     double currPivot = 1/residualRow(currColIndex);
-    Eigen::VectorXd currColumn = matrixData.block(min_i,globalCurrColIdx,nRows,1);
+    Eigen::VectorXd currColumn = matrixData.block(min_i,globalCurrColIdx,numRows,1);
 
-    sum = Eigen::VectorXd::Zero(nRows);
+    sum = Eigen::VectorXd::Zero(numRows);
     for(int l = 0; l < k; l++){
       sum += tempV(currColIndex,l) * tempW.col(l);
     }
@@ -202,8 +198,8 @@ double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Mat
   calculatedRank = k;
   // Return zero for zero matrix
   if ( k == 0){
-    W = Eigen::MatrixXd::Zero(nRows,1);
-    V = Eigen::MatrixXd::Zero(nCols,1);
+    W = Eigen::MatrixXd::Zero(numRows,1);
+    V = Eigen::MatrixXd::Zero(numCols,1);
     calculatedRank = 1;
     return epsilon;
   }
@@ -212,15 +208,15 @@ double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Mat
   if (k >= maxRank - 1){
     // Return original matrix
     // Skinny matrix
-    if (nCols <= nRows){
-      W = matrixData.block(min_i,min_j,nRows,nCols);
-      V = Eigen::MatrixXd::Identity(nCols,nCols);
-      calculatedRank = nCols;
+    if (numCols <= numRows){
+      W = matrixData.block(min_i,min_j,numRows,numCols);
+      V = Eigen::MatrixXd::Identity(numCols,numCols);
+      calculatedRank = numCols;
     }// Fat matrix      
     else {
-      W = Eigen::MatrixXd::Identity(nRows,nRows);
-      V = matrixData.block(min_i,min_j,nRows,nCols).transpose();
-      calculatedRank = nRows;
+      W = Eigen::MatrixXd::Identity(numRows,numRows);
+      V = matrixData.block(min_i,min_j,numRows,numCols).transpose();
+      calculatedRank = numRows;
     } 
     return epsilon;
   }
@@ -251,20 +247,18 @@ int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::Vecto
 
 void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex);
 
-void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank){
+void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j,const int numRows, const int numCols, const double tolerance, int &calculatedRank){
 	
-  int nRows = max_i-min_i+1;
-  int nCols = max_j-min_j+1;
 
   std::set<int> rowIdxSet,colIdxSet;
  
-  Eigen::SparseMatrix<double> lowRankMatrix_Sp = matrixData_Sp.block(min_i,min_j,nRows,nCols);
+  Eigen::SparseMatrix<double> lowRankMatrix_Sp = matrixData_Sp.block(min_i,min_j,numRows,numCols);
   //find numPoints
   if (lowRankMatrix_Sp.nonZeros() == 0){
     calculatedRank = 1;
-    W = Eigen::MatrixXd::Zero(nRows,1);
+    W = Eigen::MatrixXd::Zero(numRows,1);
     K = Eigen::MatrixXd::Zero(1,1);
-    V = Eigen::MatrixXd::Zero(nCols,1);
+    V = Eigen::MatrixXd::Zero(numCols,1);
     return;
   }
   for (int k = 0; k < lowRankMatrix_Sp.outerSize(); ++k)
@@ -282,11 +276,10 @@ void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen
 
 }
 
-void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank, const std::string pointChoosingMethod,const int minRank){
+void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j,const int numRows, const int numCols, const double tolerance, int &calculatedRank, const std::string pointChoosingMethod,const int minRank){
 	
-  int nRows = max_i-min_i+1;
-  int nCols = max_j-min_j+1;
-  int maxRank = std::min(nRows,nCols);
+  
+  int maxRank = std::min(numRows,numCols);
   int numPoints;
 
   if (minRank > 0)
@@ -297,7 +290,7 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
   double absFrobNormDiff = 1;
   double relFrobNormDiff = 1;
   double approxError = 1;
-  Eigen::MatrixXd lowRankMatrix = matrixData.block(min_i,min_j,nRows,nCols);
+  Eigen::MatrixXd lowRankMatrix = matrixData.block(min_i,min_j,numRows,numCols);
   
   while ((approxError > tolerance) && (numPoints <= maxRank)){	
     
@@ -306,14 +299,14 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
     Eigen::VectorXi  rowIndex(numPoints),colIndex(numPoints);
     if (pointChoosingMethod == "Chebyshev")
       for (int i = 0 ; i < numPoints; i++){
-	rowIndex(i) = floor((nRows + nRows * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
-	colIndex(i) = floor((nCols + nCols * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
+	rowIndex(i) = floor((numRows + numRows * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
+	colIndex(i) = floor((numCols + numCols * cos(pi * (2 * i + 1)/(2 * numPoints))) / 2);
 	rowIndex_Vec[i] = rowIndex(i);
 	colIndex_Vec[i] = colIndex(i);
       }
     if (pointChoosingMethod == "Uniform" && numPoints > 1){
-      int rowStride = nRows / (numPoints - 1);
-      int colStride = nCols / (numPoints - 1);
+      int rowStride = numRows / (numPoints - 1);
+      int colStride = numCols / (numPoints - 1);
       if (rowStride == 0)
 	rowStride = 1;
       if (colStride == 0)
@@ -334,10 +327,10 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
     Eigen::VectorXi rowIndexTest = (rowIndex.head(numPoints-1)+rowIndex.tail(numPoints-1))/2;
     Eigen::VectorXi colIndexTest = (colIndex.head(numPoints-1)+colIndex.tail(numPoints-1))/2;
     
-    Eigen::MatrixXd sampleColsTest(nRows,numPoints-1);
-    Eigen::MatrixXd approxColsTest(nRows,numPoints-1);
-    Eigen::MatrixXd sampleRowsTest(numPoints-1,nCols);
-    Eigen::MatrixXd approxRowsTest(numPoints-1,nCols);
+    Eigen::MatrixXd sampleColsTest(numRows,numPoints-1);
+    Eigen::MatrixXd approxColsTest(numRows,numPoints-1);
+    Eigen::MatrixXd sampleRowsTest(numPoints-1,numCols);
+    Eigen::MatrixXd approxRowsTest(numPoints-1,numCols);
     
     //fill KTempApprox
     for (int i = 0; i < numPoints-1;i++){
@@ -347,11 +340,11 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
       approxColsTest.col(i) = (W * K)*(V.row(colIndexTest(i)).transpose());	
     }
     
-    Eigen::MatrixXd sampleColsTestBlock = sampleColsTest.block(numPoints-1,0,nRows-numPoints+1,numPoints-1);
-    Eigen::MatrixXd approxColsTestBlock = approxColsTest.block(numPoints-1,0,nRows-numPoints+1,numPoints-1);
+    Eigen::MatrixXd sampleColsTestBlock = sampleColsTest.block(numPoints-1,0,numRows-numPoints+1,numPoints-1);
+    Eigen::MatrixXd approxColsTestBlock = approxColsTest.block(numPoints-1,0,numRows-numPoints+1,numPoints-1);
     absFrobNormDiff = (sampleRowsTest-approxRowsTest).norm()+(sampleColsTestBlock-approxColsTestBlock).norm();
     relFrobNormDiff = absFrobNormDiff/(sampleRowsTest.norm()+sampleColsTestBlock.norm());
-    approxError = relFrobNormDiff*(sqrt((nRows*nCols)/((numPoints-1)*(nCols+nRows-numPoints+1))));
+    approxError = relFrobNormDiff*(sqrt((numRows*numCols)/((numPoints-1)*(numCols+numRows-numPoints+1))));
     numPoints *= 1.5;
   }
   calculatedRank = W.cols(); 
@@ -360,27 +353,27 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
 
 void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex){
 	
-  int nRowsSelect = rowIndex.size();
-  int nColsSelect = colIndex.size();
+  int numRowsSelect = rowIndex.size();
+  int numColsSelect = colIndex.size();
   
   //double rankTolerance=max(inputMatrix.rows(),inputMatrix.cols())*1e-16;
   double rankTolerance  = 1e-10;
-  Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(inputMatrix.rows(),nColsSelect);
-  Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(inputMatrix.cols(),nRowsSelect);
-  Eigen::MatrixXd KTemp = Eigen::MatrixXd::Zero(nRowsSelect,nColsSelect);
+  Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(inputMatrix.rows(),numColsSelect);
+  Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(inputMatrix.cols(),numRowsSelect);
+  Eigen::MatrixXd KTemp = Eigen::MatrixXd::Zero(numRowsSelect,numColsSelect);
   
   //fill W
-  for (int i = 0; i < nColsSelect; i++)
+  for (int i = 0; i < numColsSelect; i++)
     WTemp.col(i) = inputMatrix.col(colIndex[i]);
   
   //fill V
-  for (int i = 0; i < nRowsSelect; i++)
+  for (int i = 0; i < numRowsSelect; i++)
     VTemp.col(i) = inputMatrix.row(rowIndex[i]).transpose();
   
   
   //fill K
-  for (int i = 0; i < nRowsSelect; i++)
-    for (int j = 0; j < nColsSelect; j++)
+  for (int i = 0; i < numRowsSelect; i++)
+    for (int j = 0; j < numColsSelect; j++)
       KTemp(i,j) = inputMatrix(rowIndex[i],colIndex[j]);
   
 
@@ -445,11 +438,9 @@ int SVD_LowRankApprox(const Eigen::MatrixXd & inputMatrix, const double accuracy
 }
 
 
-void SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank, const int minRank ){
+void SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols,const double tolerance, int & calculatedRank, const int minRank ){
 
-  int nRows = max_i-min_i+1;
-  int nCols = max_j-min_j+1;
-  Eigen::MatrixXd lowRankMatrix = matrixData.block(min_i,min_j,nRows,nCols);
+  Eigen::MatrixXd lowRankMatrix = matrixData.block(min_i,min_j,numRows,numCols);
   calculatedRank = SVD_LowRankApprox(lowRankMatrix, tolerance, &W, &V, &K, minRank);
    
 }
