@@ -12,7 +12,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  /*
+  
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -22,7 +22,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
   CPPUNIT_TEST(iterative_Solve_Test);
   CPPUNIT_TEST(assignment_Test_Simple);
-  CPPUNIT_TEST(assignment_Test_ExtendedSp);*/
+  CPPUNIT_TEST(assignment_Test_ExtendedSp);
   CPPUNIT_TEST(blockExtraction_Test);
   CPPUNIT_TEST(extendAdd_LowRankToHODLR_Test);
   CPPUNIT_TEST(extendAdd_DenseToHODLR_Test);
@@ -481,10 +481,10 @@ public:
     HODLR_Matrix sampleMatrix;
     int matrixSize = 10000;
     Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
-    Eigen::MatrixXd extract_Full  = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
-    Eigen::MatrixXd extract_Part  = sampleMatrix.get_Block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2);
-    Eigen::MatrixXd extract_Row   = sampleMatrix.get_Row(50);
-    Eigen::MatrixXd extract_Col   = sampleMatrix.get_Col(6532);
+    Eigen::MatrixXd extract_Full  = sampleMatrix.block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd extract_Part  = sampleMatrix.block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2);
+    Eigen::MatrixXd extract_Row   = sampleMatrix.row(50);
+    Eigen::MatrixXd extract_Col   = sampleMatrix.col(6532);
     CPPUNIT_ASSERT((extract_Full - exact_Matrix).norm() < 1e-16);
     CPPUNIT_ASSERT((extract_Part - exact_Matrix.block(matrixSize/4,matrixSize/4,matrixSize/2,matrixSize/2)).norm() < 1e-16);
     CPPUNIT_ASSERT((extract_Row - exact_Matrix.row(50)).norm() < 1e-16);
@@ -510,7 +510,7 @@ public:
     Eigen::MatrixXd U = Eigen::MatrixXd::Random(updateSize,rank);
     Eigen::MatrixXd V = Eigen::MatrixXd::Random(updateSize,rank);
     sampleMatrix.extendAddUpdate(U,V,extendIdxVec,1e-16,"Exact");
-    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd exact_Update = U * V.transpose();
     Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
@@ -521,7 +521,7 @@ public:
     HODLR_Matrix sampleMatrix2;
     exact_Matrix  = sampleMatrix2.createExactHODLR(10,matrixSize,30);
     sampleMatrix2.extendAddUpdate(U,V,extendIdxVec,1e-6,"Compress_LU");
-    HODLR_Result = sampleMatrix2.get_Block(0,0,matrixSize,matrixSize);
+    HODLR_Result = sampleMatrix2.block(0,0,matrixSize,matrixSize);
     exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
     error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;
@@ -531,7 +531,7 @@ public:
     HODLR_Matrix sampleMatrix3;
     exact_Matrix  = sampleMatrix3.createExactHODLR(10,matrixSize,30);
     sampleMatrix3.extendAddUpdate(U,V,extendIdxVec,1e-6,"Compress_QR");
-    HODLR_Result = sampleMatrix3.get_Block(0,0,matrixSize,matrixSize);
+    HODLR_Result = sampleMatrix3.block(0,0,matrixSize,matrixSize);
     exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,exact_Update,0,0,updateSize,updateSize,"RowsCols");
     error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;
@@ -553,7 +553,7 @@ public:
     std::sort(extendIdxVec.begin(),extendIdxVec.end());
     Eigen::MatrixXd D = Eigen::MatrixXd::Random(updateSize,updateSize);
     sampleMatrix.extendAddUpdate(D,extendIdxVec,1e-6,"Compress_LU");
-    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;
@@ -574,7 +574,7 @@ public:
     HODLR_Matrix D_HODLR;
     Eigen::MatrixXd D = D_HODLR.createExactHODLR(10,updateSize,30);
     D_HODLR.extend(extendIdxVec,matrixSize);
-    Eigen::MatrixXd HODLR_Result = D_HODLR.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd HODLR_Result = D_HODLR.block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd exact_Result = extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;
@@ -597,7 +597,7 @@ public:
     HODLR_Matrix D_HODLR;
     Eigen::MatrixXd D = D_HODLR.createExactHODLR(10,updateSize,30);
     sampleMatrix.extendAddUpdate(D_HODLR,extendIdxVec,1e-6,"Compress_LU");
-    Eigen::MatrixXd HODLR_Result = sampleMatrix.get_Block(0,0,matrixSize,matrixSize);
+    Eigen::MatrixXd HODLR_Result = sampleMatrix.block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
     //std::cout<<error<<std::endl;

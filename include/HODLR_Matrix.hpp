@@ -5,16 +5,17 @@
 #include "helperFunctions.hpp"
 #include "user_IndexTree.hpp"
 #include "recLU_FactorTree.hpp"
+#include "lowRank.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <string>
 #include <cmath>
 #include <vector>
-#include <set>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+
 /* Author : Amir Aminfar ---> aminfar@stanford.edu */
 class HODLR_Matrix{
 
@@ -50,20 +51,9 @@ public:
   Eigen::MatrixXd extendedSp_Solve(const Eigen::MatrixXd & input_RHS);
   Eigen::MatrixXd iterative_Solve(const Eigen::MatrixXd & input_RHS, const int maxIterations, const double stop_tolerance,const double init_LRTolerance,const std::string input_LR_Method, const std::string directSolve_Method);
 
-  /**************************** Low-Rank Approximation Methods **************************/
-  double partialPivACA_LowRankApprox(Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minRank = -1);
-
- 
-  
-  void PS_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank, const std::string pointChoosingMethod = "Chebyshev",const int minRank = -1) const;
-  
-  void SVD_LowRankApprox(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank, const int minRank = -1) const;
-  
-  void PS_LowRankApprox_Sp(Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int max_i,const int min_j, const int max_j, const double tolerance, int &calculatedRank)const;
-
   /************************************* Attribute Modification **********************************/
   void set_LRTolerance(double tolerance);  
-  void set_MinValueACA(double minValue);
+  void set_minPivot(double minPivot);
   void set_def_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
   void saveExtendedSp(std::string savePath);
@@ -79,9 +69,9 @@ public:
   double get_MatrixSize() const;
 
   /************************************ Acessing HODLR Entries *******************************/
-  Eigen::MatrixXd get_Block(int min_i,int min_j,int numRows,int numCols);
-  Eigen::MatrixXd get_Row(int row);
-  Eigen::MatrixXd get_Col(int col);
+  Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);
+  Eigen::MatrixXd row(int row);
+  Eigen::MatrixXd col(int col);
  
   
   HODLR_Matrix  topDiag();
@@ -135,7 +125,7 @@ private:
   bool isSquareMatrix;
 
   double LR_Tolerance;
-  double minValueACA;
+  double minPivot;
 
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;
@@ -155,7 +145,6 @@ private:
   Eigen::MatrixXd recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot);
   Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, const recLU_FactorTree::node* factorRoot);
 
-
   /**************************extendedSp Solver Functions***************************/
   void findNodesAtLevel(HODLR_Tree::node* HODLR_Root, const int level, std::vector<HODLR_Tree::node*> & outputVector);
   void findLeafNodes(HODLR_Tree::node* HODLR_Root, std::vector<HODLR_Tree::node*>& outputVector);
@@ -167,16 +156,7 @@ private:
   /***************************Iterative Solver Functions****************************/
   Eigen::MatrixXd oneStep_Iterate(const Eigen::MatrixXd &  prevStep_result,const Eigen::MatrixXd & RHS,const Eigen::MatrixXd & initSolveGuess,Eigen::MatrixXd & prevStep_Product,const std::string directSolve_Method);
 
-  /***************************LR Approximation Related Functions********************/  
-  int chooseNNZRowIndex(const std::vector<bool> &chosenRows) const;
-  int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow) const;
-  
-  void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd & inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex)const;
-  
-  void LUDecompose(const Eigen::MatrixXd &inputMatrix,Eigen::MatrixXd &LU,Eigen::MatrixXd &P) const;
 
-  int SVD_LowRankApprox(const Eigen::MatrixXd & inputMatrix, const double accuracy, Eigen::MatrixXd* Wptr = NULL, Eigen::MatrixXd* Vptr = NULL, Eigen::MatrixXd* Kptr = NULL, int minRank = -1) const;
-  
   /**********************************Accessing Matrix Entries***************************/
   void fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j);
 
@@ -186,8 +166,6 @@ private:
   void freeDenseMatMem();
   void freeSparseMatMem();
   
-
-
   /***********************************Extend Add Functions *******************************/
   void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
   void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,double tol,std::string mode);
@@ -204,7 +182,5 @@ private:
 /****************************************Extend-Add external functions**************************/
 Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::MatrixXd & child,int min_i,int min_j,int numRows,int numCols,std::string mode);
 
-/****************************************LR_Approximation external funcions*************************/
-double fullPivACA_LowRankApprox(Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int max_i, const int min_j, const int max_j, const double tolerance, int & calculatedRank,const int minPivot = 0,const int minRank = -1);
 
 #endif
