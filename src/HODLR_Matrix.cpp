@@ -934,7 +934,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   //set_def_LRMethod(prev_LRMethod);
   return solution;
 }
-
+/*
 void HODLR_Matrix::LUDecompose(const Eigen::MatrixXd &inputMatrix,Eigen::MatrixXd &LU,Eigen::MatrixXd &P) const{
     
   Eigen::PartialPivLU<Eigen::MatrixXd> lu(inputMatrix);
@@ -942,7 +942,7 @@ void HODLR_Matrix::LUDecompose(const Eigen::MatrixXd &inputMatrix,Eigen::MatrixX
   P = lu.permutationP();
   return;	  
 }
-
+*/
 void HODLR_Matrix::reset_attributes(){
   LRStoredInTree = false;
   createdRecLUfactorTree = false;
@@ -1045,15 +1045,15 @@ double HODLR_Matrix::get_MatrixSize() const{
 
 
 /************************************ Acessing HODLR Entries *******************************/
-Eigen::MatrixXd HODLR_Matrix::get_Row(int row){
-  return get_Block(row,0,1,matrixNumCols);
+Eigen::MatrixXd HODLR_Matrix::row(int row){
+  return block(row,0,1,matrixNumCols);
 }
 
-Eigen::MatrixXd HODLR_Matrix::get_Col(int col){
-  return get_Block(0,col,matrixNumRows,1);
+Eigen::MatrixXd HODLR_Matrix::col(int col){
+  return block(0,col,matrixNumRows,1);
 }
 
-Eigen::MatrixXd HODLR_Matrix::get_Block(int min_i,int min_j,int numRows,int numCols){
+Eigen::MatrixXd HODLR_Matrix::block(int min_i,int min_j,int numRows,int numCols){
   if (matrixDataAvail == true){
     return matrixData.block(min_i,min_j,numRows,numCols);
   }else  if(matrixDataAvail_Sp == true){
@@ -1443,7 +1443,7 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix &
   if (HODLR_Root->isLeaf == true){
     int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
     int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
-    HODLR_Root->leafMatrix += extendD_HODLR.get_Block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+    HODLR_Root->leafMatrix += extendD_HODLR.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
     return;
   }
 
@@ -1498,19 +1498,19 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix &
       for (int i = 0; i < topOffDiagRank; i++){
 	int min_i = HODLR_Root->min_i;
 	int min_j = HODLR_Root->splitIndex_j + 1;
-	U1_TopOffDiag.col(i) = get_Block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-	V1_TopOffDiag.col(i) = get_Block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
-	U2_TopOffDiag.col(i) = extendD_HODLR.get_Block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-	V2_TopOffDiag.col(i) = extendD_HODLR.get_Block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
+	U1_TopOffDiag.col(i) = block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
+	V1_TopOffDiag.col(i) = block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
+	U2_TopOffDiag.col(i) = extendD_HODLR.block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
+	V2_TopOffDiag.col(i) = extendD_HODLR.block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
       }
       
       for (int i = 0; i < bottOffDiagRank; i++){
 	int min_i = HODLR_Root->splitIndex_i + 1;
 	int min_j = HODLR_Root->min_j;
-	U1_BottOffDiag.col(i) = get_Block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
-	V1_BottOffDiag.col(i) = get_Block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
-	U2_BottOffDiag.col(i) = extendD_HODLR.get_Block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1);
-	V2_BottOffDiag.col(i) = extendD_HODLR.get_Block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
+	U1_BottOffDiag.col(i) = block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
+	V1_BottOffDiag.col(i) = block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
+	U2_BottOffDiag.col(i) = extendD_HODLR.block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1);
+	V2_BottOffDiag.col(i) = extendD_HODLR.block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
       }
       
       
@@ -1550,10 +1550,10 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix &
   }else if (mode == "Compress_LU"){
     int min_i_Top = HODLR_Root->min_i;
     int min_j_Top = HODLR_Root->splitIndex_j + 1;
-    Eigen::MatrixXd addedMatrix_Top = get_Block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag) + extendD_HODLR.get_Block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag);
+    Eigen::MatrixXd addedMatrix_Top = block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag) + extendD_HODLR.block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag);
     int min_i_Bott = HODLR_Root->splitIndex_i + 1;
     int min_j_Bott = HODLR_Root->min_j;
-    Eigen::MatrixXd addedMatrix_Bott = get_Block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag) + extendD_HODLR.get_Block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag);
+    Eigen::MatrixXd addedMatrix_Bott = block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag) + extendD_HODLR.block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag);
     //topRank  = SVD_LowRankApprox(addedMatrix_Top ,LR_Tolerance, &U_TopOffDiag, &V_TopOffDiag, &K_TopOffDiag);
     //bottRank = SVD_LowRankApprox(addedMatrix_Bott ,LR_Tolerance, &U_BottOffDiag, &V_BottOffDiag, &K_BottOffDiag);
     ::fullPivACA_LowRankApprox(addedMatrix_Top ,U_TopOffDiag ,V_TopOffDiag ,0,addedMatrix_Top.rows() - 1 ,0,addedMatrix_Top.cols() - 1 ,tol,topRank); 
@@ -1644,8 +1644,8 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixX
   for (int i = 0; i < topOffDiagRank; i++){
     int min_i = HODLR_Root->min_i;
     int min_j = HODLR_Root->splitIndex_j + 1;
-    U1_TopOffDiag.col(i) = get_Block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-    V1_TopOffDiag.col(i) = get_Block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
+    U1_TopOffDiag.col(i) = block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
+    V1_TopOffDiag.col(i) = block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
     U2_TopOffDiag.col(i) = extendD.block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
     V2_TopOffDiag.col(i) = extendD.block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
   }
@@ -1653,8 +1653,8 @@ void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixX
   for (int i = 0; i < bottOffDiagRank; i++){
     int min_i = HODLR_Root->splitIndex_i + 1;
     int min_j = HODLR_Root->min_j;
-    U1_BottOffDiag.col(i) = get_Block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
-    V1_BottOffDiag.col(i) = get_Block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
+    U1_BottOffDiag.col(i) = block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
+    V1_BottOffDiag.col(i) = block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
     U2_BottOffDiag.col(i) = extendD.block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1);
     V2_BottOffDiag.col(i) = extendD.block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
   }
