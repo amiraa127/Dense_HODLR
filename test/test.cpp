@@ -12,7 +12,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  
+  /*
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -28,7 +28,8 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendAdd_DenseToHODLR_Test);
   CPPUNIT_TEST(extend_HODLRtoHODLR_Test);
   CPPUNIT_TEST(extendAdd_HODLRtoHODLR_Test);
-
+  */
+  CPPUNIT_TEST(boundaryFinder_Test);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -603,6 +604,56 @@ public:
     //std::cout<<error<<std::endl;
     CPPUNIT_ASSERT(error < 1e-5);
   } 
+
+  void boundaryFinder_Test(){
+    Eigen::MatrixXd inputMatrix = Eigen::MatrixXd::Zero(12,12);
+    for (int i = 0; i < 12; i++)
+      inputMatrix(i,i)   = 10;
+    inputMatrix(0,1)   =  2; inputMatrix(0,4)  =  4;
+    inputMatrix(1,2)   = -1; inputMatrix(1,5)  = -3;
+    inputMatrix(2,3)   =  2 ; inputMatrix(2,6)  = -1;
+    inputMatrix(3,7)   =  5 ;
+    inputMatrix(4,5)   = -3; inputMatrix(4,8)  =  2;
+    inputMatrix(5,6)   = -2; inputMatrix(5,9)  = -1;
+    inputMatrix(6,7)   =  4; inputMatrix(6,10) = -2; inputMatrix(6,11) = 3 ; 
+    inputMatrix(7,11)  = -1;
+    inputMatrix(8,9)   = -3;
+    inputMatrix(9,10)  =  5;
+    inputMatrix(10,11) =  2;
+    
+    for (int i = 0; i < 12;i++)
+      for (int j = i; j < 12; j++)
+	inputMatrix(j,i) = inputMatrix(i,j);
+  
+    Eigen::SparseMatrix<double> inputSpMatrix = inputMatrix.sparseView();
+    std::map<int,std::vector<int> > rowPos,colPos;
+    std::set<int> rowSet,colSet;
+    for (int i = 0; i <= 5; i++)
+      rowSet.insert(i);
+    
+    for (int i = 6; i <= 11; i++)
+      colSet.insert(i);
+    
+    identifyBoundary(inputSpMatrix,rowSet,colSet,rowPos,colPos);
+      
+    for(std::map<int,std::vector<int> >::iterator iter = rowPos.begin(); iter != rowPos.end(); ++iter){
+      std::cout<<iter->first<<":";
+      for (unsigned int i = 0; i < iter->second.size();i++)
+	std::cout<<iter->second[i]<<" ";
+      std::cout<<std::endl;
+    }
+    
+    for(std::map<int,std::vector<int> >::iterator iter = colPos.begin(); iter != colPos.end(); ++iter){
+      std::cout<<iter->first<<":";
+      for (unsigned int i = 0; i < iter->second.size();i++)
+	std::cout<<iter->second[i]<<" ";
+      std::cout<<std::endl;
+    }
+    
+
+
+  }
+
 
 };   
 

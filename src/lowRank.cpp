@@ -444,3 +444,82 @@ void SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, Eigen::MatrixXd & W, 
   calculatedRank = SVD_LowRankApprox(lowRankMatrix, tolerance, &W, &V, &K, minRank);
    
 }
+
+void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos){
+  int numRows = rowSet.size();
+  int numCols = colSet.size();
+  assert(inputGraph.rows() == numRows + numCols);
+  assert(inputGraph.cols() == numRows + numCols);
+  
+  std::vector<int> rowCurrClassVec;
+  std::vector<int> colCurrClassVec;
+  std::vector<int> rowNextClassVec;
+  std::vector<int> colNextClassVec;
+  std::map<int,bool> classifiedRows,classifiedCols;
+  //initialize
+  for (std::set<int>::iterator iter = rowSet.begin(); iter != rowSet.end(); ++ iter)
+    classifiedRows[*iter] = false;
+  
+  for (std::set<int>::iterator iter = colSet.begin(); iter != colSet.end(); ++ iter)
+    classifiedCols[*iter] = false;
+
+  int numClassifiedRows = 0;
+  int numClassifiedCols = 0;
+  //Identify boundary nodes
+  for (int k = 0; k < inputGraph.outerSize(); ++k)
+    for (Eigen::SparseMatrix<double>::InnerIterator it(inputGraph,k); it; ++it){
+      if (rowSet.count(it.row()) == 1 && colSet.count(it.col()) == 1){
+	if (classifiedRows[it.row()] == false && classifiedCols[it.col()] == false){
+	  rowPos[0].push_back(it.row());
+	  colPos[0].push_back(it.col());
+	  classifiedRows[it.row()] = true;
+	  classifiedCols[it.col()] = true;
+	  rowCurrClassVec.push_back(it.row());
+	  colCurrClassVec.push_back(it.col());
+	  numClassifiedRows ++;
+	  numClassifiedCols ++;
+	}
+      }
+    }     
+
+  //Clasify other rows
+  int rowCurrClass = 0;
+  while (numClassifiedRows < numRows){
+    for (unsigned int i = 0; i < rowCurrClassVec.size();i++){
+      Eigen::SparseMatrix<double> currNode = inputGraph.block(rowCurrClassVec[i],0,1,numRows+numCols);
+      for (int k = 0; k < currNode.outerSize(); ++k)
+	for (Eigen::SparseMatrix<double>::InnerIterator it(currNode,k); it; ++it){
+	  if (rowSet.count(it.col()) == 1 && classifiedRows[it.col()] == false){
+	    rowPos[rowCurrClass + 1].push_back(it.col());
+	    classifiedRows[it.col()] = true;
+	    rowNextClassVec.push_back(it.col());
+	    numClassifiedRows ++;
+	  }
+	}  
+    }
+    rowCurrClass ++;
+    rowCurrClassVec = rowNextClassVec;
+    rowNextClassVec.clear();
+  }
+
+   //Clasify other cols
+  int colCurrClass = 0;
+  while (numClassifiedCols < numCols){
+    for (unsigned int i = 0; i < colCurrClassVec.size();i++){
+      Eigen::SparseMatrix<double> currNode = inputGraph.block(colCurrClassVec[i],0,1,numRows+numCols);
+      for (int k = 0; k < currNode.outerSize(); ++k)
+	for (Eigen::SparseMatrix<double>::InnerIterator it(currNode,k); it; ++it){
+	  if (colSet.count(it.col()) == 1 && classifiedCols[it.col()] == false){
+	    colPos[colCurrClass + 1].push_back(it.col());
+	    classifiedCols[it.col()] = true;
+	    colNextClassVec.push_back(it.col());
+	    numClassifiedCols ++;
+	  }
+	} 
+    }
+    colCurrClass ++;
+    colCurrClassVec = colNextClassVec;
+    colNextClassVec.clear();
+  }
+ 
+}
