@@ -30,6 +30,9 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendAdd_HODLRtoHODLR_Test);
   */
   CPPUNIT_TEST(boundaryFinder_Test);
+  CPPUNIT_TEST(boundaryFinder_lowRank_Test);
+
+
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -478,7 +481,7 @@ public:
   }
 
   void blockExtraction_Test(){
-    std::cout<<"Testing HODLR get_block function....."<<std::endl;
+    std::cout<<"Testing HODLR block function....."<<std::endl;
     HODLR_Matrix sampleMatrix;
     int matrixSize = 10000;
     Eigen::MatrixXd exact_Matrix  = sampleMatrix.createExactHODLR(10,matrixSize,30);
@@ -633,7 +636,7 @@ public:
     
     for (int i = 6; i <= 11; i++)
       colSet.insert(i);
-    
+    /*
     identifyBoundary(inputSpMatrix,rowSet,colSet,rowPos,colPos);
       
     for(std::map<int,std::vector<int> >::iterator iter = rowPos.begin(); iter != rowPos.end(); ++iter){
@@ -649,9 +652,78 @@ public:
 	std::cout<<iter->second[i]<<" ";
       std::cout<<std::endl;
     }
+    */
+  }
+
+  void boundaryFinder_lowRank_Test(){
+    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_FETI/400_front_num_5_level_0");
+    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_FETI/400_front_num_5_level_0_Graph");
+    /*
+    // identify boundary
+    std::map<int,std::vector<int> > rowPos,colPos;
+    std::set<int> rowSet,colSet;
+    int split = schurComplement.rows()/2;
+    for (int i = 0; i <= split; i++)
+      rowSet.insert(i);
     
-
-
+    for (int i = split + 1; i < schurComplement.cols() ; i++)
+      colSet.insert(i);
+    
+    identifyBoundary(graph,rowSet,colSet,rowPos,colPos);
+    
+    
+    for (int i = 0;i <= 10; i++){
+      std::vector<int> rowIdx,colIdx;
+      createIdxFromBoundaryMap(rowPos,colPos,i,rowIdx,colIdx);
+      
+      // adjust colIndex
+      int minCol = split + 1;
+      for (unsigned int i = 0; i < colIdx.size();i++)
+	colIdx[i] = colIdx[i] - minCol;
+      // Extract
+      Eigen::MatrixXd W,K,V;
+      Eigen::MatrixXd LR_Matrix = schurComplement.block(0,split+1,split+1,schurComplement.cols() - split - 1);
+      extractRowsCols(W,K,V,LR_Matrix,rowIdx,colIdx);
+      double absError = (LR_Matrix - W*K*V.transpose()).norm();
+      double relError = absError/LR_Matrix.norm();
+      std::cout<<"depth = "<<i<<" rank = "<<colIdx.size()<<" abs error = "<<absError<< " rel error = "<<relError<<std::endl;
+    
+    }
+    */
+    Eigen::MatrixXd W,K,V;
+    int rank;
+    int split = schurComplement.rows()/2;
+    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,rank);
+   
+    std::cout<<rank<<std::endl;
+    Eigen::MatrixXd LR_Matrix = schurComplement.block(split+1,0,schurComplement.rows() - split - 1,split+1);
+    
+    double absError = (LR_Matrix - W*K*V.transpose()).norm();
+    double relError = absError/LR_Matrix.norm();
+    std::cout<<relError<<" "<<absError<<std::endl;
+    HODLR_Matrix schur_HODLR(schurComplement,graph,30);
+    //HODLR_Matrix schur_HODLR(schurComplement,30);
+    
+    schur_HODLR.printResultInfo = true;
+    //schur_HODLR.printLevelAccuracy = true;
+    
+    int matrixSize = schurComplement.rows();
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd inputF = schurComplement * exactSoln;
+    //Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
+    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,10000,1e-10,1e-3,"partialPiv_ACA","recLU");
+    Eigen::VectorXd difference = solverSoln - exactSoln;
+    relError = difference.norm()/exactSoln.norm();
+    std::cout<<relError<<std::endl;
+  
+    double startTime = clock();
+    Eigen::PartialPivLU<Eigen::MatrixXd> LU (schurComplement);
+    solverSoln = LU.solve(inputF);
+    double endTime = clock();
+    double time = (endTime - startTime)/CLOCKS_PER_SEC;
+    std::cout<<time<<std::endl;
+    std::cout<<schurComplement.rows()<<std::endl;
+    
   }
 
 

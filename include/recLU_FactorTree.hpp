@@ -12,8 +12,7 @@ public:
     node* left;
     node* right;
     bool isLeaf;
-    Eigen::MatrixXd P_S, LU_S;
-    Eigen::MatrixXd P_leaf, LU_leaf;
+    Eigen::PartialPivLU<Eigen::MatrixXd> LU;
     Eigen::MatrixXd topDiagSoln_LR;
     Eigen::MatrixXd bottDiagSoln_LR;
   };

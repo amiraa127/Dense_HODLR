@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <vector>
 #include <cmath>
 
@@ -68,6 +69,16 @@ void saveMatrixXdToBinary(const Eigen::MatrixXd& inputMatrix, const std::string 
  * inputFileName : Path of the input file.
  */
 Eigen::MatrixXd readBinaryIntoMatrixXd(const std::string inputFileName);
+
+
+/* Function : readMtxIntoSparseMatrix
+ *-------------------------------------
+ * This function reads a sparse matrix market format (*.mmx) file and returns an Eigen sparse matrix object.
+ * Currently it only supports matrix object type with coordinate format. Only real or double data types are acceptable at this time.
+ * The symmetricity can only be general or symmetric.
+ * inputFileName : The path of the input matrix market file.
+ */
+Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileName);
 
 
 /* Function: makeMatrixFrom1DInterval

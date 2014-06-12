@@ -31,12 +31,18 @@ public:
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix);
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph);
+  
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold);
-
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
+  
+  
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+
   
   HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
 

@@ -150,6 +150,93 @@ Eigen::MatrixXd readBinaryIntoMatrixXd(const std::string inputFileName){
 }
 
 
+
+/* Function : readMtxIntoSparseMatrix
+ *-------------------------------------
+ * This function reads a sparse matrix market format (*.mmx) file and returns an Eigen sparse matrix object.
+ * Currently it only supports matrix object type with coordinate format. Only real or double data types are acceptable at this time.
+ * The symmetricity can only be general or symmetric.
+ * inputFileName : The path of the input matrix market file.
+ */
+Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileName){
+  //open the file
+  std::ifstream inputFile;
+  inputFile.open(inputFileName.c_str());
+  if (!inputFile.fail()){
+    std::string currLine;
+    int numRows,numCols,nnz;
+    double value;
+    int currRow,currCol;
+    int error;
+    bool isSymmetric;
+    //check header
+    char str1[20],str2[20],str3[20],str4[20],str5[20];
+    getline(inputFile,currLine);
+    error = sscanf(currLine.c_str(),"%s %s %s %s %s",str1,str2,str3,str4,str5);
+    if ((error != 5) || (strcmp(str1,"%%MatrixMarket") != 0)){
+      std::cout<<"Error! Incorrect file header."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
+    if (strcmp(str2,"matrix") != 0){
+      std::cout<<"Error! Only matrix object type is acceptable at this time."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
+    if (strcmp(str3,"coordinate") != 0){
+      std::cout<<"Error! Only coordinate format is acceptable at this time."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
+    if ((strcmp(str4,"real") != 0) && (strcmp(str4,"double") != 0)){
+      std::cout<<"Error! Only real or double data types are acceptable at this time."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
+    if ((strcmp(str5,"general") == 0))
+      isSymmetric = false;
+    else if ((strcmp(str5,"symmetric") == 0))
+      isSymmetric = true;
+    else{
+      std::cout<<"Error! Only general or symmetric symmetry types are acceptable at this time."<<std::endl;
+      exit(EXIT_FAILURE);
+    } 
+      
+    //start filling the matrix
+    while (inputFile.peek() == '%')
+      inputFile.ignore(2048,'\n');
+    getline(inputFile,currLine);
+    error = sscanf(currLine.c_str(),"%u %u %u",&numRows,&numCols,&nnz);
+    //check format correctness
+    if (error != 3){
+      std::cout<<"Error! Bad format."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
+    Eigen::SparseMatrix<double> result(numRows,numCols);
+    std::vector<Eigen::Triplet<double,int> > tripletVector;
+    int numEntries = 0;
+    while ((!inputFile.eof()) && (numEntries < nnz)){
+      getline(inputFile,currLine);
+      error = sscanf(currLine.c_str(),"%u %u %lf",&currRow,&currCol,&value);
+      //check format correctness
+      if (error != 3){
+	std::cout<<"Error! Bad format."<<std::endl;
+	exit(EXIT_FAILURE);
+      }
+      Eigen::Triplet<double,int> currTriplet(currRow-1,currCol-1,value);
+      tripletVector.push_back(currTriplet);
+      // push back adjoint value into the matrix
+      if (isSymmetric){
+	Eigen::Triplet<double,int> adjTriplet(currCol-1,currRow-1,value);
+	tripletVector.push_back(adjTriplet);
+      }
+      numEntries++;
+    }
+    inputFile.close();
+    result.setFromTriplets(tripletVector.begin(),tripletVector.end());
+    return result;
+  }else{
+    std::cout<<"Error! File "<<inputFileName<<" could not be opened."<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------
  * This function creates a dense interaction matrix given a set of row and column points given a kernel.

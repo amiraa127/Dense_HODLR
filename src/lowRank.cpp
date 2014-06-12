@@ -2,6 +2,20 @@
 
 const double pi = 3.14159265359;
 
+// Some needed function prototypes
+// ACA
+int chooseNNZRowIndex(const std::vector<bool> &chosenRows);
+int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
+
+// Boundary Identifier
+void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int depth = -1);
+void createIdxFromBoundaryMap(std::map<int,std::vector<int> > & rowPos, std::map<int,std::vector<int> > & colPos, int depth,std::vector<int> &rowIdx,std::vector<int> &colIdx);
+
+// Psuedo Skeleton
+void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex);
+void extractRowsCols(const Eigen::MatrixXd & matrixData, int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V,const std::vector<int> & rowIndex,const std::vector<int> & colIndex);
+
+
 double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int minPivot){
 
   int maxRank = std::min(numRows,numCols);
@@ -83,9 +97,6 @@ double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::Matrix
   return epsilon;
 }
 
-
-int chooseNNZRowIndex(const std::vector<bool> &chosenRows);
-int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
 double partialPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int minPivot)  {
   
   int maxRank = std::min(numRows,numCols);
@@ -245,7 +256,6 @@ int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::Vecto
 }
 
 
-void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V, const Eigen::MatrixXd &inputMatrix,const std::vector<int> & rowIndex,const std::vector<int> & colIndex);
 
 void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j,const int numRows, const int numCols, const double tolerance, int &calculatedRank){
 	
@@ -272,6 +282,7 @@ void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen
   //choose rows and columns and do the low-rank approximation
   Eigen::MatrixXd dummyW,dummyK,dummyV;
   extractRowsCols(W,K,V,Eigen::MatrixXd(lowRankMatrix_Sp),rowIndex,colIndex);
+  //extractRowsCols(Eigen::MatrixXd(lowRankMatrix_Sp),0,0,numRows,numCols,W,K,V,rowIndex,colIndex);
   calculatedRank = W.cols();
 
 }
@@ -320,7 +331,10 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
     }
 
     //choose rows and columns and do the low-rank approximation
-    extractRowsCols(W,K,V,lowRankMatrix,rowIndex_Vec,colIndex_Vec);
+    //extractRowsCols(W,K,V,lowRankMatrix,rowIndex_Vec,colIndex_Vec);
+    extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,K,V,rowIndex_Vec,colIndex_Vec);
+    
+
     calculatedRank = W.cols();
 
     //obtain stopping criterion
@@ -355,8 +369,10 @@ void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd &
 	
   int numRowsSelect = rowIndex.size();
   int numColsSelect = colIndex.size();
+  int numPoints = std::max(numRowsSelect,numColsSelect);
   
   //double rankTolerance=max(inputMatrix.rows(),inputMatrix.cols())*1e-16;
+  
   double rankTolerance  = 1e-10;
   Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(inputMatrix.rows(),numColsSelect);
   Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(inputMatrix.cols(),numRowsSelect);
@@ -365,7 +381,8 @@ void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd &
   //fill W
   for (int i = 0; i < numColsSelect; i++)
     WTemp.col(i) = inputMatrix.col(colIndex[i]);
-  
+ 
+
   //fill V
   for (int i = 0; i < numRowsSelect; i++)
     VTemp.col(i) = inputMatrix.row(rowIndex[i]).transpose();
@@ -391,7 +408,77 @@ void extractRowsCols(Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd &
   for (int i = 0; i < KTempRank; i++)
     K(i,i) = 1/svdK(i,i);
   
+ 
+  /*
+  Eigen::MatrixXd tempW = Eigen::MatrixXd::Zero(inputMatrix.rows(),numPoints);
+  Eigen::MatrixXd tempV = Eigen::MatrixXd::Zero(inputMatrix.cols(),numPoints);
+  Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
+  
+  //fill W
+  for (int i = 0; i < numPoints; i++){
+    if (i < numColsSelect)
+      tempW.col(i) = inputMatrix.col(colIndex[i]);
+    if (i < numRowsSelect)
+      tempV.col(i) = inputMatrix.row(rowIndex[i]).transpose();
+  }
+ 
+  //fill K
+  for (int i = 0; i < numPoints; i++)
+    for (int j = 0; j < numPoints; j++)
+      if (i < numRowsSelect && j < numColsSelect)
+	tempK(i,j) = inputMatrix(rowIndex[i],colIndex[j]);
+  
+  Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
+  lu.setThreshold(1e-10);
+  int rank = lu.rank();
+
+  V = ((lu.permutationP() * tempV.transpose()).transpose()).leftCols(rank);
+  Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
+  V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
+  K = Eigen::MatrixXd::Identity(rank,rank);
+  W = (tempW * lu.permutationQ()).leftCols(rank);
+  */
 }
+
+
+void extractRowsCols(const Eigen::MatrixXd & matrixData, int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V,const std::vector<int> & rowIndex,const std::vector<int> & colIndex){
+	
+  int numRowsSelect = rowIndex.size();
+  int numColsSelect = colIndex.size();
+  int numPoints = std::max(numRowsSelect,numColsSelect);
+
+  double rankTolerance  = 1e-10;
+  Eigen::MatrixXd tempW = Eigen::MatrixXd::Zero(numRows,numPoints);
+  Eigen::MatrixXd tempV = Eigen::MatrixXd::Zero(numCols,numPoints);
+  Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
+  
+  //fill W
+  for (int i = 0; i < numPoints; i++){
+    if (i < numColsSelect)
+      tempW.col(i) = matrixData.block(min_i,min_j + colIndex[i],numRows,1);
+    if (i < numRowsSelect)
+      tempV.col(i) = matrixData.block(min_i + rowIndex[i],min_j,1,numCols).transpose();
+  
+  }
+ 
+  //fill K
+  for (int i = 0; i < numPoints; i++)
+    for (int j = 0; j < numPoints; j++)
+      if (i < numRowsSelect && j < numColsSelect)
+	tempK(i,j) = matrixData(min_i + rowIndex[i],min_j + colIndex[j]);
+  
+  Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
+  lu.setThreshold(1e-1);
+  int rank = lu.rank();
+
+  V = ((lu.permutationP() * tempV.transpose()).transpose()).leftCols(rank);
+  Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
+  V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
+  K = Eigen::MatrixXd::Identity(rank,rank);
+  W = (tempW * lu.permutationQ()).leftCols(rank);
+}
+
+
 
 int SVD_LowRankApprox(const Eigen::MatrixXd & inputMatrix, const double accuracy, Eigen::MatrixXd* Wptr, Eigen::MatrixXd* Vptr, Eigen::MatrixXd* Kptr, int minRank){
   
@@ -445,7 +532,7 @@ void SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, Eigen::MatrixXd & W, 
    
 }
 
-void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos){
+void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int depth){
   int numRows = rowSet.size();
   int numCols = colSet.size();
   assert(inputGraph.rows() == numRows + numCols);
@@ -485,6 +572,8 @@ void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::
   //Clasify other rows
   int rowCurrClass = 0;
   while (numClassifiedRows < numRows){
+    if (rowCurrClass == depth)
+      break;			 
     for (unsigned int i = 0; i < rowCurrClassVec.size();i++){
       Eigen::SparseMatrix<double> currNode = inputGraph.block(rowCurrClassVec[i],0,1,numRows+numCols);
       for (int k = 0; k < currNode.outerSize(); ++k)
@@ -505,6 +594,8 @@ void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::
    //Clasify other cols
   int colCurrClass = 0;
   while (numClassifiedCols < numCols){
+    if (colCurrClass == depth)
+      break;
     for (unsigned int i = 0; i < colCurrClassVec.size();i++){
       Eigen::SparseMatrix<double> currNode = inputGraph.block(colCurrClassVec[i],0,1,numRows+numCols);
       for (int k = 0; k < currNode.outerSize(); ++k)
@@ -523,3 +614,46 @@ void identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::
   }
  
 }
+
+void createIdxFromBoundaryMap( std::map<int,std::vector<int> > & rowPos, std::map<int,std::vector<int> > & colPos, int depth,std::vector<int> & rowIdx,std::vector<int> & colIdx){
+  assert(depth >= 0 );
+  rowIdx = rowPos[0];
+  colIdx = colPos[0];
+  for (int i = 1; i <= depth; i++){
+    rowIdx.insert(rowIdx.end(),rowPos[i].begin(),rowPos[i].end());
+    colIdx.insert(colIdx.end(),colPos[i].begin(),colPos[i].end());
+  }
+
+}
+
+void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::SparseMatrix<double> graphData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols,int & calculatedRank, const int depth){
+   std::map<int,std::vector<int> > rowPos,colPos;
+   std::set<int> rowSet,colSet;
+   std::vector<int> rowIdx,colIdx;
+   int max_i     = min_i + numRows - 1;
+   int max_j     = min_j + numCols - 1;
+   int minIdx    = std::min(min_i,min_j);
+   int maxIdx    = std::max(max_i,max_j);
+   int offset_i  = min_i - minIdx;
+   int offset_j  = min_j - minIdx;
+   int numPoints = maxIdx - minIdx + 1;
+   
+   for (int i = 0; i < numRows; i++)
+     rowSet.insert(i + min_i - minIdx);
+    
+   for (int i = 0; i < numCols; i++)
+     colSet.insert(i + min_j - minIdx);
+    
+   identifyBoundary(graphData.block(minIdx,minIdx,numPoints,numPoints),rowSet,colSet,rowPos,colPos,depth);
+   createIdxFromBoundaryMap(rowPos,colPos,depth,rowIdx,colIdx);
+
+   // Adjust for offsets
+   for (unsigned int i = 0; i < rowIdx.size();i++)
+     rowIdx[i] -= offset_i;
+   for (unsigned int i = 0; i < colIdx.size();i++)
+     colIdx[i] -= offset_j;
+   //extractRowsCols(W,K,V,matrixData.block(min_i,min_j,numRows,numCols),rowIdx,colIdx);
+   extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,K,V,rowIdx,colIdx);
+   calculatedRank = K.cols();
+}
+
