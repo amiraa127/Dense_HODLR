@@ -6,6 +6,7 @@
 #include <set>
 #include <assert.h>
 #include <iostream>
+#include <algorithm>
 
 double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
 

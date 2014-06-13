@@ -447,7 +447,6 @@ void extractRowsCols(const Eigen::MatrixXd & matrixData, int min_i,int min_j,int
   int numColsSelect = colIndex.size();
   int numPoints = std::max(numRowsSelect,numColsSelect);
 
-  double rankTolerance  = 1e-10;
   Eigen::MatrixXd tempW = Eigen::MatrixXd::Zero(numRows,numPoints);
   Eigen::MatrixXd tempV = Eigen::MatrixXd::Zero(numCols,numPoints);
   Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
@@ -652,8 +651,55 @@ void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::S
      rowIdx[i] -= offset_i;
    for (unsigned int i = 0; i < colIdx.size();i++)
      colIdx[i] -= offset_j;
-   //extractRowsCols(W,K,V,matrixData.block(min_i,min_j,numRows,numCols),rowIdx,colIdx);
    extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,K,V,rowIdx,colIdx);
    calculatedRank = K.cols();
-}
 
+   
+   int numRowsSelect = rowIdx.size();
+   int numColsSelect = colIdx.size();
+   numPoints = std::max(numRowsSelect,numColsSelect);
+   
+   Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
+   
+   
+   //fill K
+   for (int i = 0; i < numPoints; i++)
+     for (int j = 0; j < numPoints; j++)
+       if (i < numRowsSelect && j < numColsSelect)
+	 tempK(i,j) = matrixData(min_i + rowIdx[i],min_j + colIdx[j]);
+   
+   Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
+   lu.setThreshold(1e-1);
+   int rank = lu.rank();
+   
+   Eigen::VectorXi colIdxVec = Eigen::VectorXi::Zero(numPoints);
+   Eigen::VectorXi rowIdxVec = Eigen::VectorXi::Zero(numPoints);
+   
+   for (int i = 0; i < colIdx.size(); i++)
+     colIdxVec[i] = colIdx[i] + offset_j;
+   for (int i = 0; i < rowIdx.size(); i++)
+     rowIdxVec[i] = rowIdx[i] + offset_i;
+   Eigen::VectorXi colIdxVecPerm = lu.permutationQ()*colIdxVec ;
+   Eigen::VectorXi rowIdxVecPerm = lu.permutationP()*rowIdxVec ;
+   /*
+   for(std::map<int,std::vector<int> >::iterator iter = rowPos.begin(); iter != rowPos.end(); ++iter){
+     std::cout<<iter->first<<":";
+     for (unsigned int i = 0; i < iter->second.size();i++)
+       std::cout<<iter->second[i]<<" ";
+      std::cout<<std::endl;
+   }
+   */
+   
+   for (int i = 0; i <= depth; i++)
+     std::sort(rowPos[i].begin(),rowPos[i].end());
+   for (int i = 0; i < numPoints; i++){
+     //std::cout<<rowIdxVecPerm[i]<<" ";
+     for (int j = 0; j <= depth; j++){
+       if (std::binary_search(rowPos[j].begin(),rowPos[j].end(),rowIdxVecPerm[i]))
+	   std::cout<<j<<std::endl;
+     }
+   }
+} 
+	   
+   
+   

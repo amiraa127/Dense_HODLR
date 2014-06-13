@@ -656,8 +656,8 @@ public:
   }
 
   void boundaryFinder_lowRank_Test(){
-    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_FETI/400_front_num_5_level_0");
-    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_FETI/400_front_num_5_level_0_Graph");
+    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_FETI/Structured/400k/400_front_num_5_level_0");
+    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_FETI/Structured/400k/400_front_num_5_level_0_Graph");
     /*
     // identify boundary
     std::map<int,std::vector<int> > rowPos,colPos;
@@ -693,7 +693,7 @@ public:
     Eigen::MatrixXd W,K,V;
     int rank;
     int split = schurComplement.rows()/2;
-    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,rank);
+    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,rank,10);
    
     std::cout<<rank<<std::endl;
     Eigen::MatrixXd LR_Matrix = schurComplement.block(split+1,0,schurComplement.rows() - split - 1,split+1);
@@ -703,7 +703,7 @@ public:
     std::cout<<relError<<" "<<absError<<std::endl;
     HODLR_Matrix schur_HODLR(schurComplement,graph,30);
     //HODLR_Matrix schur_HODLR(schurComplement,30);
-    
+    /*
     schur_HODLR.printResultInfo = true;
     //schur_HODLR.printLevelAccuracy = true;
     
@@ -723,7 +723,7 @@ public:
     double time = (endTime - startTime)/CLOCKS_PER_SEC;
     std::cout<<time<<std::endl;
     std::cout<<schurComplement.rows()<<std::endl;
-    
+    */
   }
 
 
