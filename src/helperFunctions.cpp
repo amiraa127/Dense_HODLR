@@ -237,6 +237,21 @@ Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileN
   }
 }
 
+
+
+void saveVectorAsText(const std::string outputFileName, const std::vector<double> & inputVector){
+  std::ofstream outputFile;
+  outputFile.open(outputFileName.c_str());
+  if (!outputFile.is_open()){
+    std::cout<<"Error! Unable to open file for saving."<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  for (unsigned int i = 0; i < inputVector.size(); i++)
+      outputFile<<i<<" "<<inputVector[i]<<" "<<std::endl;
+  outputFile.close();
+}
+
+
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------
  * This function creates a dense interaction matrix given a set of row and column points given a kernel.

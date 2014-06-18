@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <random>
 
 /* Author : Amir Aminfar ---> aminfar@stanford.edu */
 class HODLR_Matrix{
@@ -103,7 +104,7 @@ public:
   void check_Structure();
   Eigen::MatrixXd createExactHODLR(const int rank,int input_MatrixSize,const int inpt_SizeThreshold);
 
-
+  void saveSolverInfo(const std::string outputFileName);
 private:
 
   int sizeThreshold;
@@ -119,7 +120,14 @@ private:
   double extendedSp_FactorizationTime;
   double extendedSp_SolveTime;
   double iter_SolveTime;
-
+    
+  std::vector<double> LR_ComputationLevelTimeVec;
+  std::vector<double> recLU_FactorLevelTimeVec;
+  std::vector<double> recLU_SolveLevelTimeVec;
+  std::vector<double> iter_IterTimeVec;
+  std::vector<double> iter_IterAccuracyVec;
+  std::vector<double> levelRankAverageVec;
+    
   bool LRStoredInTree;
   bool createdRecLUfactorTree;
   bool assembled_ExtendedSp;
@@ -143,6 +151,7 @@ private:
 
   void setDefaultValues();
   void reset_attributes();
+  void initializeInfoVecotrs(int numLevels);
 
   /****************************recLU Solver Functions*******************************/
  

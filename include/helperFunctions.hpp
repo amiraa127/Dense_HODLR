@@ -81,6 +81,9 @@ Eigen::MatrixXd readBinaryIntoMatrixXd(const std::string inputFileName);
 Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileName);
 
 
+void saveVectorAsText(const std::string outputFileName, const std::vector<double> & inputVector);
+
+
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------
  * This function creates a dense interaction matrix given a set of row and column points given a kernel.

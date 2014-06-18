@@ -31,7 +31,6 @@ HODLR_Tree& HODLR_Tree::operator = (const HODLR_Tree & rhs){
 }
 
 void HODLR_Tree::createDefaultTree(const int matrixSize){
-  numLevels = 0;
   rootNode = new node;
   rootNode->min_i = 0;
   rootNode->max_i = matrixSize - 1;
@@ -42,7 +41,7 @@ void HODLR_Tree::createDefaultTree(const int matrixSize){
   rootNode->LR_Method = def_LRMethod;
   rootNode->currLevel = 0;
   numLevels = 1;
-  rootNode->topOffDiag_minRank = -1;
+  rootNode->topOffDiag_minRank  = -1;
   rootNode->bottOffDiag_minRank = -1;
 
   if ( matrixSize < sizeThreshold ){
@@ -73,7 +72,7 @@ void HODLR_Tree::createDefaultTree(node* root){
   leftNode->max_j = root->min_j + topDiagSize - 1;
   leftNode->LR_Method = root->LR_Method;
   leftNode->currLevel = root->currLevel + 1;
-  leftNode->topOffDiag_minRank = -1;
+  leftNode->topOffDiag_minRank  = -1;
   leftNode->bottOffDiag_minRank = -1;
   root->left = leftNode;
   
@@ -90,6 +89,8 @@ void HODLR_Tree::createDefaultTree(node* root){
     leftNode->left = NULL;
     leftNode->right = NULL;
     leafNodesVec.push_back(leftNode);
+    if (leftNode->currLevel  > (numLevels - 1))
+      numLevels = leftNode->currLevel + 1;
   }
 
   // Allocate right node
@@ -99,7 +100,7 @@ void HODLR_Tree::createDefaultTree(node* root){
   rightNode->max_j = root->max_j;
   rightNode->LR_Method = root->LR_Method;
   rightNode->currLevel = root->currLevel + 1;
-  rightNode->topOffDiag_minRank = -1;
+  rightNode->topOffDiag_minRank  = -1;
   rightNode->bottOffDiag_minRank = -1;
   root->right = rightNode;
   
@@ -116,6 +117,8 @@ void HODLR_Tree::createDefaultTree(node* root){
     rightNode->left = NULL;
     rightNode->right = NULL;
     leafNodesVec.push_back(rightNode);
+    if (rightNode->currLevel  > (numLevels - 1))
+      numLevels = rightNode->currLevel + 1;
   }
   return;
 }
@@ -276,6 +279,8 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
 	leftNode->left = NULL;
 	leftNode->right = NULL;
 	leafNodesVec.push_back(leftNode);
+	if (leftNode->currLevel  > (numLevels - 1))
+	  numLevels = leftNode->currLevel + 1;
       }else{
 	leftNode->isLeaf = false;
 	leftNode->splitIndex_i = min_i + leftNodeSize/2 - 1;
@@ -299,6 +304,8 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
 	rightNode->left = NULL;
 	rightNode->right = NULL;
 	leafNodesVec.push_back(rightNode);
+	if (rightNode->currLevel  > (numLevels - 1))
+	  numLevels = rightNode->currLevel + 1;
       }else{
 	rightNode->isLeaf = false;
 	rightNode->splitIndex_i = user_IndexRoot->splitIndex + rightNodeSize/2;
