@@ -7,6 +7,8 @@
 #include <Eigen/Sparse>
 #include <vector>
 #include <cmath>
+#include "HODLR_Matrix.hpp"
+#include <ctime>
 
 /******************Pre-programmed radial basis function kernels:**********************/
 
@@ -156,4 +158,8 @@ void testACASolverSpeed1DUniformPts(const double intervalMin, const double inter
  * solverType : Type of HODLR solver. Default is recLU.
  */
 void testACASolverSpeed1DUniformPts_FixedSize(const double intervalMin, const double intervalMax,const double diagValue,const double LR_Tolerance, std::string outputFileName, double (*kernel)(const double), const int matrixSize, std::string solverType);
+
+void testBoundaryLR(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int depth);
+
+
 #endif

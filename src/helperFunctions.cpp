@@ -1,10 +1,4 @@
-#include <fstream>
-#include <iostream>
-#include <Eigen/Dense>
-#include <vector>
-#include "HODLR_Matrix.hpp"
-#include <cmath>
-#include <ctime>
+#include "helperFunctions.hpp"
 
 double quadraticKernel(const double r){
   return (1 + pow(r,2));
@@ -501,4 +495,27 @@ void testACASolverSpeed1DUniformPts_FixedSize(const double intervalMin, const do
     outputFile<<"Assembly        "<<"       "<<sum_Assembly/numIterations<<std::endl; 
   
   outputFile.close();
+}
+
+void testBoundaryLR(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int depth){
+  Eigen::MatrixXd inputMatrix = readBinaryIntoMatrixXd(inputMatrixFileName);
+  Eigen::SparseMatrix<double> inputGraph = readMtxIntoSparseMatrix(inputGraphFileName);
+  HODLR_Matrix testHODLR(inputMatrix,inputGraph,30);
+  int matrixSize = inputMatrix.rows();
+  Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+  Eigen::VectorXd inputF    = inputMatrix * exactSoln;
+  testHODLR.set_BoundaryDepth(depth);
+  testHODLR.printResultInfo = true;
+  Eigen::VectorXd solverSoln = testHODLR.iterative_Solve(inputF,10000,1e-10,iterInitTol,"PS_Boundary","recLU");
+  Eigen::VectorXd difference = solverSoln - exactSoln;
+  //double relError = difference.norm()/exactSoln.norm();
+  //std::cout<<relError<<std::endl;
+  testHODLR.saveSolverInfo(outputFileName);
+  double startTime = clock();
+  Eigen::PartialPivLU<Eigen::MatrixXd> LU (inputMatrix);
+  solverSoln = LU.solve(inputF);
+  double endTime = clock();
+  double LU_SolveTime = (endTime - startTime)/CLOCKS_PER_SEC;
+  std::cout<<"LU Solve Time = "<<LU_SolveTime<<std::endl;
+  std::cout<<"Matrix Size   = "<<inputMatrix.rows()<<std::endl;
 }

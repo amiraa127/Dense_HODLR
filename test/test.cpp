@@ -1,6 +1,7 @@
 #include "HODLR_Matrix.hpp"
 #include "user_IndexTree.hpp"
 #include "helperFunctions.hpp"
+#include "matrixIO.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/TestCase.h>
 #include <cppunit/TestCaller.h>
@@ -452,8 +453,7 @@ public:
     HODLR_Matrix sampleHODLR(sampleMatrix,30);
     sampleHODLR.set_LRTolerance(1e-8);
     HODLR_Matrix copy_sampleHODLR = sampleHODLR;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,
--2,2);
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd inputF = sampleMatrix * exactSoln;
     Eigen::VectorXd solverSoln = copy_sampleHODLR.recLU_Solve(inputF);
     Eigen::VectorXd difference = solverSoln - exactSoln;
@@ -471,8 +471,7 @@ public:
     HODLR_Matrix sampleHODLR(sampleMatrix,30);
     sampleHODLR.set_LRTolerance(1e-8);
     HODLR_Matrix copy_sampleHODLR = sampleHODLR;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,
--2,2);
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd inputF = sampleMatrix * exactSoln;
     Eigen::VectorXd solverSoln = copy_sampleHODLR.extendedSp_Solve(inputF);
     Eigen::VectorXd difference = solverSoln - exactSoln;
@@ -605,7 +604,7 @@ public:
     Eigen::MatrixXd HODLR_Result = sampleMatrix.block(0,0,matrixSize,matrixSize);
     Eigen::MatrixXd exact_Result = exact_Matrix + extend(extendIdxVec,matrixSize,D,0,0,updateSize,updateSize,"RowsCols");
     double error =(HODLR_Result - exact_Result).norm();
-    //std::cout<<error<<std::endl;
+    std::cout<<error<<std::endl;
     CPPUNIT_ASSERT(error < 1e-4);
   } 
 

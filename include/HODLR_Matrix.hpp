@@ -6,6 +6,7 @@
 #include "user_IndexTree.hpp"
 #include "recLU_FactorTree.hpp"
 #include "lowRank.hpp"
+#include "matrixIO.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <string>
@@ -63,6 +64,7 @@ public:
   void set_minPivot(double minPivot);
   void set_def_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
+  void set_BoundaryDepth(bool inputBoundaryDepth);
   void saveExtendedSp(std::string savePath);
  
   /************************************ Accessing Attributes ************************************/
@@ -72,7 +74,7 @@ public:
   double get_extendedSp_FactorizationTime() const;
   double get_extendedSp_SolveTime() const;
   double get_LR_ComputationTime() const;
-  double get_iter_SolveTime() const;
+  double get_totalIter_SolveTime() const;
   double get_MatrixSize() const;
 
   /************************************ Acessing HODLR Entries *******************************/
@@ -119,7 +121,7 @@ private:
   double extendedSp_AssemblyTime;
   double extendedSp_FactorizationTime;
   double extendedSp_SolveTime;
-  double iter_SolveTime;
+  double totalIter_SolveTime;
     
   std::vector<double> LR_ComputationLevelTimeVec;
   std::vector<double> recLU_FactorLevelTimeVec;
@@ -127,7 +129,8 @@ private:
   std::vector<double> iter_IterTimeVec;
   std::vector<double> iter_IterAccuracyVec;
   std::vector<double> levelRankAverageVec;
-    
+  std::vector<double> levelRankAverageVecCnt;
+  
   bool LRStoredInTree;
   bool createdRecLUfactorTree;
   bool assembled_ExtendedSp;
@@ -140,6 +143,7 @@ private:
 
   double LR_Tolerance;
   double minPivot;
+  int boundaryDepth;
 
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;

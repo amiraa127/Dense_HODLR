@@ -12,11 +12,11 @@ void HODLR_Matrix::setDefaultValues(){
   extendedSp_AssemblyTime      = 0;
   extendedSp_FactorizationTime = 0;
   extendedSp_SolveTime         = 0;
-  iter_SolveTime               = 0;
+  totalIter_SolveTime               = 0;
   matrixSize                   = 0; 
   matrixNumRows                = 0;
   matrixNumCols                = 0; 
-
+  boundaryDepth                = 2;
 
   LRStoredInTree         = false;
   createdRecLUfactorTree = false;
@@ -204,6 +204,7 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   matrixSize         = rhs.matrixSize;
   matrixNumRows      = rhs.matrixNumRows;
   matrixNumCols      = rhs.matrixNumCols;
+  boundaryDepth      = rhs.boundaryDepth;
 
   recLU_FactorizationTime      = rhs.recLU_FactorizationTime;
   recLU_SolveTime              = rhs.recLU_SolveTime;
@@ -211,14 +212,15 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   extendedSp_AssemblyTime      = rhs.extendedSp_AssemblyTime;
   extendedSp_FactorizationTime = rhs.extendedSp_FactorizationTime;
   extendedSp_SolveTime         = rhs.extendedSp_SolveTime;
-  iter_SolveTime               = rhs.iter_SolveTime;
+  totalIter_SolveTime          = rhs.totalIter_SolveTime;
 
-  recLU_FactorLevelTimeVec      = rhs.recLU_FactorLevelTimeVec;
-  recLU_SolveLevelTimeVec       = rhs.recLU_FactorLevelTimeVec;
-  LR_ComputationLevelTimeVec    = rhs.LR_ComputationLevelTimeVec;
-  iter_IterTimeVec              = rhs.iter_IterTimeVec;
-  iter_IterAccuracyVec          = rhs.iter_IterAccuracyVec;
-  levelRankAverageVec           = rhs.levelRankAverageVec; 
+  recLU_FactorLevelTimeVec     = rhs.recLU_FactorLevelTimeVec;
+  recLU_SolveLevelTimeVec      = rhs.recLU_FactorLevelTimeVec;
+  LR_ComputationLevelTimeVec   = rhs.LR_ComputationLevelTimeVec;
+  iter_IterTimeVec             = rhs.iter_IterTimeVec;
+  iter_IterAccuracyVec         = rhs.iter_IterAccuracyVec;
+  levelRankAverageVec          = rhs.levelRankAverageVec; 
+  levelRankAverageVecCnt       = rhs.levelRankAverageVecCnt;
 
   LRStoredInTree         = rhs.LRStoredInTree;
   createdRecLUfactorTree = rhs.createdRecLUfactorTree;
@@ -232,11 +234,11 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   LR_Tolerance           = rhs.LR_Tolerance;
   minPivot               = rhs.minPivot;
 
-   matrixData          = rhs.matrixData;
-  matrixData_Sp       = rhs.matrixData_Sp;
-  extendedSp_Solver   = rhs.extendedSp_Solver; 
-  extendedSp_SavePath = rhs.extendedSp_SavePath;
-  indexTree           = rhs.indexTree;
+  matrixData             = rhs.matrixData;
+  matrixData_Sp          = rhs.matrixData_Sp;
+  extendedSp_Solver      = rhs.extendedSp_Solver; 
+  extendedSp_SavePath    = rhs.extendedSp_SavePath;
+  indexTree              = rhs.indexTree;
   //recLUfactorTree needs to be copied :)) TODO
 
 }
@@ -246,6 +248,7 @@ void HODLR_Matrix::initializeInfoVecotrs(int numLevels){
   recLU_SolveLevelTimeVec    = std::vector<double>(numLevels,0.0);
   LR_ComputationLevelTimeVec = std::vector<double>(numLevels,0.0);
   levelRankAverageVec        = std::vector<double>(numLevels,0.0);
+  levelRankAverageVecCnt     = std::vector<double>(numLevels,0.0);
 }
 
 
@@ -267,7 +270,7 @@ void HODLR_Matrix::storeLRinTree(){
 }
 
 void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
-  
+
   // Base cases;
   if (HODLR_Root == NULL)
     return;
@@ -290,18 +293,17 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1;
 
   // Calculate the LR factorizations
-  HODLR_Root->topOffDiagK_Identity  = false;
-  HODLR_Root->bottOffDiagK_Identity = false;
-  
+ 
   if (HODLR_Root->LR_Method == "partialPiv_ACA"){
+    
     ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
     ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
-
+ 
     HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
     HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
     HODLR_Root->topOffDiagK_Identity  = true;
     HODLR_Root->bottOffDiagK_Identity = true;
- 
+  
   }else if (HODLR_Root->LR_Method == "fullPiv_ACA"){
     ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
     ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
@@ -326,9 +328,9 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
 
   }else if (HODLR_Root->LR_Method == "PS_Boundary"){
-    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
     
-    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     HODLR_Root->topOffDiagK_Identity  = true;
     HODLR_Root->bottOffDiagK_Identity = true;
  
@@ -338,10 +340,12 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   }
   
   double endTime = clock();
+  levelRankAverageVec[HODLR_Root->currLevel] = levelRankAverageVec[HODLR_Root->currLevel] * levelRankAverageVecCnt[HODLR_Root->currLevel] + HODLR_Root->topOffDiagRank + HODLR_Root->bottOffDiagRank;
+  levelRankAverageVecCnt[HODLR_Root->currLevel] += 2;
+  levelRankAverageVec[HODLR_Root->currLevel] /= levelRankAverageVecCnt[HODLR_Root->currLevel];
   LR_ComputationLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
   storeLRinTree(HODLR_Root->left);
   storeLRinTree(HODLR_Root->right);
-  
 }
 
 Eigen::MatrixXd HODLR_Matrix::createExactHODLR(const int rank,int input_MatrixSize,const int input_SizeThreshold){
@@ -423,14 +427,14 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   int topDiagSize = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1;
   int bottDiagSize = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
   int parentRHS_Cols = input_RHS.cols();
-  //if (HODLR_Root->topOffDiagK_Identity == false)
+  if (HODLR_Root->topOffDiagK_Identity == false)
     WB = HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK;
-    //else
-    //WB = HODLR_Root->topOffDiagU;
-    //if (HODLR_Root->bottOffDiagK_Identity == false)
+  else
+    WB = HODLR_Root->topOffDiagU;
+  if (HODLR_Root->bottOffDiagK_Identity == false)
     WC = HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK;
-    //else
-    //WC = HODLR_Root->bottOffDiagU;
+  else
+    WC = HODLR_Root->bottOffDiagU;
   VB = HODLR_Root->topOffDiagV;
   VC = HODLR_Root->bottOffDiagV;
   calculatedRankB = HODLR_Root->topOffDiagRank;
@@ -529,7 +533,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
       double startTime = clock();
       Eigen::MatrixXd result = factorRoot->LU.solve(input_RHS);
       double endTime = clock();
-      recLU_FactorLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
+      recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
       return result;
   }
   double startTime = clock();
@@ -650,7 +654,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
   result.topRows(x1.rows())    = x1;
   result.bottomRows(x2.rows()) = x2;
   double endTime = clock();
-  recLU_FactorLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
+  recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
   return result;
 }
 
@@ -1045,18 +1049,19 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   }
   Eigen::MatrixXd solution = currStep_Soln;
   double endTime = clock();
-  iter_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
+  totalIter_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
   printResultInfo = save_printResultInfo;
   if (printResultInfo){
     std::cout<<"**************************************************"<<std::endl;
-    std::cout<<"Solver Type                      = iterative"<<std::endl;
-    std::cout<<"Low-Rank Computation Time        = "<<LR_ComputationTime<<" seconds"<<std::endl;
-    std::cout<<"HODLR Factorization Time         = "<<recLU_FactorizationTime<<" seconds"<<std::endl;
-    std::cout<<"Total Iteration Time             = "<<iter_SolveTime<<" seconds"<<std::endl;
-    std::cout<<"Total Solve Time                 = "<<iter_SolveTime + LR_ComputationTime<<" seconds"<<std::endl;
-    std::cout<<"LR Tolerance                     = "<<LR_Tolerance<<std::endl;
-    std::cout<<"Number of Iterations             = "<<num_Iter<<std::endl;
-    std::cout<<"Residual l2 Relative Error       = "<<((matrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;
+    std::cout<<"Solver Type                        = iterative"<<std::endl;
+    std::cout<<"Low-Rank Computation Time          = "<<LR_ComputationTime<<" seconds"<<std::endl;
+    std::cout<<"HODLR Factorization Time           = "<<recLU_FactorizationTime<<" seconds"<<std::endl;
+    std::cout<<"HODLR Direct Solver Total Time     = "<<recLU_FactorizationTime + LR_ComputationTime + recLU_SolveTime<<" seconds"<<std::endl; 
+    std::cout<<"Total Iteration Time               = "<<totalIter_SolveTime<<" seconds"<<std::endl;
+    std::cout<<"Total Solve Time                   = "<<totalIter_SolveTime + LR_ComputationTime<<" seconds"<<std::endl;
+    std::cout<<"LR Tolerance                       = "<<LR_Tolerance<<std::endl;
+    std::cout<<"Number of Iterations               = "<<num_Iter<<std::endl;
+    std::cout<<"Residual l2 Relative Error         = "<<((matrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;
   }
   
   // restore previous state;
@@ -1070,14 +1075,14 @@ void HODLR_Matrix::saveSolverInfo(const std::string outputFileName){
   std::string recLU_FactorLevelTiming = outputFileName + "recLU_FactorTiming";
   std::string recLU_SolveLevelTiming  = outputFileName + "recLU_SolveTiming";
   std::string iter_IterTiming         = outputFileName + "iter_IterTiming";
-  std::string iter_AccuracyTiming     = outputFileName + "iter_AccuracyTiming";
+  std::string iter_Accuracy           = outputFileName + "iter_Accuracy";
   std::string levelRankAverage        = outputFileName + "levelRankAverage";
 
   saveVectorAsText(LR_LevelTiming,LR_ComputationLevelTimeVec);
   saveVectorAsText(recLU_FactorLevelTiming,recLU_FactorLevelTimeVec);
   saveVectorAsText(recLU_SolveLevelTiming,recLU_SolveLevelTimeVec);
   saveVectorAsText(iter_IterTiming,iter_IterTimeVec);
-  saveVectorAsText(iter_AccuracyTiming,iter_IterAccuracyVec);
+  saveVectorAsText(iter_Accuracy,iter_IterAccuracyVec);
   saveVectorAsText(levelRankAverage,levelRankAverageVec);
 
 }
@@ -1136,6 +1141,10 @@ void HODLR_Matrix::set_FreeMatrixMemory(bool inputVal){
   freeMatrixMemory_Sp = inputVal;
 }
 
+void HODLR_Matrix::set_BoundaryDepth(bool inputBoundaryDepth){
+  boundaryDepth = inputBoundaryDepth;
+}
+
 void HODLR_Matrix::saveExtendedSp(std::string savePath){
   saveExtendedSp_Matrix = true;
   extendedSp_SavePath = savePath;
@@ -1175,8 +1184,8 @@ double HODLR_Matrix::get_LR_ComputationTime() const{
   return LR_ComputationTime;
 }
 
-double HODLR_Matrix::get_iter_SolveTime() const {
-  return iter_SolveTime;
+double HODLR_Matrix::get_totalIter_SolveTime() const {
+  return totalIter_SolveTime;
 }
 double HODLR_Matrix::get_MatrixSize() const{
   return matrixSize;
