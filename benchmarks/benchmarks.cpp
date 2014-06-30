@@ -3,8 +3,8 @@
 
 int main(int argc,char* argv[]){
   bool ACA_TestConvergence = false;
-  bool ACA_TestSpeed =false;
-  bool boundaryLR_Test = false;
+  bool ACA_TestSpeed       = false;
+  bool boundaryLR_Test     = false;
   switch (argc){
   case 1:
     {
@@ -286,15 +286,239 @@ int main(int argc,char* argv[]){
     testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/logR_10",logRKernel,"extendedSp");    
   }
   if (boundaryLR_Test){
-    std::cout<<"Testing solver for structured meshes.."<<std::endl;
-    testBoundaryLR("boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0","boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0_Graph","boundaryLR/FETI/structured/400k/results/400_front_num_5_level_0_",1e-1,2);   
-    testBoundaryLR("boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1","boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1_Graph","boundaryLR/FETI/structured/400k/results/400_front_num_4_level_1_",1e-1,2);   
-    testBoundaryLR("boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2_Graph","boundaryLR/FETI/structured/400k/results/400_front_num_2_level_2_",1e-1,2);   
-    std::cout<<"Testing solver for unstructured meshes.."<<std::endl;
-    testBoundaryLR("boundaryLR/stiffness/unstructured/300k/input/300_front_num_6_level_0","boundaryLR/stiffness/unstructured/300k/input/300_front_num_6_level_0_Graph","boundaryLR/stiffness/unstructured/300k/results/300_front_num_6_level_0_",1e-1,2);
-    testBoundaryLR("boundaryLR/stiffness/unstructured/300k/input/300_front_num_4_level_1","boundaryLR/stiffness/unstructured/300k/input/300_front_num_4_level_1_Graph","boundaryLR/stiffness/unstructured/300k/results/300_front_num_4_level_1_",1e-1,2);
-    testBoundaryLR("boundaryLR/stiffness/unstructured/300k/input/300_front_num_2_level_2","boundaryLR/stiffness/unstructured/300k/input/300_front_num_2_level_2_Graph","boundaryLR/stiffness/unstructured/300k/results/300_front_num_2_level_2_",1e-1,2);
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Testing solver for 3D FETI structured meshes.."<<std::endl;
+    std::cout<<"Timing tests........."<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_5_level_0"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0","boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_5_level_0_",1e-1,30,1);   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_4_level_1"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1","boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_4_level_1_",1e-1,30,1); 
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_3_level_1"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_3_level_1","boundaryLR/FETI/structured/400k/input/400_front_num_3_level_1_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_3_level_1_",1e-1,30,1);   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_2_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_2_level_2_",1e-1,30,1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_1_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_1_level_2_",1e-1,100,1);   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_0_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_0_level_2_",1e-1,100,1);
     
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Testing solver for 3D FETI unstructured meshes.."<<std::endl;
+    std::cout<<"Timing tests........."<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_0_level_13"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/unstructured/400k/input/400_front_num_0_level_13","boundaryLR/FETI/unstructured/400k/input/400_front_num_0_level_13_Graph","boundaryLR/FETI/unstructured/400k/results_timing/400_front_num_0_level_13_",1e-1,30,1);   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_1_level_11"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/unstructured/400k/input/400_front_num_1_level_11","boundaryLR/FETI/unstructured/400k/input/400_front_num_1_level_11_Graph","boundaryLR/FETI/unstructured/400k/results_timing/400_front_num_1_level_11_",1e-1,30,1); 
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_2_level_7"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/unstructured/400k/input/400_front_num_2_level_7","boundaryLR/FETI/unstructured/400k/input/400_front_num_2_level_7_Graph","boundaryLR/FETI/unstructured/400k/results_timing/400_front_num_2_level_7_",1e-1,30,1);   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_3_level_6"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/FETI/unstructured/400k/input/400_front_num_3_level_6","boundaryLR/FETI/unstructured/400k/input/400_front_num_3_level_6_Graph","boundaryLR/FETI/unstructured/400k/results_timing/400_front_num_3_level_6_",1e-1,30,1); 
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Testing solver for 3D unstructured meshes.."<<std::endl;
+    std::cout<<"Timing tests........."<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_6_level_0"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_6_level_0","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_6_level_0_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_6_level_0_",1e-1,30,1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_5_level_1"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_5_level_1","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_5_level_1_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_5_level_1_",1e-1,30,1); 
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_4_level_1"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_4_level_1","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_4_level_1_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_4_level_1_",1e-1,30,1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_3_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_3_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_3_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_3_level_2_",1e-1,30,1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_2_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_2_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_2_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_2_level_2_",1e-1,30,1);    
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_1_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_1_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_1_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_1_level_2_",1e-1,30,1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_0_level_2"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_0_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_0_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_timing/300_front_num_0_level_2_",1e-1,30,1);    
+    
+
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    // Create usrTrees fro turbine blade results
+    std::cout<<"Testing solver for 2D unstructured meshes(turbine blade)"<<std::endl;
+    
+    // Create 9k user tree
+    // Create custom indexing tree
+    
+    user_IndexTree usrTree;
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 1498;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "PS_Boundary";
+
+    user_IndexTree::node* leftNode = new user_IndexTree::node;
+    user_IndexTree::node* rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+
+    rightNode->splitIndex = 6497;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "PS_Boundary";
+
+    leftNode->splitIndex = 749;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Boundary";
+
+    usrTree.setChildren_NULL(leftNode);
+    usrTree.setChildren_NULL(rightNode);
+   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_9k_level_0"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_timing/blade_9k_level_0_",1e-1,30,2,usrTree);
+  
+    // Create 12k userTree
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 2098;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "PS_Boundary";
+
+    leftNode  = new user_IndexTree::node;
+    rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+
+    rightNode->splitIndex = 9097;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "PS_Boundary";
+
+    leftNode->splitIndex = 1048;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Boundary";
+
+    usrTree.setChildren_NULL(leftNode);
+    usrTree.setChildren_NULL(rightNode);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_12k_level_0"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_timing/blade_12k_level_0_",1e-1,30,2,usrTree);
+     
+    // Create 16K userTree
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 8998;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "PS_Boundary";
+
+    leftNode = new user_IndexTree::node;
+    rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+   
+    rightNode->splitIndex = 13932;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "PS_Boundary";
+
+    leftNode->splitIndex = 4499;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Boundary";
+
+    usrTree.setChildren_NULL(leftNode);
+    usrTree.setChildren_NULL(rightNode);
+   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_16k_level_0"<<std::endl;
+    testBoundaryLRSolver("boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_timing/blade_16k_level_0_",1e-1,30,2,usrTree);
+
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Low-rank accuracy tests for a 3D FETI structured mesh ........"<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_5_level_0"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0","boundaryLR/FETI/structured/400k/input/400_front_num_5_level_0_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_5_level_0_",0,0,0,0,"topOffDiag");   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_4_level_1"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1","boundaryLR/FETI/structured/400k/input/400_front_num_4_level_1_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_4_level_1_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_3_level_1"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_3_level_1","boundaryLR/FETI/structured/400k/input/400_front_num_3_level_1_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_3_level_1_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_2_level_2"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_2_level_2_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_2_level_2_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_1_level_2"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_1_level_2_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_0_level_2"<<std::endl;
+    analyzeRank("boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2_Graph","boundaryLR/FETI/structured/400k/results_LR/400_front_num_0_level_2_",0,0,0,0,"topOffDiag");
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Low-rank accuracy tests for a 3D FETI unstructured mesh ........"<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_0_level_13"<<std::endl;
+    analyzeRank("boundaryLR/FETI/unstructured/400k/input/400_front_num_0_level_13","boundaryLR/FETI/unstructured/400k/input/400_front_num_0_level_13_Graph","boundaryLR/FETI/unstructured/400k/results_LR/400_front_num_0_level_13_",0,0,0,0,"topOffDiag");   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_1_level_11"<<std::endl;
+    analyzeRank("boundaryLR/FETI/unstructured/400k/input/400_front_num_1_level_11","boundaryLR/FETI/unstructured/400k/input/400_front_num_1_level_11_Graph","boundaryLR/FETI/unstructured/400k/results_LR/400_front_num_1_level_11_",0,0,0,0,"topOffDiag"); 
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_2_level_7"<<std::endl;
+    analyzeRank("boundaryLR/FETI/unstructured/400k/input/400_front_num_2_level_7","boundaryLR/FETI/unstructured/400k/input/400_front_num_2_level_7_Graph","boundaryLR/FETI/unstructured/400k/results_LR/400_front_num_2_level_7_",0,0,0,0,"topOffDiag");   
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"400_front_num_3_level_6"<<std::endl;
+    analyzeRank("boundaryLR/FETI/unstructured/400k/input/400_front_num_3_level_6","boundaryLR/FETI/unstructured/400k/input/400_front_num_3_level_6_Graph","boundaryLR/FETI/unstructured/400k/results_LR/400_front_num_3_level_6_",0,0,0,0,"topOffDiag"); 
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Low-rank accuracy tests for a 3D unstructured mesh........."<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_6_level_0"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_6_level_0","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_6_level_0_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_6_level_0_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_5_level_1"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_5_level_1","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_5_level_1_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_5_level_1_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_4_level_1"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_4_level_1","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_4_level_1_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_4_level_1_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_3_level_2"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_3_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_3_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_3_level_2_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_2_level_2"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_2_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_2_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_2_level_2_",0,0,0,0,"topOffDiag");    
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_1_level_2"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_1_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_1_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_1_level_2_",0,0,0,0,"topOffDiag");
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"300_front_num_0_level_2"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_0_level_2","boundaryLR/stiffness/unstructured/3D/300k/input/300_front_num_0_level_2_Graph","boundaryLR/stiffness/unstructured/3D/300k/results_LR/300_front_num_0_level_2_",0,0,0,0,"topOffDiag");    
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Low-rank accuracy tests for a 2D unstructured mesh........."<<std::endl;
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_9k_level_0"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_LR/blade_9k_level_0_",1499,3997,3996-1499+1,6497-3997+1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_12k_level_0"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_LR/blade_12k_level_0_",2099,5598,5597-2099+1,9072-5598+1);
+    std::cout<<"-----------------------"<<std::endl;
+    std::cout<<"blade_16k_level_0"<<std::endl;
+    analyzeRank("boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0","boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0_Graph","boundaryLR/stiffness/unstructured/2D/results_LR/blade_16k_level_0_",0,4500,4500,8998-4500+1);
+
   }
   return 0;
 }

@@ -292,16 +292,17 @@ void testACASolverSpeed1DUniformPts_FixedSize(const double intervalMin, const do
   outputFile.close();
 }
 
-void testBoundaryLR(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int depth){
+
+void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth){
   Eigen::MatrixXd inputMatrix = readBinaryIntoMatrixXd(inputMatrixFileName);
   Eigen::SparseMatrix<double> inputGraph = readMtxIntoSparseMatrix(inputGraphFileName);
-  HODLR_Matrix testHODLR(inputMatrix,inputGraph,30);
+  HODLR_Matrix testHODLR(inputMatrix,inputGraph,sizeThreshold);
   int matrixSize = inputMatrix.rows();
   Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
   Eigen::VectorXd inputF    = inputMatrix * exactSoln;
   testHODLR.set_BoundaryDepth(depth);
   testHODLR.printResultInfo = true;
-  Eigen::VectorXd solverSoln = testHODLR.iterative_Solve(inputF,10000,1e-10,iterInitTol,"PS_Boundary","recLU");
+  Eigen::VectorXd solverSoln = testHODLR.iterative_Solve(inputF,100,1e-10,iterInitTol,"PS_Boundary","recLU");
   Eigen::VectorXd difference = solverSoln - exactSoln;
   //double relError = difference.norm()/exactSoln.norm();
   //std::cout<<relError<<std::endl;
@@ -311,6 +312,96 @@ void testBoundaryLR(const std::string inputMatrixFileName,const std::string inpu
   solverSoln = LU.solve(inputF);
   double endTime = clock();
   double LU_SolveTime = (endTime - startTime)/CLOCKS_PER_SEC;
-  std::cout<<"LU Solve Time = "<<LU_SolveTime<<std::endl;
+  std::cout<<"LU Solve Time = "<<LU_SolveTime<<" seconds"<<std::endl;
   std::cout<<"Matrix Size   = "<<inputMatrix.rows()<<std::endl;
+}
+
+void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth,user_IndexTree &usrTree){
+  Eigen::MatrixXd inputMatrix = readBinaryIntoMatrixXd(inputMatrixFileName);
+  Eigen::SparseMatrix<double> inputGraph = readMtxIntoSparseMatrix(inputGraphFileName);
+  HODLR_Matrix testHODLR(inputMatrix,inputGraph,sizeThreshold,usrTree);
+  int matrixSize = inputMatrix.rows();
+  Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+  Eigen::VectorXd inputF    = inputMatrix * exactSoln;
+  testHODLR.set_BoundaryDepth(depth);
+  testHODLR.printResultInfo = true;
+  Eigen::VectorXd solverSoln = testHODLR.iterative_Solve(inputF,100,1e-10,iterInitTol,"PS_Boundary","recLU");
+  Eigen::VectorXd difference = solverSoln - exactSoln;
+  //double relError = difference.norm()/exactSoln.norm();
+  //std::cout<<relError<<std::endl;
+  testHODLR.saveSolverInfo(outputFileName);
+  double startTime = clock();
+  Eigen::PartialPivLU<Eigen::MatrixXd> LU (inputMatrix);
+  solverSoln = LU.solve(inputF);
+  double endTime = clock();
+  double LU_SolveTime = (endTime - startTime)/CLOCKS_PER_SEC;
+  std::cout<<"LU Solve Time = "<<LU_SolveTime<<" seconds"<<std::endl;
+  std::cout<<"Matrix Size   = "<<inputMatrix.rows()<<std::endl;
+}
+
+void analyzeRank(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const int input_Min_i,const int input_Min_j, const int input_NumRows,const int input_NumCols,std::string mode){
+  Eigen::MatrixXd inputMatrix = readBinaryIntoMatrixXd(inputMatrixFileName);
+  Eigen::SparseMatrix<double> inputGraph = readMtxIntoSparseMatrix(inputGraphFileName);
+  int min_i,min_j,numRows,numCols;
+  int matrixSize = inputMatrix.rows();
+  if (mode == "topOffDiag"){  
+    int split = matrixSize/2; 
+    min_i = 0;
+    min_j = split + 1;
+    numRows = split + 1;
+    numCols = matrixSize - split - 1;
+  } else if (mode == "bottOffDiag"){  
+    int split = matrixSize/2; 
+    min_i = split + 1;
+    min_j = 0;
+    numRows = matrixSize - split - 1;
+    numCols = split + 1; 
+  }else{
+    min_i   = input_Min_i;
+    min_j   = input_Min_j;
+    numRows = input_NumRows;
+    numCols = input_NumCols;
+  }
+  int currRank  = 0;
+  int currRankComp = 0;
+  int nextRank  = -1;
+  int depth     = 0;
+  Eigen::MatrixXd currBlock = inputMatrix.block(min_i,min_j,numRows,numCols);
+  Eigen::MatrixXd U,V,K;
+  std::vector<double> numPoints,boundaryError,boundaryErrorComp,SVDError,singularValues;
+  while (currRank != nextRank){
+    nextRank = currRank;
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,depth);
+    numPoints.push_back(currRank);
+    double relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    boundaryError.push_back(relError);
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-1,currRankComp,depth);
+    relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    boundaryErrorComp.push_back(relError);
+    depth ++;
+  }
+  saveVectorAsText(outputFileName + "numPointsVsBoundaryDistance",numPoints);
+  saveVectorAsText(outputFileName + "boundaryErrorVsBoundaryDistance",boundaryError);
+  saveVectorAsText(outputFileName + "boundaryErrorCompVsBoundaryDistance",boundaryErrorComp);
+  // Use svd to calculate the optimal low-rank approximation error
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(currBlock,Eigen::ComputeThinU|Eigen::ComputeThinV);
+  Eigen::VectorXd s = svd.singularValues();
+  for (unsigned int i = 0; i < s.rows(); i++)
+    singularValues.push_back(s(i));
+
+  for (unsigned int i = 0; i < numPoints.size(); i++){
+    int rank = numPoints[i];
+    U = svd.matrixU().leftCols(rank);
+    V = svd.matrixV().leftCols(rank);
+    K = Eigen::MatrixXd::Zero(rank,rank);
+    for (int j = 0; j < rank; j++)
+      K(j,j) = singularValues[j];
+    double relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    SVDError.push_back(relError);
+  }
+  saveVectorAsText(outputFileName + "SVDErrorVsBoundaryDistance",SVDError);
+  saveVectorAsText(outputFileName + "SingularValueDecay",singularValues);
+
+  // Calculate distance from boundary vs pivot size
+  PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,matrixSize,outputFileName + "distanceFromBoundaryVsPivotSize");
 }

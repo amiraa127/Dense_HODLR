@@ -64,7 +64,7 @@ public:
   void set_minPivot(double minPivot);
   void set_def_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
-  void set_BoundaryDepth(bool inputBoundaryDepth);
+  void set_BoundaryDepth(int inputBoundaryDepth);
   void saveExtendedSp(std::string savePath);
  
   /************************************ Accessing Attributes ************************************/

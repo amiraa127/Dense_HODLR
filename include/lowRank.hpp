@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <iostream>
 #include <algorithm>
+#include <matrixIO.hpp>
 
 double fullPivACA_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
 
@@ -20,7 +21,7 @@ void SVD_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, E
 
 int SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, const double accuracy, Eigen::MatrixXd* Wptr = NULL, Eigen::MatrixXd* Vptr = NULL, Eigen::MatrixXd* Kptr = NULL, int minRank = -1); 
 
-void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::SparseMatrix<double> graphData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols,const double tolerance,int & calculatedRank, const int depth = 2);  
+void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::SparseMatrix<double> graphData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols,const double tolerance,int & calculatedRank, const int maxDepth = 2,const std::string savePath = "default");  
 
 void extractRowsCols(const Eigen::MatrixXd & matrixData, int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & W, Eigen::MatrixXd & K, Eigen::MatrixXd & V,const std::vector<int> & rowIndex,const std::vector<int> & colIndex,const double tolerance, int & calculatedRank,const std::string mode = "fullPivLU");
 

@@ -13,7 +13,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  
+  /*
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -32,7 +32,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(extendAdd_DenseToHODLR_Test);
   CPPUNIT_TEST(extend_HODLRtoHODLR_Test);
   CPPUNIT_TEST(extendAdd_HODLRtoHODLR_Test);
-  
+  */
 
   CPPUNIT_TEST(boundaryFinder_Test);
   CPPUNIT_TEST(boundaryFinder_lowRank_Test);
@@ -889,8 +889,14 @@ public:
   void boundaryFinder_lowRank_Test(){
     //Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_Stiffness/unStructured/300k/300_front_num_2_level_2");
     //Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_Stiffness/unStructured/300k/300_front_num_2_level_2_Graph");
-    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_FETI/Structured/400k/400_front_num_5_level_0");
-    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_FETI/Structured/400k/400_front_num_5_level_0_Graph");
+    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_FETI/Structured/400k/400_front_num_0_level_2");
+    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_FETI/Structured/400k/400_front_num_0_level_2_Graph");
+    //Eigen::MatrixXd schurComplement1 = readBinaryIntoMatrixXd("../benchmarks/boundaryLR/stiffness/unstructured/2D/input/blade9000Schur.bin");
+    //Eigen::SparseMatrix<double> graph1 = readMtxIntoSparseMatrix("../benchmarks/boundaryLR/stiffness/unstructured/2D/input/blade9000Graph");
+    
+    //Eigen::MatrixXd schurComplement = schurComplement1.block(0,0,8999,8999);
+    //Eigen::SparseMatrix<double> graph = graph1.block(0,0,8999,8999);
+    
     /*
     // identify boundary
     std::map<int,std::vector<int> > rowPos,colPos;
@@ -927,8 +933,9 @@ public:
     Eigen::MatrixXd W,K,V;
     int rank;
     int split = schurComplement.rows()/2;
-    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,1e-5,rank,15);
-   
+    
+    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,1e-5,rank,1500);
+    
     std::cout<<rank<<std::endl;
     Eigen::MatrixXd LR_Matrix = schurComplement.block(split+1,0,schurComplement.rows() - split - 1,split+1);
     
@@ -936,7 +943,7 @@ public:
     double relError = absError/LR_Matrix.norm();
     std::cout<<relError<<" "<<absError<<std::endl;
     
-    HODLR_Matrix schur_HODLR(schurComplement,graph,30);
+    HODLR_Matrix schur_HODLR(schurComplement,graph,100);
     //HODLR_Matrix schur_HODLR(schurComplement,30);
     
     schur_HODLR.printResultInfo = true;
@@ -945,8 +952,12 @@ public:
     int matrixSize = schurComplement.rows();
     Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd inputF = schurComplement * exactSoln;
+    //schur_HODLR.printLevelAccuracy = true;
+    schur_HODLR.set_BoundaryDepth(1);
+    //schur_HODLR.set_LRTolerance(1e-1);
     //Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
-    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,10000,1e-10,1e-1,"PS_Boundary","recLU");
+   
+    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,100,1e-10,1e-1,"PS_Boundary","recLU");
     Eigen::VectorXd difference = solverSoln - exactSoln;
     relError = difference.norm()/exactSoln.norm();
     std::cout<<relError<<std::endl;
@@ -960,7 +971,7 @@ public:
     std::cout<<schurComplement.rows()<<std::endl;
     
   }
-     
+    
 
 };   
 

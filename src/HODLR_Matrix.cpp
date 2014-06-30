@@ -12,7 +12,7 @@ void HODLR_Matrix::setDefaultValues(){
   extendedSp_AssemblyTime      = 0;
   extendedSp_FactorizationTime = 0;
   extendedSp_SolveTime         = 0;
-  totalIter_SolveTime               = 0;
+  totalIter_SolveTime          = 0;
   matrixSize                   = 0; 
   matrixNumRows                = 0;
   matrixNumCols                = 0; 
@@ -1141,7 +1141,7 @@ void HODLR_Matrix::set_FreeMatrixMemory(bool inputVal){
   freeMatrixMemory_Sp = inputVal;
 }
 
-void HODLR_Matrix::set_BoundaryDepth(bool inputBoundaryDepth){
+void HODLR_Matrix::set_BoundaryDepth(int inputBoundaryDepth){
   boundaryDepth = inputBoundaryDepth;
 }
 

@@ -117,7 +117,10 @@ void testACASolverSpeed1DUniformPts(const double intervalMin, const double inter
  */
 void testACASolverSpeed1DUniformPts_FixedSize(const double intervalMin, const double intervalMax,const double diagValue,const double LR_Tolerance, std::string outputFileName, double (*kernel)(const double), const int matrixSize, std::string solverType);
 
-void testBoundaryLR(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int depth);
+void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth);
 
+void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth,user_IndexTree &usrTree);
+
+void analyzeRank(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const int input_Min_i,const int input_Min_j,const int input_NumRows, const int input_NumCols,std::string mode = "default");
 
 #endif
