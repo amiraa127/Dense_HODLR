@@ -70,9 +70,11 @@ public:
   /************************************ Accessing Attributes ************************************/
   double get_recLU_FactorizationTime() const;
   double get_recLU_SolveTime() const;
+  double get_recLU_TotalTime() const;
   double get_extendedSp_AssemblyTime() const; 
   double get_extendedSp_FactorizationTime() const;
   double get_extendedSp_SolveTime() const;
+  double get_extendedSp_TotalTime() const;
   double get_LR_ComputationTime() const;
   double get_totalIter_SolveTime() const;
   double get_MatrixSize() const;
@@ -117,10 +119,12 @@ private:
 
   double recLU_FactorizationTime;
   double recLU_SolveTime;
+  double recLU_TotalTime;
   double LR_ComputationTime;
   double extendedSp_AssemblyTime;
   double extendedSp_FactorizationTime;
   double extendedSp_SolveTime;
+  double extendedSp_TotalTime;
   double totalIter_SolveTime;
     
   std::vector<double> LR_ComputationLevelTimeVec;

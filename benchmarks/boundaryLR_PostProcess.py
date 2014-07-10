@@ -12,10 +12,11 @@ def uploadToDropBox(currDir):
             currFilePath = os.path.join(root,f)
             if (('tex' in currFilePath or 'pdf' in currFilePath or 'result' in currFilePath) and 'ACA' not in currFilePath and './' not in currFilePath and 'log' not in currFilePath):
                 src = currFilePath;
-                dst = '/Users/Amir/Dropbox/Amir_Siva/boundaryLR'+currFilePath[string.find(currFilePath,'benchmarks/')+11:]
-                print src
-                print dst
-
+                if 'boundaryLR' in currFilePath:
+                    dst = '/Users/Amir/Dropbox/Amir_Siva/'+currFilePath[string.find(currFilePath,'benchmarks/')+11:]
+                else:
+                    dst = '/Users/Amir/Dropbox/Amir_Siva/boundaryLR/'+currFilePath[string.find(currFilePath,'benchmarks/')+11:]
+                shutil.copyfile(src,dst)
 
 def getTime(stream,token,startIdx):
     timeStartIdx = string.find(stream,token,startIdx);
@@ -31,6 +32,15 @@ def getInfo(stream,token,startIdx):
     info         = string.split(info)
     info         = info[len(info) - 1]
     return info
+
+def insertNumPoints(filePath,numPointsVec):
+    f    = open(filePath)
+    data = f.readlines()
+    f.close();
+    f = open(filePath,'w')
+    for i in range(len(numPointsVec)):
+        f.write(string.split(numPointsVec[i])[1] +'\t'+ string.split(data[i])[1]+'\n')
+    f.close();
 
 def parseResultFile(path,nameList):
     f = open(path)
@@ -133,52 +143,61 @@ def generateLRAnalysisFigure(inputFilePath):
     matrixName   = inputFilePath[inputFilePath.find('input/') + 6:]
     LRFileName   = matrixName + '_LR_Plot.tex';
     SVDFileName  = matrixName + '_SingularValueDecay';
-    distanceFileName_Col      = matrixName + '_distanceFromBoundaryVsPivotSize_Col'
-    distanceFileName_Row      = matrixName + '_distanceFromBoundaryVsPivotSize_Row'
-    SVDErrorFileName          = matrixName + '_SVDErrorVsBoundaryDistance'
-    boundaryErrorFileName     = matrixName + '_boundaryErrorVsBoundaryDistance'
-    boundaryErrorCompFileName = matrixName + '_boundaryErrorCompVsBoundaryDistance'
-    numPointsFileName         = matrixName + '_numPointsVsBoundaryDistance'
-    SVDFilePath               = root + 'results_LR/' + SVDFileName;
-    distanceFilePath_Col      = root + 'results_LR/' + distanceFileName_Col;
-    distanceFilePath_Row      = root + 'results_LR/' + distanceFileName_Row;
-    SVDErrorFilePath          = root + 'results_LR/' + SVDErrorFileName;
-    boundaryErrorFilePath     = root + 'results_LR/' + boundaryErrorFileName;
-    boundaryErrorCompFilePath = root + 'results_LR/' + boundaryErrorCompFileName;
-    LRFilePath                = LRFolderPath + LRFileName;  
-    numPointsFilePath         = root + 'results_LR/' + numPointsFileName;
+    distanceFileName_Col       = matrixName + '_distanceFromBoundaryVsPivotSize_Col'
+    distanceFileName_Row       = matrixName + '_distanceFromBoundaryVsPivotSize_Row'
+    SVDErrorFileName           = matrixName + '_SVDErrorVsBoundaryDistance'
+    boundaryErrorFileName      = matrixName + '_boundaryErrorVsBoundaryDistance'
+    boundaryErrorCompFileName1 = matrixName + '_boundaryErrorCompVsBoundaryDistance1'
+    boundaryErrorCompFileName3 = matrixName + '_boundaryErrorCompVsBoundaryDistance3'
+    boundaryErrorCompFileName5 = matrixName + '_boundaryErrorCompVsBoundaryDistance5'
+    numPointsFileName          = matrixName + '_numPointsVsBoundaryDistance'
+    SVDFilePath                = root + 'results_LR/' + SVDFileName;
+    distanceFilePath_Col       = root + 'results_LR/' + distanceFileName_Col;
+    distanceFilePath_Row       = root + 'results_LR/' + distanceFileName_Row;
+    SVDErrorFilePath           = root + 'results_LR/' + SVDErrorFileName;
+    boundaryErrorFilePath      = root + 'results_LR/' + boundaryErrorFileName;
+    boundaryErrorCompFilePath1 = root + 'results_LR/' + boundaryErrorCompFileName1;
+    boundaryErrorCompFilePath3 = root + 'results_LR/' + boundaryErrorCompFileName3;
+    boundaryErrorCompFilePath5 = root + 'results_LR/' + boundaryErrorCompFileName5;
+    LRFilePath                 = LRFolderPath + LRFileName;  
+    numPointsFilePath          = root + 'results_LR/' + numPointsFileName;
     width = str(8)
     
     numPoints_f = open(numPointsFilePath)
     numPoints   = numPoints_f.readlines();
     numPoints_f.close();
     
-    SVDError_f = open(SVDErrorFilePath)
-    SVDError   = SVDError_f.readlines()
-    SVDError_f.close();
+    insertNumPoints(SVDErrorFilePath,numPoints)
+    insertNumPoints(boundaryErrorFilePath,numPoints)
+    insertNumPoints(boundaryErrorCompFilePath1,numPoints)
+    insertNumPoints(boundaryErrorCompFilePath3,numPoints)
+    insertNumPoints(boundaryErrorCompFilePath5,numPoints)
+    #SVDError_f = open(SVDErrorFilePath)
+    #SVDError   = SVDError_f.readlines()
+    #SVDError_f.close();
     
-    SVDError_f = open(SVDErrorFilePath,'w')
-    for i in range(len(numPoints)):
-        SVDError_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(SVDError[i])[1]+'\n')
-    SVDError_f.close();
+    #SVDError_f = open(SVDErrorFilePath,'w')
+    #for i in range(len(numPoints)):
+    #    SVDError_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(SVDError[i])[1]+'\n')
+    #SVDError_f.close();
 
-    boundaryError_f = open(boundaryErrorFilePath)
-    boundaryError   = boundaryError_f.readlines()
-    boundaryError_f.close();
+    #boundaryError_f = open(boundaryErrorFilePath)
+    #boundaryError   = boundaryError_f.readlines()
+    #boundaryError_f.close();
 
-    boundaryError_f = open(boundaryErrorFilePath,'w')
-    for i in range(len(numPoints)):
-        boundaryError_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(boundaryError[i])[1]+'\n')
-    boundaryError_f.close();
+    #boundaryError_f = open(boundaryErrorFilePath,'w')
+    #for i in range(len(numPoints)):
+    #    boundaryError_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(boundaryError[i])[1]+'\n')
+    #boundaryError_f.close();
 
-    boundaryErrorComp_f = open(boundaryErrorCompFilePath)
-    boundaryErrorComp   = boundaryErrorComp_f.readlines()
-    boundaryErrorComp_f.close();
+    #boundaryErrorComp_f = open(boundaryErrorCompFilePath1)
+    #boundaryErrorComp   = boundaryErrorComp_f.readlines()
+    #boundaryErrorComp_f.close();
     
-    boundaryErrorComp_f = open(boundaryErrorCompFilePath,'w')
-    for i in range(len(numPoints)):
-        boundaryErrorComp_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(boundaryErrorComp[i])[1]+'\n')
-    boundaryErrorComp_f.close();
+    #boundaryErrorComp_f = open(boundaryErrorCompFilePath1,'w')
+    #for i in range(len(numPoints)):
+    #    boundaryErrorComp_f.write(string.split(numPoints[i])[1] +'\t'+ string.split(boundaryErrorComp[i])[1]+'\n')
+    #boundaryErrorComp_f.close();
     
     SVD_f = open(SVDFilePath)
     denseSize = str(len(SVD_f.readlines()));
@@ -226,8 +245,10 @@ def generateLRAnalysisFigure(inputFilePath):
     f.write('\t\t\\begin{semilogyaxis}[width='+width+'cm,height=7cm,grid=major,xlabel=Number of Added Points, ylabel=Relative Error,legend style={font=\\tiny}]\n');
     f.write('\t\t\t\\addplot file{"'+SVDErrorFilePath+'"};\n')
     f.write('\t\t\t\\addplot file{"'+boundaryErrorFilePath+'"};\n')
-    f.write('\t\t\t\\addplot file{"'+boundaryErrorCompFilePath+'"};\n')
-    f.write('\t\t\t\\legend{SVD,RRLU\\_Boundary,RRLU\\_Boundary\\_Comp}\n')
+    f.write('\t\t\t\\addplot file{"'+boundaryErrorCompFilePath1+'"};\n')
+    f.write('\t\t\t\\addplot file{"'+boundaryErrorCompFilePath3+'"};\n')
+    f.write('\t\t\t\\addplot file{"'+boundaryErrorCompFilePath5+'"};\n')
+    f.write('\t\t\t\\legend{SVD,RRLU\\_Boundary\\_1e-15,RRLU\\_Boundary\\_1e-1,RRLU\\_Boundary\\_1e-3,RRLU\\_Boundary\\_1e-5}\n')
     f.write('\t\t\\end{semilogyaxis}\n');
     f.write('\t\\end{tikzpicture}\n');
     f.write('}\n')
@@ -419,8 +440,8 @@ for root,dirs,fileNames in os.walk(currDir):
                     else:
                         meshType = meshType[2:]
             
-                    speedup = 100.*(LUTime[currFilePath] - totalTime[currFilePath])/totalTime[currFilePath]
-                    sumFile.write('\t'+matrixType+'&'+meshType+'&'+meshDim+'&'+matrixLevel+'&'+sparseSize+'&'+str(size[currFilePath])+'&'+'%.2e' %directTime[currFilePath]+'&'+'%.2e' %directAccuracy[currFilePath]+'&'+'%.2e' %totalTime[currFilePath]+'&'+'%.2e' %finalAccuracy[currFilePath]+'&'+'%.2e' %LUTime[currFilePath]+'&'+ '%.2g' %speedup+'\\\ \n') 
+                    speedup = 100.*(LUTime[currFilePath])/totalTime[currFilePath]
+                    sumFile.write('\t'+matrixType+'&'+meshType+'&'+meshDim+'&'+matrixLevel+'&'+sparseSize+'&'+str(size[currFilePath])+'&'+'%.2e' %directTime[currFilePath]+'&'+'%.2e' %directAccuracy[currFilePath]+'&'+'%.2e' %totalTime[currFilePath]+'&'+'%.2e' %finalAccuracy[currFilePath]+'&'+'%.2e' %LUTime[currFilePath]+'&'+ '%.2e' %speedup+'\\\ \n') 
 
 sumFile.write('\t\\hline\n')
 sumFile.write('\t\\end{tabular}}\n')

@@ -5,6 +5,8 @@ int main(int argc,char* argv[]){
   bool ACA_TestConvergence = false;
   bool ACA_TestSpeed       = false;
   bool boundaryLR_Test     = false;
+  bool ACA_Blade           = false;
+  bool extendedSp          = false;
   switch (argc){
   case 1:
     {
@@ -14,27 +16,29 @@ int main(int argc,char* argv[]){
       break;
     }
   case 2:
-   {
-     if (strcmp(argv[1],"-cACA") == 0)
-       ACA_TestConvergence = true;
-     else if (strcmp(argv[1],"-sACA") == 0) 
-       ACA_TestSpeed = true;
-     else if (strcmp(argv[1],"-boundary") == 0)
-       boundaryLR_Test = true;
-     else{
-       std::cout<<"Error! Use -cACA flag for ACA convergence or -sACA for ACA speed analysis."<<std::endl;
-       std::cout<<"Use -boundary for boundary low-rank approximation method analysis."<<std::endl;
-       exit(EXIT_FAILURE);
-     }
-     break;
-   }
+    {
+      if (strcmp(argv[1],"-cACA") == 0)
+	ACA_TestConvergence = true;
+      else if (strcmp(argv[1],"-sACA") == 0) 
+	ACA_TestSpeed = true;
+      else if (strcmp(argv[1],"-boundary") == 0)
+	boundaryLR_Test = true;
+      else if (strcmp(argv[1],"-blade") == 0)
+	ACA_Blade = true;
+      else{
+	std::cout<<"Error! Use -cACA flag for ACA convergence or -sACA for ACA speed analysis."<<std::endl;
+	std::cout<<"Use -boundary for boundary low-rank approximation method analysis."<<std::endl;
+	exit(EXIT_FAILURE);
+    }
+      break;
+    }
   default:
     {
-      std::cout<<"Error! invalid number of inputs. Only use single flags."<<std::endl;
+      std::cout<<"Error! invalid number of inputs."<<std::endl;
       exit(EXIT_FAILURE);
     }
   }
-  
+
   /**************************************************Benchmarking ACA convegence on 1D interval***********************************************/  
   if (ACA_TestConvergence){
     int intervalSize = 10000;
@@ -201,89 +205,271 @@ int main(int argc,char* argv[]){
     std::cout<<"     Benchmarking log r kernel..."<<std::endl;
     testACASolverSpeed1DUniformPts_FixedSize(-1,1,0,1e-10,"ACA/recLU/speed/fixedSize/10k/1e-10/logR_0",logRKernel,10000,"recLU");
     
+    if (extendedSp){
+      std::cout<<"***********************************************************************"<<std::endl;
+      std::cout<<"Benchmarking extendedSp solver speed on 1D interval with ACA LR...."<<std::endl;
+      
+      std::cout<<"     Benchmarking quadratic kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/quadratic_0",quadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/quadratic_10",quadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/quadratic_0",quadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/quadratic_10",quadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/quadratic_0",quadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/quadratic_10",quadraticKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking multi quadratic kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking inverse quadratic kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking inverse multi quadratic kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking gaussian kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/gaussian_0",gaussianKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/gaussian_10",gaussianKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/gaussian_0",gaussianKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/gaussian_10",gaussianKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/gaussian_0",gaussianKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/gaussian_10",gaussianKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking exponential kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/exponential_0",exponentialKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/exponential_10",exponentialKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/exponential_0",exponentialKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/exponential_10",exponentialKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/exponential_0",exponentialKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/exponential_10",exponentialKernel,"extendedSp");
+    
+      std::cout<<"     Benchmarking logarithmic kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/logarithmic_0",logarithmicKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/logarithmic_10",logarithmicKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/logarithmic_0",logarithmicKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/logarithmic_10",logarithmicKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/logarithmic_0",logarithmicKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/logarithmic_10",logarithmicKernel,"extendedSp");
 
+      std::cout<<"     Benchmarking one over r kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/oneOverR_0",oneOverRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/oneOverR_10",oneOverRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/oneOverR_0",oneOverRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/oneOverR_10",oneOverRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/oneOverR_0",oneOverRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/oneOverR_10",oneOverRKernel,"extendedSp");
+      
+      std::cout<<"     Benchmarking one over r squared kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
+    
+      std::cout<<"     Benchmarking log r kernel..."<<std::endl;
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/logR_0",logRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/logR_10",logRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/logR_0",logRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/logR_10",logRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/logR_0",logRKernel,"extendedSp");
+      testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/logR_10",logRKernel,"extendedSp");    
+    }
     std::cout<<"***********************************************************************"<<std::endl;
-    std::cout<<"Benchmarking extendedSp solver speed on 1D interval with ACA LR...."<<std::endl;
-
+    std::cout<<"Benchmarking Eigen's LU solver speed on 1D interval...."<<std::endl;
+    
     std::cout<<"     Benchmarking quadratic kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/quadratic_0",quadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/quadratic_10",quadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/quadratic_0",quadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/quadratic_10",quadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/quadratic_0",quadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/quadratic_10",quadraticKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/quadratic_0",quadraticKernel,"EigenLU");
    
     std::cout<<"     Benchmarking multi quadratic kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/multiQuadratic_0",multiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/multiQuadratic_10",multiQuadraticKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/multiQuadratic_0",multiQuadraticKernel,"EigenLU");
 
     std::cout<<"     Benchmarking inverse quadratic kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/inverseQuadratic_0",inverseQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/inverseQuadratic_10",inverseQuadraticKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/inverseQuadratic_0",inverseQuadraticKernel,"EigenLU");
 
     std::cout<<"     Benchmarking inverse multi quadratic kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/inverseMultiQuadratic_10",inverseMultiQuadraticKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/inverseMultiQuadratic_0",inverseMultiQuadraticKernel,"EigenLU");
 
     std::cout<<"     Benchmarking gaussian kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/gaussian_0",gaussianKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/gaussian_10",gaussianKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/gaussian_0",gaussianKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/gaussian_10",gaussianKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/gaussian_0",gaussianKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/gaussian_10",gaussianKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/gaussian_0",gaussianKernel,"EigenLU");
 
     std::cout<<"     Benchmarking exponential kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/exponential_0",exponentialKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/exponential_10",exponentialKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/exponential_0",exponentialKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/exponential_10",exponentialKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/exponential_0",exponentialKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/exponential_10",exponentialKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/exponential_0",exponentialKernel,"EigenLU");
     
     std::cout<<"     Benchmarking logarithmic kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/logarithmic_0",logarithmicKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/logarithmic_10",logarithmicKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/logarithmic_0",logarithmicKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/logarithmic_10",logarithmicKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/logarithmic_0",logarithmicKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/logarithmic_10",logarithmicKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/logarithmic_0",logarithmicKernel,"EigenLU");
 
     std::cout<<"     Benchmarking one over r kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/oneOverR_0",oneOverRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/oneOverR_10",oneOverRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/oneOverR_0",oneOverRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/oneOverR_10",oneOverRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/oneOverR_0",oneOverRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/oneOverR_10",oneOverRKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/oneOverR_0",oneOverRKernel,"EigenLU");
     
     std::cout<<"     Benchmarking one over r squared kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/oneOverSqR_0",oneOverSqRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/oneOverSqR_10",oneOverSqRKernel,"extendedSp");
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/oneOverSqR_0",oneOverSqRKernel,"EigenLU");
     
     std::cout<<"     Benchmarking log r kernel..."<<std::endl;
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/extendedSp/speed/1e-7/logR_0",logRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-7,"ACA/extendedSp/speed/1e-7/logR_10",logRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-5,"ACA/extendedSp/speed/1e-5/logR_0",logRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-5,"ACA/extendedSp/speed/1e-5/logR_10",logRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,0,1e-10,"ACA/extendedSp/speed/1e-10/logR_0",logRKernel,"extendedSp");
-    testACASolverSpeed1DUniformPts(-1,1,10,1e-10,"ACA/extendedSp/speed/1e-10/logR_10",logRKernel,"extendedSp");    
+    testACASolverSpeed1DUniformPts(-1,1,0,1e-7,"ACA/Eigen/logR_0",logRKernel,"EigenLU");
+
+  }
+  if (ACA_Blade){
+    std::cout<<"*******************************************************"<<std::endl;
+    std::cout<<"Benchmarking blade geometry with ACA-PS LR approximation"<<std::endl;
+    std::cout<<"     Benchmarking 9K matrix..."<<std::endl;
+                                                                                                                                                               
+    user_IndexTree usrTree;
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 1498;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "partialPiv_ACA";
+
+    user_IndexTree::node* leftNode = new user_IndexTree::node;
+    user_IndexTree::node* rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+
+    rightNode->splitIndex = 6497;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "partialPiv_ACA";
+
+    leftNode->splitIndex = 749;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Cheby";
+
+    usrTree.setChildren_NULL(leftNode);
+
+    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
+    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
+    rightNode->left = leftRightNode;
+    rightNode->right = rightRightNode;
+
+    leftRightNode->splitIndex = 3998;
+    leftRightNode->topOffDiag_minRank = -1;
+    leftRightNode->bottOffDiag_minRank = -1;
+    leftRightNode->LR_Method = "PS_Cheby";
+
+    rightRightNode->splitIndex = 7868;
+    rightRightNode->topOffDiag_minRank = -1;
+    rightRightNode->bottOffDiag_minRank = -1;
+    rightRightNode->LR_Method = "PS_Cheby";
+
+    testSolverSpeed("boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0","ACA_Blade/blade_9k_",30,"recLU",usrTree);
+      
+    std::cout<<"     Benchmarking 12K matrix..."<<std::endl;
+    
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 2098;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "partialPiv_ACA";
+
+    leftNode = new user_IndexTree::node;
+    rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+
+    rightNode->splitIndex = 9097;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "partialPiv_ACA";
+
+    leftNode->splitIndex = 1048;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Cheby";
+
+    usrTree.setChildren_NULL(leftNode);
+
+    leftRightNode = new user_IndexTree::node;
+    rightRightNode = new user_IndexTree::node;
+    rightNode->left = leftRightNode;
+    rightNode->right = rightRightNode;
+
+    leftRightNode->splitIndex = 5597;
+    leftRightNode->topOffDiag_minRank = -1;
+    leftRightNode->bottOffDiag_minRank = -1;
+    leftRightNode->LR_Method = "PS_Cheby";
+
+    rightRightNode->splitIndex = 11016;
+    rightRightNode->topOffDiag_minRank = -1;
+    rightRightNode->bottOffDiag_minRank = -1;
+    rightRightNode->LR_Method = "PS_Cheby";
+
+    usrTree.setChildren_NULL(leftRightNode);
+    usrTree.setChildren_NULL(rightRightNode);
+
+    testSolverSpeed("boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0","ACA_Blade/blade_12k_",30,"recLU",usrTree);
+    
+    std::cout<<"     Benchmarking 16K matrix..."<<std::endl;
+    
+    usrTree.rootNode = new user_IndexTree::node;
+    usrTree.rootNode->splitIndex = 8998;
+    usrTree.rootNode->topOffDiag_minRank = -1;
+    usrTree.rootNode->bottOffDiag_minRank = -1;
+    usrTree.rootNode->LR_Method = "partialPiv_ACA";
+
+    leftNode = new user_IndexTree::node;
+    rightNode = new user_IndexTree::node;
+    usrTree.rootNode->left = leftNode;
+    usrTree.rootNode->right = rightNode;
+
+    rightNode->splitIndex = 13932;
+    rightNode->topOffDiag_minRank = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->LR_Method = "partialPiv_ACA";
+
+    leftNode->splitIndex = 4499;
+    leftNode->topOffDiag_minRank = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->LR_Method = "PS_Cheby";
+
+    usrTree.setChildren_NULL(leftNode);
+
+    leftRightNode = new user_IndexTree::node;
+    rightRightNode = new user_IndexTree::node;
+    rightNode->left = leftRightNode;
+    rightNode->right = rightRightNode;
+
+    leftRightNode->splitIndex = 11465;
+    leftRightNode->topOffDiag_minRank = -1;
+    leftRightNode->bottOffDiag_minRank = -1;
+    leftRightNode->LR_Method = "PS_Cheby";
+
+    rightRightNode->splitIndex = 15282;
+    rightRightNode->topOffDiag_minRank = -1;
+    rightRightNode->bottOffDiag_minRank = -1;
+    rightRightNode->LR_Method = "PS_Cheby";
+
+    usrTree.setChildren_NULL(leftRightNode);
+    usrTree.setChildren_NULL(rightRightNode);
+
+    testSolverSpeed("boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0","ACA_Blade/blade_16k_",30,"recLU",usrTree);
+    
+    
+    std::cout<<"Benchmarking Eigen's LU solver..."<<std::endl;
+    std::ofstream outputFile;
+    outputFile.open("ACA_Blade/Eigen");
+    Eigen::MatrixXd inputMatrix = readBinaryIntoMatrixXd("boundaryLR/stiffness/unstructured/2D/input/blade_9k_level_0");
+    outputFile<<inputMatrix.rows()<<"     "<<eigenPartialPivLUSpeed(inputMatrix)<<std::endl;
+    inputMatrix = readBinaryIntoMatrixXd("boundaryLR/stiffness/unstructured/2D/input/blade_12k_level_0");
+    outputFile<<inputMatrix.rows()<<"     "<<eigenPartialPivLUSpeed(inputMatrix)<<std::endl;
+    inputMatrix = readBinaryIntoMatrixXd("boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0");
+    outputFile<<inputMatrix.rows()<<"     "<<eigenPartialPivLUSpeed(inputMatrix)<<std::endl;
+    outputFile.close();
   }
   if (boundaryLR_Test){
     std::cout<<"*******************************************************"<<std::endl;
@@ -307,8 +493,7 @@ int main(int argc,char* argv[]){
     testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_1_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_1_level_2_",1e-1,100,1);   
     std::cout<<"-----------------------"<<std::endl;
     std::cout<<"400_front_num_0_level_2"<<std::endl;
-    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_0_level_2_",1e-1,100,1);
-    
+    testBoundaryLRSolver("boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2","boundaryLR/FETI/structured/400k/input/400_front_num_0_level_2_Graph","boundaryLR/FETI/structured/400k/results_timing/400_front_num_0_level_2_",1e-1,100,1);    
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"Testing solver for 3D FETI unstructured meshes.."<<std::endl;

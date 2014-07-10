@@ -7,11 +7,13 @@ void HODLR_Matrix::setDefaultValues(){
   
   recLU_FactorizationTime      = 0;
   recLU_SolveTime              = 0;
+  recLU_TotalTime              = 0;
   LR_ComputationTime           = 0;
   extendedSp_Size              = 0;
   extendedSp_AssemblyTime      = 0;
   extendedSp_FactorizationTime = 0;
   extendedSp_SolveTime         = 0;
+  extendedSp_TotalTime         = 0;
   totalIter_SolveTime          = 0;
   matrixSize                   = 0; 
   matrixNumRows                = 0;
@@ -208,10 +210,12 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
 
   recLU_FactorizationTime      = rhs.recLU_FactorizationTime;
   recLU_SolveTime              = rhs.recLU_SolveTime;
+  recLU_TotalTime              = rhs.recLU_TotalTime;
   LR_ComputationTime           = rhs.LR_ComputationTime;
   extendedSp_AssemblyTime      = rhs.extendedSp_AssemblyTime;
   extendedSp_FactorizationTime = rhs.extendedSp_FactorizationTime;
   extendedSp_SolveTime         = rhs.extendedSp_SolveTime;
+  extendedSp_TotalTime         = rhs.extendedSp_TotalTime;
   totalIter_SolveTime          = rhs.totalIter_SolveTime;
 
   recLU_FactorLevelTimeVec     = rhs.recLU_FactorLevelTimeVec;
@@ -683,12 +687,14 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
   solution = recLU_Solve(input_RHS,indexTree.rootNode,recLUfactorTree.rootNode);
   double endTime = clock();
   recLU_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
+  recLU_TotalTime = recLU_FactorizationTime + recLU_SolveTime + LR_ComputationTime;
   if (printResultInfo){
     std::cout<<"**************************************************"<<std::endl;
     std::cout<<"Solver Type                      = recLU"<<std::endl;
     std::cout<<"Low-Rank Computation Time        = "<<LR_ComputationTime<<" seconds"<<std::endl;
     std::cout<<"Factorization Time               = "<<recLU_FactorizationTime<<" seconds"<<std::endl;
     std::cout<<"Solve Time                       = "<<recLU_SolveTime<<" seconds"<<std::endl; 
+    std::cout<<"Total Solve Time                 = "<<recLU_TotalTime<<" seconds"<<std::endl;
     std::cout<<"LR Tolerance                     = "<<LR_Tolerance<<std::endl;
     std::cout<<"Residual l2 Relative Error       = "<<((matrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;
   }
@@ -961,7 +967,7 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
 
   // Extract Dense Solution
   Eigen::MatrixXd solution = sp_Solution.topLeftCorner(input_RHS.rows(),input_RHS.cols());
-  
+  extendedSp_TotalTime = LR_ComputationTime + extendedSp_AssemblyTime + extendedSp_FactorizationTime + extendedSp_SolveTime;
   if (printResultInfo){
     std::cout<<"**************************************************"<<std::endl;
     std::cout<<"Solver Type                      = extendedSp"<<std::endl;
@@ -970,6 +976,7 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     std::cout<<"Factorization Time               = "<<extendedSp_FactorizationTime<<" seconds"<<std::
 endl;
     std::cout<<"Solve Time                       = "<<extendedSp_SolveTime<<" seconds"<<std::endl; 
+    std::cout<<"Total Solve Time                 = "<<extendedSp_TotalTime<<" seconds"<<std::endl;
     std::cout<<"LR Tolerance                     = "<<LR_Tolerance<<std::endl;
     std::cout<<"Residual l2 Relative Error       = "<<((matrixData * solution)-input_RHS).norm()/input_RHS.norm()<<std::endl;
   }
@@ -1168,6 +1175,10 @@ double HODLR_Matrix::get_recLU_SolveTime() const{
   return recLU_SolveTime;
 }
 
+double HODLR_Matrix::get_recLU_TotalTime() const{
+  return recLU_TotalTime;
+}
+
 double HODLR_Matrix::get_extendedSp_AssemblyTime() const{
   return extendedSp_AssemblyTime;
 }
@@ -1178,6 +1189,10 @@ double HODLR_Matrix::get_extendedSp_FactorizationTime() const{
 
 double HODLR_Matrix::get_extendedSp_SolveTime() const{
   return extendedSp_SolveTime;
+}
+
+double HODLR_Matrix::get_extendedSp_TotalTime() const{
+  return extendedSp_TotalTime;
 }
 
 double HODLR_Matrix::get_LR_ComputationTime() const{

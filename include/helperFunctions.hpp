@@ -117,6 +117,10 @@ void testACASolverSpeed1DUniformPts(const double intervalMin, const double inter
  */
 void testACASolverSpeed1DUniformPts_FixedSize(const double intervalMin, const double intervalMax,const double diagValue,const double LR_Tolerance, std::string outputFileName, double (*kernel)(const double), const int matrixSize, std::string solverType);
 
+double eigenPartialPivLUSpeed(const Eigen::MatrixXd & inputMatrix);
+
+void testSolverSpeed(const std::string inputFilePath,const std::string outputFilePath,const int sizeThreshold,std::string solverType,user_IndexTree & usrTree);
+
 void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth);
 
 void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth,user_IndexTree &usrTree);
