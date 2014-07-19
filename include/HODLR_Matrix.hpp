@@ -15,8 +15,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <chrono>
-#include <random>
 
 /* Author : Amir Aminfar ---> aminfar@stanford.edu */
 class HODLR_Matrix{
@@ -79,6 +77,9 @@ public:
   double get_totalIter_SolveTime() const;
   double get_MatrixSize() const;
 
+  int rows() const;
+  int cols() const;
+  HODLR_Tree::node* get_TreeRootNode();
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);
   Eigen::MatrixXd row(int row);
@@ -98,17 +99,14 @@ public:
   Eigen::MatrixXd& returnBottOffDiagV();
   Eigen::MatrixXd& returnBottOffDiagK();
 
-  /**********************************Extend Add Functions **************************************/
-  void extend(std::vector<int> & extendIdxVec,int parentSize);
-  void extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,double tol,std::string mode);
-  void extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode);
-  void extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int> & updateIdxVec,double tol,std::string mode);
-
   /******************************** Check ******************************************************/
   void check_Structure();
   Eigen::MatrixXd createExactHODLR(const int rank,int input_MatrixSize,const int inpt_SizeThreshold);
 
   void saveSolverInfo(const std::string outputFileName);
+  
+  void freeMatrixData();
+  void recalculateSize();
 private:
 
   int sizeThreshold;
@@ -188,22 +186,11 @@ private:
   /******************************Memory Management Functions***********************************/ 
   void freeDenseMatMem();
   void freeSparseMatMem();
-  
-  /***********************************Extend Add Functions *******************************/
-  void extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize);
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,double tol,std::string mode);
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode);
-  void extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec,double tol);
-
-  int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode);
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
 
 };
-
-/****************************************Extend-Add external functions**************************/
-Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::MatrixXd & child,int min_i,int min_j,int numRows,int numCols,std::string mode);
 
 
 #endif

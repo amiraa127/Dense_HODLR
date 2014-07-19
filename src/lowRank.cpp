@@ -281,9 +281,8 @@ void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen
  
   //choose rows and columns and do the low-rank approximation
   Eigen::MatrixXd dummyW,dummyK,dummyV;
-  //extractRowsCols(W,K,V,Eigen::MatrixXd(lowRankMatrix_Sp),rowIndex,colIndex);
   extractRowsCols(Eigen::MatrixXd(lowRankMatrix_Sp),0,0,numRows,numCols,W,K,V,rowIndex,colIndex,1e-10,calculatedRank);
-  //calculatedRank = W.cols();
+
 
 }
 
@@ -708,6 +707,7 @@ void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::S
     rowIdx[i] -= offset_i;
   for (unsigned int i = 0; i < colIdx.size();i++)
     colIdx[i] -= offset_j;
+
   extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,K,V,rowIdx,colIdx,tolerance,calculatedRank);
   
   /*
@@ -719,10 +719,7 @@ void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::S
     }
   */
  
-  
-  
-  
-  if (savePath != "default"){
+  if (savePath != "none"){
     int numRowsSelect = rowIdx.size();
     int numColsSelect = colIdx.size();
     numPoints = std::max(numRowsSelect,numColsSelect);
@@ -780,4 +777,132 @@ void PS_Boundary_LowRankApprox(const Eigen::MatrixXd & matrixData,const Eigen::S
 } 
 	   
    
+int getBoundaryRowColIdx(const Eigen::SparseMatrix<double>  & graphData,const int min_i, const int min_j,const int numRows,const int numCols,const int depth,std::vector<int> & rowIdx,std::vector<int> & colIdx){
+  std::map<int,std::vector<int> > rowPos,colPos;
+  std::set<int> rowSet,colSet;
+  int max_i     = min_i + numRows - 1;
+  int max_j     = min_j + numCols - 1;
+  int minIdx    = std::min(min_i,min_j);
+  int maxIdx    = std::max(max_i,max_j);
+  int offset_i  = min_i - minIdx;
+  int offset_j  = min_j - minIdx;
+  int numPoints = maxIdx - minIdx + 1;
+  
+  for (int i = 0; i < numRows; i++)
+    rowSet.insert(i + min_i - minIdx);
+  
+  for (int i = 0; i < numCols; i++)
+    colSet.insert(i + min_j - minIdx);
+  
+  int noInteraction = identifyBoundary(graphData.block(minIdx,minIdx,numPoints,numPoints),rowSet,colSet,rowPos,colPos,depth);
+  if (noInteraction == 1)
+    return 1;
+  
+  createIdxFromBoundaryMap(rowPos,colPos,depth,rowIdx,colIdx);
+    
+  // Adjust for offsets
+  for (unsigned int i = 0; i < rowIdx.size();i++)
+    rowIdx[i] -= offset_i;
+  for (unsigned int i = 0; i < colIdx.size();i++)
+    colIdx[i] -= offset_j;
+  
+  std::sort(rowIdx.begin(),rowIdx.end());
+  std::sort(colIdx.begin(),colIdx.end());
+  return 0;
+}
+
+
+int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
+  assert(U1.rows() == U2.rows());
+  assert(V1.rows() == V2.rows());
+  Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
+  Eigen::MatrixXd Vtot(V1.rows(),V1.cols() + V2.cols());
+  Utot.leftCols(U1.cols())  = U1;
+  Utot.rightCols(U2.cols()) = U2;
+  Vtot.leftCols(V1.cols())  = V1;
+  Vtot.rightCols(V2.cols()) = V2;
+  
+  if (mode == "Compress_QR"){
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_U(Utot);
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_V(Vtot);
+    Eigen::MatrixXd thinQ_U,thinQ_V;
+    thinQ_U.setIdentity(Utot.rows(),Utot.cols());
+    thinQ_V.setIdentity(Vtot.rows(),Vtot.cols());
+    qr_U.householderQ().applyThisOnTheLeft(thinQ_U);
+    qr_V.householderQ().applyThisOnTheLeft(thinQ_V);
+    int rank_U = qr_U.rank();
+    int rank_V = qr_V.rank();
+    rank_U = std::max(rank_U,1);
+    rank_V = std::max(rank_V,1);
+    
+    Eigen::MatrixXd Q_U = thinQ_U.leftCols(rank_U);
+    Eigen::MatrixXd Q_V = thinQ_V.leftCols(rank_V);
+    Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_U = qr_U.colsPermutation();
+    Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_V = qr_V.colsPermutation();
+    Eigen::MatrixXd sigma = (Q_U.transpose() * Utot * Vtot.transpose() * Q_V);
+    Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
+    assert(sigma.rows() * sigma.cols() > 0);
+    ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
+    result_U = Q_U * sigma_W;
+    result_K = sigma_K;
+    result_V = Q_V * sigma_V;
+    return sigma_K.rows();
+  }else if (mode == "Compress_LU"){
+    Eigen::MatrixXd U_U,V_U;
+    int rank_U;
+    ::fullPivACA_LowRankApprox(Utot,U_U,V_U,0,0,Utot.rows(),Utot.cols(),tol,rank_U);
+    Eigen::MatrixXd U_V,V_V;
+    int rank_V;
+    ::fullPivACA_LowRankApprox(Vtot,U_V,V_V,0,0,Vtot.rows(),Vtot.cols(),tol,rank_V);
+    Eigen::MatrixXd sigma = V_U.transpose() * V_V;
+    Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
+    ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
+    result_U = U_U * sigma_W;
+    result_K = sigma_K;
+    result_V = U_V * sigma_V;
+    return sigma_K.rows();
+  }else if (mode == "Exact"){
+    int totRank = U1.cols() + U2.cols();
+    result_U = Utot;
+    result_V = Vtot;
+    result_K = Eigen::MatrixXd::Identity(totRank,totRank);
+    return totRank;
+  }else{
+    std::cout<<"Error! Unknown operation mode"<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Eigen::MatrixXd & U, Eigen::MatrixXd & V,Eigen::MatrixXd & K,std::vector<int> rowIdxVec,const  double tol,const std::string mode){
+  int numRowsSelect = rowMatrix.cols();
+  int numColsSelect = colMatrix.cols();
+  
+  Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numRowsSelect,numColsSelect);
    
+  for (int i = 0; i < numRowsSelect; i++)
+    for (int j = 0; j < numColsSelect; j++)
+      if (i < (int)rowIdxVec.size()) 
+	tempK(i,j) = colMatrix(rowIdxVec[i],j);
+  int rank;
+  if (mode == "fullPivLU"){
+    Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
+    lu.setThreshold(tol);
+    rank = lu.rank();
+    if (rank > 0){
+      V = ((lu.permutationP() * rowMatrix.transpose()).transpose()).leftCols(rank);
+      Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
+      V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
+      K = Eigen::MatrixXd::Identity(rank,rank);
+      U = (colMatrix * lu.permutationQ()).leftCols(rank);
+    }else{
+      U = Eigen::MatrixXd::Zero(colMatrix.rows(),1);
+      V = Eigen::MatrixXd::Zero(rowMatrix.rows(),1);
+      K = Eigen::MatrixXd::Zero(1,1);
+      rank = 1;
+    }
+  }else{
+    std::cout<<"Error! Unknown operation mode"<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return rank;
+}

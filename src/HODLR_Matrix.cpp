@@ -18,7 +18,7 @@ void HODLR_Matrix::setDefaultValues(){
   matrixSize                   = 0; 
   matrixNumRows                = 0;
   matrixNumCols                = 0; 
-  boundaryDepth                = 2;
+  boundaryDepth                = 1;
 
   LRStoredInTree         = false;
   createdRecLUfactorTree = false;
@@ -300,41 +300,50 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
  
   if (HODLR_Root->LR_Method == "partialPiv_ACA"){
     
-    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
-    ::partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
- 
+    assert(matrixDataAvail == true);
+    partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
+    partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
     HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
     HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
     HODLR_Root->topOffDiagK_Identity  = true;
     HODLR_Root->bottOffDiagK_Identity = true;
   
   }else if (HODLR_Root->LR_Method == "fullPiv_ACA"){
-    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
-    ::fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
+
+    assert(matrixDataAvail == true);
+    fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
+    fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
     HODLR_Root->topOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank, HODLR_Root->topOffDiagRank);
     HODLR_Root->bottOffDiagK = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank, HODLR_Root->bottOffDiagRank);
     HODLR_Root->topOffDiagK_Identity  = true;
     HODLR_Root->bottOffDiagK_Identity = true;
  
   }else if (HODLR_Root->LR_Method == "PS_Cheby"){
-    ::PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
     
-    ::PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
+    assert(matrixDataAvail ==  true);
+    PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
+    PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
 
   }else if (HODLR_Root->LR_Method == "SVD"){ 
-    ::SVD_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
     
-    ::SVD_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
+    assert(matrixDataAvail == true);
+    SVD_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank);
+    SVD_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank);
 
   }else if (HODLR_Root->LR_Method == "PS_Sparse"){
-    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
     
-    ::PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
-
+    assert(matrixDataAvail_Sp == true);
+    PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
+    PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+    getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
+  
   }else if (HODLR_Root->LR_Method == "PS_Boundary"){
-    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
     
-    ::PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
+    assert(matrixDataAvail == true);
+    assert(matrixDataAvail_Sp == true);
+    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
+    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     HODLR_Root->topOffDiagK_Identity  = true;
     HODLR_Root->bottOffDiagK_Identity = true;
  
@@ -1167,6 +1176,19 @@ void HODLR_Matrix::freeSparseMatMem(){
   matrixDataAvail_Sp = false;
 }
 
+void HODLR_Matrix::freeMatrixData(){
+  freeDenseMatMem();
+  freeSparseMatMem();
+}
+
+void HODLR_Matrix::recalculateSize(){
+  if (indexTree.rootNode != NULL){
+    matrixNumRows = indexTree.rootNode->max_i - indexTree.rootNode->min_i + 1;
+    matrixNumCols = indexTree.rootNode->max_j - indexTree.rootNode->min_j + 1;
+    matrixSize    = matrixNumRows;
+  }
+}
+
 double HODLR_Matrix::get_recLU_FactorizationTime() const{
   return recLU_FactorizationTime;
 }
@@ -1206,6 +1228,16 @@ double HODLR_Matrix::get_MatrixSize() const{
   return matrixSize;
 }
 
+int HODLR_Matrix::rows() const {
+  return matrixNumRows;
+}
+
+int HODLR_Matrix::cols() const {
+  return matrixNumCols;
+}
+HODLR_Tree::node* HODLR_Matrix::get_TreeRootNode(){
+  return indexTree.rootNode;
+}
 
 /************************************ Acessing HODLR Entries *******************************/
 Eigen::MatrixXd HODLR_Matrix::row(int row){
@@ -1333,7 +1365,8 @@ HODLR_Matrix  HODLR_Matrix::topDiag(){
   storeLRinTree();
   HODLR_Matrix* topDiagMatrixPtr = new HODLR_Matrix;
   *(topDiagMatrixPtr) = *this;
-  (*(topDiagMatrixPtr)).keepTopDiag();
+  topDiagMatrixPtr->keepTopDiag();
+  topDiagMatrixPtr->recalculateSize();
   return *topDiagMatrixPtr;
 }
 
@@ -1341,7 +1374,8 @@ HODLR_Matrix HODLR_Matrix::bottDiag(){
   storeLRinTree();
   HODLR_Matrix* bottDiagMatrixPtr = new HODLR_Matrix;
   *(bottDiagMatrixPtr) = *this;
-  (*(bottDiagMatrixPtr)).keepBottDiag();
+  bottDiagMatrixPtr->keepBottDiag();
+  bottDiagMatrixPtr->recalculateSize();
   return *bottDiagMatrixPtr;
 }
 
@@ -1420,557 +1454,7 @@ void HODLR_Matrix::check_Structure(HODLR_Tree::node* HODLR_Root){
 }
 
 
-/**************************************Extend-Add Functions************************************/
-void HODLR_Matrix::extend(std::vector<int> & extendIdxVec, int parentSize){
-  assert(matrixSize == (int)extendIdxVec.size()); 
-  storeLRinTree();
-  freeDenseMatMem();
-  freeSparseMatMem();
-  extend(indexTree.rootNode,extendIdxVec,parentSize);
-  matrixSize = parentSize;
-}
-
-void HODLR_Matrix::extend(HODLR_Tree::node* HODLR_Root,std::vector<int> & extendIdxVec,int parentSize){
-  int min_i,min_j,max_i,max_j;
-  assert(HODLR_Root->max_i < matrixSize);
-  assert(HODLR_Root->max_j < matrixSize);
-  // Modify Indices
-  if (HODLR_Root->min_i == 0)
-    min_i = 0;
-  else{
-    min_i = extendIdxVec[HODLR_Root->min_i - 1] + 1;
-  }
-  if (HODLR_Root->min_j == 0)
-    min_j = 0;
-  else{
-    min_j = extendIdxVec[HODLR_Root->min_j - 1] + 1;
-  }
-  
-  if (HODLR_Root->max_i == matrixSize - 1)
-    max_i = parentSize - 1;
-  else{
-    max_i = extendIdxVec[HODLR_Root->max_i];
-  }
-
-  if (HODLR_Root->max_j == matrixSize - 1)
-    max_j = parentSize - 1;
-  else{
-    max_j = extendIdxVec[HODLR_Root->max_j];
-  }
-    
-  int numRows = max_i - min_i + 1;
-  int numCols = max_j - min_j + 1;
-  Eigen::MatrixXd leafMatrix = Eigen::MatrixXd::Zero(numRows,numCols);
-  if (HODLR_Root->isLeaf == true){
-    for (int i = 0; i < (HODLR_Root->leafMatrix).rows(); i++){
-      for (int j = 0; j < (HODLR_Root->leafMatrix).cols(); j++){
-	int rowIdx = extendIdxVec[i + HODLR_Root->min_i] - min_i;
-	int colIdx = extendIdxVec[j + HODLR_Root->min_j] - min_j;
-	leafMatrix(rowIdx,colIdx) = (HODLR_Root->leafMatrix)(i,j);
-      } 
-    }
-    HODLR_Root->min_i         = min_i;
-    HODLR_Root->min_j         = min_j;
-    HODLR_Root->max_i         = max_i;
-    HODLR_Root->max_j         = max_j;
-    HODLR_Root->leafMatrix    = leafMatrix;
-    return;
-  }
-  
-  int splitIndex_i  = extendIdxVec[HODLR_Root->splitIndex_i];
-  int splitIndex_j  = extendIdxVec[HODLR_Root->splitIndex_j];
-  
-  // Modify Matrices
-  int numRows_TopOffDiag  = splitIndex_i - min_i + 1; 
-  int numRows_BottOffDiag = max_i - splitIndex_i;
-  int numCols_TopOffDiag  = numRows_BottOffDiag;
-  int numCols_BottOffDiag = numRows_TopOffDiag; 
-  int topRank             = (HODLR_Root->topOffDiagU).cols();
-  int bottRank            = (HODLR_Root->bottOffDiagU).cols();
-  Eigen::MatrixXd topOffDiagU  = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topRank);
-  Eigen::MatrixXd topOffDiagV  = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topRank);
-  Eigen::MatrixXd bottOffDiagU = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottRank);
-  Eigen::MatrixXd bottOffDiagV = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottRank);
-  
-  for (int i = 0; i < (HODLR_Root->topOffDiagU).rows(); i++){
-    int rowIdx = extendIdxVec[i + HODLR_Root->min_i] - min_i;
-    topOffDiagU.row(rowIdx) = (HODLR_Root->topOffDiagU).row(i);
-  } 
-    
-  for (int i = 0; i < (HODLR_Root->topOffDiagV).rows(); i++){
-    int rowIdx = extendIdxVec[i + HODLR_Root->splitIndex_j + 1] - splitIndex_j - 1;
-    topOffDiagV.row(rowIdx) = (HODLR_Root->topOffDiagV).row(i);
-  } 
-
-  for (int i = 0; i < (HODLR_Root->bottOffDiagU).rows(); i++){
-    int rowIdx = extendIdxVec[i + HODLR_Root->splitIndex_i + 1] - splitIndex_i - 1;
-    bottOffDiagU.row(rowIdx) = (HODLR_Root->bottOffDiagU).row(i);
-  } 
-
-  for (int i = 0; i < (HODLR_Root->bottOffDiagV).rows(); i++){
-    int rowIdx = extendIdxVec[i + HODLR_Root->min_j] - min_j;
-    bottOffDiagV.row(rowIdx) = (HODLR_Root->bottOffDiagV).row(i);
-  } 
- 
- 
-  HODLR_Root->min_i         = min_i;
-  HODLR_Root->min_j         = min_j;
-  HODLR_Root->max_i         = max_i;
-  HODLR_Root->max_j         = max_j;
-  HODLR_Root->splitIndex_i  = splitIndex_i;
-  HODLR_Root->splitIndex_j  = splitIndex_j;
-  HODLR_Root->topOffDiagU   = topOffDiagU;
-  HODLR_Root->topOffDiagV   = topOffDiagV;
-  HODLR_Root->bottOffDiagU  = bottOffDiagU;
-  HODLR_Root->bottOffDiagV  = bottOffDiagV;
-  extend( HODLR_Root->left ,extendIdxVec,parentSize);
-  extend( HODLR_Root->right,extendIdxVec,parentSize);
-
-}
-
-void HODLR_Matrix::extendAddUpdate(HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode){
-  storeLRinTree();
-  freeDenseMatMem();
-  freeSparseMatMem();
-  D_HODLR.extend(updateIdxVec,matrixSize);
-  assert(D_HODLR.get_MatrixSize() == matrixSize);
-  extendAddLRinTree(indexTree.rootNode,D_HODLR,updateIdxVec,tol,mode);
-}
-
-
-void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,double tol,std::string mode){
-  storeLRinTree(); 
-  freeDenseMatMem();
-  freeSparseMatMem();
- 
-  //if (mode == "Compress_LU"){
-    Eigen::MatrixXd U_D,V_D;
-    int D_Rank;
-    //::fullPivACA_LowRankApprox(D,U_D,V_D,0,D.rows() - 1,0,D.cols() - 1,tol,D_Rank);
-    ::fullPivACA_LowRankApprox(D,U_D,V_D,0,0,D.rows(),D.cols(),tol,D_Rank);
-    extendAddUpdate(U_D,V_D,updateIdxVec,tol,"Compress_LU");
-    //extendAddLRinTree(indexTree.rootNode,extendD,Eigen::MatrixXd::Identity(matrixSize,matrixSize),1e-16,"Exact");
-    /*
-  }else if (mode == "PS_Random"){
-    Eigen::MatrixXd extendD = ::extend(updateIdxVec,matrixSize,D,0,0,D.rows(),D.cols(),"RowsCols");
-    assert(extendD.rows() == matrixSize);
-    extendAddLRinTree(indexTree.rootNode,extendD,updateIdxVec,tol);
-  }else{
-    std::cout<<"Error! Unknown operation mode!"<<std::endl;
-    exit(EXIT_FAILURE);
-  }
-    */
-}
-
-void HODLR_Matrix::extendAddUpdate(Eigen::MatrixXd & updateU,Eigen::MatrixXd & updateV,std::vector<int>& updateIdxVec,double tol,std::string mode){
-  storeLRinTree();
-  freeDenseMatMem();
-  freeSparseMatMem();
-  Eigen::MatrixXd updateExtendU = ::extend(updateIdxVec,matrixSize,updateU,0,0,updateU.rows(),updateU.cols(),"Rows");
-  Eigen::MatrixXd updateExtendV = ::extend(updateIdxVec,matrixSize,updateV,0,0,updateV.rows(),updateV.cols(),"Rows");
-  extendAddLRinTree(indexTree.rootNode, updateExtendU,updateExtendV,tol,mode);
-}
-
-void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,const Eigen::MatrixXd & updateExtendU,const Eigen::MatrixXd & updateExtendV,double tol,std::string mode){
-  assert(updateExtendV.cols() == updateExtendU.cols());
-  int sumChildRanks = updateExtendV.cols();
-  if (HODLR_Root->isLeaf == true){
-    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
-    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
-    HODLR_Root->leafMatrix += (updateExtendU).block(HODLR_Root->min_i,0,numRows,sumChildRanks) * (updateExtendV).block(HODLR_Root->min_j,0,numCols,sumChildRanks).transpose();       
-    return;
-  }
-  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
-  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
-  int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
-  int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1; 
-  Eigen::MatrixXd U2_TopOffDiag,U2_BottOffDiag;
-  Eigen::MatrixXd V2_TopOffDiag,V2_BottOffDiag;
-  // Create topDiag U2s
-  U2_TopOffDiag  = (updateExtendU).block(HODLR_Root->min_i,0,numRows_TopOffDiag,sumChildRanks);
-  U2_BottOffDiag = (updateExtendU).block(HODLR_Root->splitIndex_i + 1,0,numRows_BottOffDiag,sumChildRanks);
-  // Create V2s
-  V2_TopOffDiag  = (updateExtendV).block(HODLR_Root->splitIndex_j + 1,0,numCols_TopOffDiag,sumChildRanks);
-  V2_BottOffDiag = (updateExtendV).block(HODLR_Root->min_j,0,numCols_BottOffDiag,sumChildRanks);
-  // Update current LR
-  Eigen::MatrixXd result_U,result_V,result_K;
-  HODLR_Root->topOffDiagRank  = add_LR(HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagV,U2_TopOffDiag,V2_TopOffDiag,tol,mode);
-  HODLR_Root->bottOffDiagRank = add_LR(HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagV,U2_BottOffDiag,V2_BottOffDiag,tol,mode);
-  // Do the same for children
-  extendAddLRinTree(HODLR_Root->left ,updateExtendU,updateExtendV,tol,mode);
-  extendAddLRinTree(HODLR_Root->right,updateExtendU,updateExtendV,tol,mode);
-  
-}
-
-
-void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,HODLR_Matrix & extendD_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode){
-  if (HODLR_Root->isLeaf == true){
-    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
-    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
-    HODLR_Root->leafMatrix += extendD_HODLR.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
-    return;
-  }
-
-  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
-  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
-  int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
-  int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1;
- 
-  int topOffDiagRank   = std::min(2 * HODLR_Root->topOffDiagRank ,std::min(numRows_TopOffDiag,numCols_TopOffDiag));
-  int bottOffDiagRank  = std::min(2 * HODLR_Root->bottOffDiagRank,std::min(numRows_BottOffDiag,numCols_BottOffDiag));
-  
-  Eigen::MatrixXd U1_TopOffDiag,U1_BottOffDiag;
-  Eigen::MatrixXd V1_TopOffDiag,V1_BottOffDiag;  
-  Eigen::MatrixXd U2_TopOffDiag,U2_BottOffDiag;
-  Eigen::MatrixXd V2_TopOffDiag,V2_BottOffDiag;
-  Eigen::MatrixXd U_TopOffDiag,K_TopOffDiag,V_TopOffDiag;
-  Eigen::MatrixXd U_BottOffDiag,K_BottOffDiag,V_BottOffDiag;
-  int topRank,bottRank;  
-  if (mode == "PS_Random"){
-      // Create randomVectors
-      std::vector<int> topColIdxVec(numCols_TopOffDiag);
-      std::vector<int> topRowIdxVec(numRows_TopOffDiag);
-      std::vector<int> bottColIdxVec(numCols_BottOffDiag);
-      std::vector<int> bottRowIdxVec(numRows_BottOffDiag);
-      for (int i = 0; i < numCols_TopOffDiag; i++)
-	topColIdxVec[i] = i;
-      for (int i = 0; i < numRows_TopOffDiag; i++)
-	topRowIdxVec[i] = i;
-      for (int i = 0; i < numCols_BottOffDiag; i++)
-	bottColIdxVec[i] = i;
-      for (int i = 0; i < numRows_BottOffDiag; i++)
-	bottRowIdxVec[i] = i;
-      unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-      std::shuffle(topColIdxVec.begin(),topColIdxVec.end(),std::default_random_engine(seed));
-      std::shuffle(topRowIdxVec.begin(),topRowIdxVec.end(),std::default_random_engine(seed));
-      std::shuffle(bottColIdxVec.begin(),bottColIdxVec.end(),std::default_random_engine(seed));
-      std::shuffle(bottRowIdxVec.begin(),bottRowIdxVec.end(),std::default_random_engine(seed));
-      topColIdxVec = std::vector<int>(topColIdxVec.begin(),topColIdxVec.begin() + topOffDiagRank);
-      topRowIdxVec = std::vector<int>(topRowIdxVec.begin(),topRowIdxVec.begin() + topOffDiagRank);
-      bottColIdxVec = std::vector<int>(bottColIdxVec.begin(),bottColIdxVec.begin() + bottOffDiagRank);
-      bottRowIdxVec = std::vector<int>(bottRowIdxVec.begin(),bottRowIdxVec.begin() + bottOffDiagRank);
-      
-      // Create Us and Vs
-      U1_TopOffDiag   = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topOffDiagRank);
-      V1_TopOffDiag   = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topOffDiagRank);
-      U1_BottOffDiag  = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottOffDiagRank);
-      V1_BottOffDiag  = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottOffDiagRank);
-      U2_TopOffDiag   = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topOffDiagRank);
-      V2_TopOffDiag   = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topOffDiagRank);
-      U2_BottOffDiag  = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottOffDiagRank);
-      V2_BottOffDiag  = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottOffDiagRank);
-      for (int i = 0; i < topOffDiagRank; i++){
-	int min_i = HODLR_Root->min_i;
-	int min_j = HODLR_Root->splitIndex_j + 1;
-	U1_TopOffDiag.col(i) = block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-	V1_TopOffDiag.col(i) = block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
-	U2_TopOffDiag.col(i) = extendD_HODLR.block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-	V2_TopOffDiag.col(i) = extendD_HODLR.block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
-      }
-      
-      for (int i = 0; i < bottOffDiagRank; i++){
-	int min_i = HODLR_Root->splitIndex_i + 1;
-	int min_j = HODLR_Root->min_j;
-	U1_BottOffDiag.col(i) = block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
-	V1_BottOffDiag.col(i) = block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
-	U2_BottOffDiag.col(i) = extendD_HODLR.block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1);
-	V2_BottOffDiag.col(i) = extendD_HODLR.block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
-      }
-      
-      
-      // Create U,K and V
-      
-      // TopOffDiag
-      U_TopOffDiag = U1_TopOffDiag + U2_TopOffDiag;
-      V_TopOffDiag = V1_TopOffDiag + V2_TopOffDiag;
-      K_TopOffDiag = Eigen::MatrixXd::Zero(topOffDiagRank,topOffDiagRank);
-      for (int i = 0; i < topOffDiagRank; i++)
-	for (int j = 0; j < topOffDiagRank; j++)
-	  K_TopOffDiag(i,j) = U_TopOffDiag(topRowIdxVec[i],j);
-      
-      Eigen::MatrixXd svdU,svdV,svdK;
-      topRank = ::SVD_LowRankApprox(K_TopOffDiag,LR_Tolerance, &svdU, &svdV, &svdK);
-      U_TopOffDiag = U_TopOffDiag * svdV;
-      V_TopOffDiag = V_TopOffDiag * svdU;
-      K_TopOffDiag = Eigen::MatrixXd::Zero(topRank,topRank);	
-      for (int i = 0; i < topRank; i++)
-	K_TopOffDiag(i,i) = 1/svdK(i,i);
-      
-      // BottOffDiag
-      U_BottOffDiag = U1_BottOffDiag + U2_BottOffDiag;
-      V_BottOffDiag = V1_BottOffDiag + V2_BottOffDiag;
-      K_BottOffDiag = Eigen::MatrixXd::Zero(bottOffDiagRank,bottOffDiagRank);
-      for (int i = 0; i < bottOffDiagRank; i++)
-	for (int j = 0; j < bottOffDiagRank; j++)
-	  K_BottOffDiag(i,j) = U_BottOffDiag(bottRowIdxVec[i],j);
-      
-      bottRank = ::SVD_LowRankApprox(K_BottOffDiag,LR_Tolerance, &svdU, &svdV, &svdK);
-      U_BottOffDiag = U_BottOffDiag * svdV;
-      V_BottOffDiag = V_BottOffDiag * svdU;
-      K_BottOffDiag = Eigen::MatrixXd::Zero(bottRank,bottRank);	
-      for (int i = 0; i < bottRank; i++)
-	K_BottOffDiag(i,i) = 1/svdK(i,i);
-
-  }else if (mode == "Compress_LU"){
-    int min_i_Top = HODLR_Root->min_i;
-    int min_j_Top = HODLR_Root->splitIndex_j + 1;
-    Eigen::MatrixXd addedMatrix_Top = block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag) + extendD_HODLR.block(min_i_Top,min_j_Top,numRows_TopOffDiag,numCols_TopOffDiag);
-    int min_i_Bott = HODLR_Root->splitIndex_i + 1;
-    int min_j_Bott = HODLR_Root->min_j;
-    Eigen::MatrixXd addedMatrix_Bott = block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag) + extendD_HODLR.block(min_i_Bott,min_j_Bott,numRows_BottOffDiag,numCols_BottOffDiag);
-    ::fullPivACA_LowRankApprox(addedMatrix_Top ,U_TopOffDiag ,V_TopOffDiag ,0,0,addedMatrix_Top.rows(),addedMatrix_Top.cols(),tol,topRank); 
-    ::fullPivACA_LowRankApprox(addedMatrix_Bott,U_BottOffDiag,V_BottOffDiag,0,0,addedMatrix_Bott.rows(),addedMatrix_Bott.cols(),tol,bottRank);
-    K_TopOffDiag  = Eigen::MatrixXd::Identity(topRank,topRank);
-    K_BottOffDiag = Eigen::MatrixXd::Identity(bottRank,bottRank);
-      
-  }else{
-    std::cout<<"Error! Unkown operation mode."<<std::endl;
-    exit(EXIT_FAILURE);
-  }
-  
-  HODLR_Root->topOffDiagRank = topRank;
-  HODLR_Root->topOffDiagU    = U_TopOffDiag;
-  HODLR_Root->topOffDiagK    = K_TopOffDiag;
-  HODLR_Root->topOffDiagV    = V_TopOffDiag;
-  
-  HODLR_Root->bottOffDiagRank = bottRank;
-  HODLR_Root->bottOffDiagU    = U_BottOffDiag;
-  HODLR_Root->bottOffDiagK    = K_BottOffDiag;
-  HODLR_Root->bottOffDiagV    = V_BottOffDiag;
-  
-  extendAddLRinTree(HODLR_Root->left ,extendD_HODLR,updateIdxVec,tol,mode);
-  extendAddLRinTree(HODLR_Root->right,extendD_HODLR,updateIdxVec,tol,mode);
-
-}
-
-// Might not even need this !!
-void HODLR_Matrix::extendAddLRinTree(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd & extendD,std::vector<int> & updateIdxVec,double tol){
-   
-  if (HODLR_Root->isLeaf == true){
-    int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
-    int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;  
-    HODLR_Root->leafMatrix += extendD.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
-    return;
-  }
-
-  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
-  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
-  int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
-  int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1;
-
-  int topOffDiagRank   = std::min(2 * HODLR_Root->topOffDiagRank,std::min(numRows_TopOffDiag,numCols_TopOffDiag));
-  //int topOffDiagRank   = std::min(100,std::min(numRows_TopOffDiag,numCols_TopOffDiag));
-
-  int bottOffDiagRank  = std::min(2 * HODLR_Root->bottOffDiagRank,std::min(numRows_BottOffDiag,numCols_BottOffDiag));
-  //int bottOffDiagRank  = std::min(100,std::min(numRows_BottOffDiag,numCols_BottOffDiag));
-  
-  Eigen::MatrixXd U1_TopOffDiag,U1_BottOffDiag;
-  Eigen::MatrixXd V1_TopOffDiag,V1_BottOffDiag;  
-  Eigen::MatrixXd U2_TopOffDiag,U2_BottOffDiag;
-  Eigen::MatrixXd V2_TopOffDiag,V2_BottOffDiag;
-  
-  // Create randomVectors
-  std::vector<int> topColIdxVec(numCols_TopOffDiag);
-  std::vector<int> topRowIdxVec(numRows_TopOffDiag);
-  std::vector<int> bottColIdxVec(numCols_BottOffDiag);
-  std::vector<int> bottRowIdxVec(numRows_BottOffDiag);
-  for (int i = 0; i < numCols_TopOffDiag; i++)
-    topColIdxVec[i] = i;
-  for (int i = 0; i < numRows_TopOffDiag; i++)
-    topRowIdxVec[i] = i;
-  for (int i = 0; i < numCols_BottOffDiag; i++)
-    bottColIdxVec[i] = i;
-  for (int i = 0; i < numRows_BottOffDiag; i++)
-    bottRowIdxVec[i] = i;
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::shuffle(topColIdxVec.begin(),topColIdxVec.end(),std::default_random_engine(seed));
-  std::shuffle(topRowIdxVec.begin(),topRowIdxVec.end(),std::default_random_engine(seed));
-  std::shuffle(bottColIdxVec.begin(),bottColIdxVec.end(),std::default_random_engine(seed));
-  std::shuffle(bottRowIdxVec.begin(),bottRowIdxVec.end(),std::default_random_engine(seed));
-  topColIdxVec = std::vector<int>(topColIdxVec.begin(),topColIdxVec.begin() + topOffDiagRank);
-  topRowIdxVec = std::vector<int>(topRowIdxVec.begin(),topRowIdxVec.begin() + topOffDiagRank);
-  bottColIdxVec = std::vector<int>(bottColIdxVec.begin(),bottColIdxVec.begin() + bottOffDiagRank);
-  bottRowIdxVec = std::vector<int>(bottRowIdxVec.begin(),bottRowIdxVec.begin() + bottOffDiagRank);
-
-  //  Us and Vs
-  U1_TopOffDiag   = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topOffDiagRank);
-  V1_TopOffDiag   = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topOffDiagRank);
-  U1_BottOffDiag  = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottOffDiagRank);
-  V1_BottOffDiag  = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottOffDiagRank);
-  U2_TopOffDiag   = Eigen::MatrixXd::Zero(numRows_TopOffDiag,topOffDiagRank);
-  V2_TopOffDiag   = Eigen::MatrixXd::Zero(numCols_TopOffDiag,topOffDiagRank);
-  U2_BottOffDiag  = Eigen::MatrixXd::Zero(numRows_BottOffDiag,bottOffDiagRank);
-  V2_BottOffDiag  = Eigen::MatrixXd::Zero(numCols_BottOffDiag,bottOffDiagRank);
-
-  for (int i = 0; i < topOffDiagRank; i++){
-    int min_i = HODLR_Root->min_i;
-    int min_j = HODLR_Root->splitIndex_j + 1;
-    U1_TopOffDiag.col(i) = block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-    V1_TopOffDiag.col(i) = block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
-    U2_TopOffDiag.col(i) = extendD.block(min_i,min_j + topColIdxVec[i],numRows_TopOffDiag,1);
-    V2_TopOffDiag.col(i) = extendD.block(min_i + topRowIdxVec[i],min_j,1,numCols_TopOffDiag).transpose();
-  }
-  
-  for (int i = 0; i < bottOffDiagRank; i++){
-    int min_i = HODLR_Root->splitIndex_i + 1;
-    int min_j = HODLR_Root->min_j;
-    U1_BottOffDiag.col(i) = block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1); 
-    V1_BottOffDiag.col(i) = block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
-    U2_BottOffDiag.col(i) = extendD.block(min_i,min_j + bottColIdxVec[i],numRows_BottOffDiag,1);
-    V2_BottOffDiag.col(i) = extendD.block(min_i + bottRowIdxVec[i],min_j,1,numCols_BottOffDiag).transpose();
-  }
-
-
-  // Crete U,K and V
-  Eigen::MatrixXd U_TopOffDiag,K_TopOffDiag,V_TopOffDiag;
-  Eigen::MatrixXd U_BottOffDiag,K_BottOffDiag,V_BottOffDiag;
- 
-  // TopOffDiag
-  U_TopOffDiag = U1_TopOffDiag + U2_TopOffDiag;
-  V_TopOffDiag = V1_TopOffDiag + V2_TopOffDiag;
-  K_TopOffDiag = Eigen::MatrixXd::Zero(topOffDiagRank,topOffDiagRank);
-  for (int i = 0; i < topOffDiagRank; i++)
-      for (int j = 0; j < topOffDiagRank; j++)
-	K_TopOffDiag(i,j) = U_TopOffDiag(topRowIdxVec[i],j);
-
-  Eigen::MatrixXd svdU,svdV,svdK;
-  int topRank = ::SVD_LowRankApprox(K_TopOffDiag,tol, &svdU, &svdV, &svdK);
-  U_TopOffDiag = U_TopOffDiag * svdV;
-  V_TopOffDiag = V_TopOffDiag * svdU;
-  K_TopOffDiag = Eigen::MatrixXd::Zero(topRank,topRank);	
-  for (int i = 0; i < topRank; i++)
-    K_TopOffDiag(i,i) = 1.0/svdK(i,i);
-
-  // BottOffDiag
-  U_BottOffDiag = U1_BottOffDiag + U2_BottOffDiag;
-  V_BottOffDiag = V1_BottOffDiag + V2_BottOffDiag;
-  K_BottOffDiag = Eigen::MatrixXd::Zero(bottOffDiagRank,bottOffDiagRank);
-  for (int i = 0; i < bottOffDiagRank; i++)
-      for (int j = 0; j < bottOffDiagRank; j++)
-	K_BottOffDiag(i,j) = U_BottOffDiag(bottRowIdxVec[i],j);
-
-  int bottRank = ::SVD_LowRankApprox(K_BottOffDiag,tol, &svdU, &svdV, &svdK);
-  U_BottOffDiag = U_BottOffDiag * svdV;
-  V_BottOffDiag = V_BottOffDiag * svdU;
-  K_BottOffDiag = Eigen::MatrixXd::Zero(bottRank,bottRank);	
-  for (int i = 0; i < bottRank; i++)
-    K_BottOffDiag(i,i) = 1.0/svdK(i,i);
- 
-  HODLR_Root->topOffDiagRank = topRank;
-  HODLR_Root->topOffDiagU    = U_TopOffDiag;
-  HODLR_Root->topOffDiagK    = K_TopOffDiag;
-  HODLR_Root->topOffDiagV    = V_TopOffDiag;
-  
-  HODLR_Root->bottOffDiagRank = bottRank;
-  HODLR_Root->bottOffDiagU    = U_BottOffDiag;
-  HODLR_Root->bottOffDiagK    = K_BottOffDiag;
-  HODLR_Root->bottOffDiagV    = V_BottOffDiag;
-  
-  extendAddLRinTree(HODLR_Root->left ,extendD,updateIdxVec,tol);
-  extendAddLRinTree(HODLR_Root->right,extendD,updateIdxVec,tol);
-
-  
-}
-
-
-int HODLR_Matrix::add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
-  assert(U1.rows() == U2.rows());
-  assert(V1.rows() == V2.rows());
-  Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
-  Eigen::MatrixXd Vtot(V1.rows(),V1.cols() + V2.cols());
-  Utot.leftCols(U1.cols())  = U1;
-  Utot.rightCols(U2.cols()) = U2;
-  Vtot.leftCols(V1.cols())  = V1;
-  Vtot.rightCols(V2.cols()) = V2;
-  
-  if (mode == "Compress_QR"){
-    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_U(Utot);
-    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr_V(Vtot);
-    Eigen::MatrixXd thinQ_U,thinQ_V;
-    thinQ_U.setIdentity(Utot.rows(),Utot.cols());
-    thinQ_V.setIdentity(Vtot.rows(),Vtot.cols());
-    qr_U.householderQ().applyThisOnTheLeft(thinQ_U);
-    qr_V.householderQ().applyThisOnTheLeft(thinQ_V);
-    int rank_U = qr_U.rank();
-    int rank_V = qr_V.rank();
-    rank_U = std::max(rank_U,1);
-    rank_V = std::max(rank_V,1);
-    
-    Eigen::MatrixXd Q_U = thinQ_U.leftCols(rank_U);
-    Eigen::MatrixXd Q_V = thinQ_V.leftCols(rank_V);
-    Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_U = qr_U.colsPermutation();
-    Eigen::PermutationMatrix<Eigen::Dynamic,Eigen::Dynamic> permMatrix_V = qr_V.colsPermutation();
-    Eigen::MatrixXd sigma = (Q_U.transpose() * Utot * Vtot.transpose() * Q_V);
-    Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
-    assert(sigma.rows() * sigma.cols() > 0);
-    ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
-    result_U = Q_U * sigma_W;
-    result_K = sigma_K;
-    result_V = Q_V * sigma_V;
-    return sigma_K.rows();
-  }else if (mode == "Compress_LU"){
-    Eigen::MatrixXd U_U,V_U;
-    int rank_U;
-    ::fullPivACA_LowRankApprox(Utot,U_U,V_U,0,0,Utot.rows(),Utot.cols(),tol,rank_U);
-    Eigen::MatrixXd U_V,V_V;
-    int rank_V;
-    ::fullPivACA_LowRankApprox(Vtot,U_V,V_V,0,0,Vtot.rows(),Vtot.cols(),tol,rank_V);
-    Eigen::MatrixXd sigma = V_U.transpose() * V_V;
-    Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
-    ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
-    result_U = U_U * sigma_W;
-    result_K = sigma_K;
-    result_V = U_V * sigma_V;
-    return sigma_K.rows();
-  }else if (mode == "Exact"){
-    int totRank = U1.cols() + U2.cols();
-    result_U = Utot;
-    result_V = Vtot;
-    result_K = Eigen::MatrixXd::Identity(totRank,totRank);
-    return totRank;
-  }else{
-    std::cout<<"Error! Unknown operation mode"<<std::endl;
-    exit(EXIT_FAILURE);
-  }
-}
 
 
 
 
-/*************************************************************************************************************/
-Eigen::MatrixXd extend(std::vector<int> & extendIdxVec,int parentSize,Eigen::MatrixXd & child,int min_i,int min_j,int numRows,int numCols,std::string mode){
-  Eigen::MatrixXd result;
-  int max_i = min_i + numRows - 1;
-  int max_j = min_j + numCols - 1;
-  int child_NumRows = child.rows();
-  int child_NumCols = child.cols();
-  assert(max_i < child_NumRows);
-  assert(max_j < child_NumCols);
-  if (mode == "RowsCols"){
-    result = Eigen::MatrixXd::Zero(parentSize,parentSize);
-    // Go over all rows and columns in the child matrix
-     for (int i = min_i; i <= max_i; i++){
-       for (int j = min_j; j <= max_j; j++){
-	 int rowIdx = extendIdxVec[i];
-	 int colIdx = extendIdxVec[j];
-	 result(rowIdx,colIdx) = child(i,j);		
-       }
-     }
-  }else if (mode == "Cols"){
-    result = Eigen::MatrixXd::Zero(child.rows(),parentSize);
-    for (int j = min_j; j <= max_j; j++){
-      int colIdx = extendIdxVec[j];
-      result.col(colIdx) = child.col(j);		
-    }
-  }else if (mode == "Rows"){
-    result = Eigen::MatrixXd::Zero(parentSize,child.cols());
-    for (int i = min_i; i <= max_i; i++){
-      int rowIdx = extendIdxVec[i];
-      result.row(rowIdx) = child.row(i);		    
-    }
-  }else{
-    std::cout<<"Error! Unknown operation mode."<<std::endl;
-    exit(EXIT_FAILURE);
-  }
-  return result;  
-}

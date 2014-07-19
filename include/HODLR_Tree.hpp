@@ -36,6 +36,10 @@ public:
     Eigen::MatrixXd leafMatrix;
     int topOffDiagRank;
     int bottOffDiagRank;
+    std::vector<int> topOffDiagRowIdx;
+    std::vector<int> topOffDiagColIdx;
+    std::vector<int> bottOffDiagRowIdx;
+    std::vector<int> bottOffDiagColIdx;
   };
 
   HODLR_Tree();
