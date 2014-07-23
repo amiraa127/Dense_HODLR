@@ -9,7 +9,8 @@
 #include <cmath>
 #include "HODLR_Matrix.hpp"
 #include <ctime>
-
+#include <random>
+#include <chrono>
 /******************Pre-programmed radial basis function kernels:**********************/
 
 //1+r^2
@@ -43,6 +44,8 @@ double oneOverSqRKernel(const double r);
 double logRKernel(const double r); 
 
 /**************************************************************************************/
+
+std::vector<int> createUniqueRndIdx(const int min, const int max,const int n);
 
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------

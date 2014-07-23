@@ -41,6 +41,19 @@ double logRKernel(const double r){
 }
 
 
+std::vector<int> createUniqueRndIdx(const int min, const int max,const int n){
+  std::vector<int> idxVec;
+  assert(max > min);
+  assert(n <= max - min + 1);
+  for (int i = min; i <= max; i++)
+    idxVec.push_back(i);
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+  std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + n);
+  std::sort(extendIdxVec.begin(),extendIdxVec.end());
+  return extendIdxVec;
+}
+
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------
  * This function creates a dense interaction matrix given a set of row and column points given a kernel.

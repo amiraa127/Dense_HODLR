@@ -79,6 +79,7 @@ public:
 
   int rows() const;
   int cols() const;
+  double norm();
   HODLR_Tree::node* get_TreeRootNode();
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);

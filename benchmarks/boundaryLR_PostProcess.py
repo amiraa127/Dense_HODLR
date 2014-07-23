@@ -417,10 +417,10 @@ sumFile.write('\n')
 sumFile.write('\\begin{document}\n')
 sumFile.write('\\begin{table}\n') 
 sumFile.write('\t\\scalebox{0.75}{\n')
-sumFile.write('\t\\begin{tabular}{|c|c|c|c||c|c|c|c|c|c|c|c|}\n')
+sumFile.write('\t\\begin{tabular}{|c|c|c|c||c|c|c|c|c|c|c|c|c|}\n')
 sumFile.write('\t\\hline\n')
-sumFile.write('\t Matrix & Mesh & Mesh & Elimination & \\multicolumn{2}{c}{Matrix Size}\\vline & \\multicolumn{2}{c}{Direct Solver}\\vline & \\multicolumn{2}{c}{Iterative Solver} \\vline&  Partial Pivoting & Percent\\\  \\cline{5-11}\n')
-sumFile.write('\t Type & Type & Dim & Tree Level & Sparse & Dense& Time & Accuracy & Time & Accuracy & LU Time & Speedup\\\ \\hline\n')
+sumFile.write('\t Matrix & Mesh & Mesh & Elimination & \\multicolumn{2}{c}{Matrix Size}\\vline & \\multicolumn{2}{c}{Direct Solver}\\vline & \\multicolumn{3}{c}{Iterative Solver} \\vline&  Partial Pivoting & Percent\\\  \\cline{5-12}\n')
+sumFile.write('\t Type & Type & Dim & Tree Level & Sparse & Dense& Time & Accuracy & Time & Accuracy & num Iterations &LU Time & Speedup\\\ \\hline\n')
 # Loop over all files and fill the table
 for root,dirs,fileNames in os.walk(currDir):
     for f in fileNames:
@@ -440,8 +440,9 @@ for root,dirs,fileNames in os.walk(currDir):
                     else:
                         meshType = meshType[2:]
             
-                    speedup = 100.*(LUTime[currFilePath])/totalTime[currFilePath]
-                    sumFile.write('\t'+matrixType+'&'+meshType+'&'+meshDim+'&'+matrixLevel+'&'+sparseSize+'&'+str(size[currFilePath])+'&'+'%.2e' %directTime[currFilePath]+'&'+'%.2e' %directAccuracy[currFilePath]+'&'+'%.2e' %totalTime[currFilePath]+'&'+'%.2e' %finalAccuracy[currFilePath]+'&'+'%.2e' %LUTime[currFilePath]+'&'+ '%.2e' %speedup+'\\\ \n') 
+                    #speedup = 100.*(LUTime[currFilePath])/totalTime[currFilePath]
+                    speedup = (LUTime[currFilePath])/totalTime[currFilePath]
+                    sumFile.write('\t'+matrixType+'&'+meshType+'&'+meshDim+'&'+matrixLevel+'&'+sparseSize+'&'+str(size[currFilePath])+'&'+'%.2e' %directTime[currFilePath]+'&'+'%.2e' %directAccuracy[currFilePath]+'&'+'%.2e' %totalTime[currFilePath]+'&'+'%.2e' %finalAccuracy[currFilePath]+'&'+str(numIter[currFilePath])+'&'+'%.2e' %LUTime[currFilePath]+'&'+ '%.2f' %speedup+'\\\ \n')
 
 sumFile.write('\t\\hline\n')
 sumFile.write('\t\\end{tabular}}\n')

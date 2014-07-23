@@ -195,6 +195,8 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
   newNode->topOffDiag_minRank       = oldNode->topOffDiag_minRank;
   newNode->bottOffDiag_minRank      = oldNode->bottOffDiag_minRank;      
   newNode->isLeaf                   = oldNode->isLeaf;
+  newNode->topOffDiagK_Identity     = oldNode->topOffDiagK_Identity;
+  newNode->bottOffDiagK_Identity    = oldNode->bottOffDiagK_Identity; 
   newNode->LR_Method                = oldNode->LR_Method;
   newNode->topOffDiagU              = oldNode->topOffDiagU;
   newNode->topOffDiagV              = oldNode->topOffDiagV;
@@ -205,7 +207,11 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
   newNode->leafMatrix               = oldNode->leafMatrix;
   newNode->topOffDiagRank           = oldNode->topOffDiagRank;
   newNode->bottOffDiagRank          = oldNode->bottOffDiagRank;
- 
+  newNode->topOffDiagRowIdx         = oldNode->topOffDiagRowIdx;
+  newNode->topOffDiagColIdx         = oldNode->topOffDiagColIdx;
+  newNode->bottOffDiagRowIdx        = oldNode->bottOffDiagRowIdx;
+  newNode->bottOffDiagColIdx        = oldNode->bottOffDiagColIdx;
+
   if (oldNode->isLeaf == true){
     newNode->left = NULL;
     newNode->right = NULL; 

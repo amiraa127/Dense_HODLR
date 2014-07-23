@@ -613,14 +613,35 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	}
       }
     }     
-  if (numClassifiedRows == 0)
+  if (numClassifiedRows == 0){
+    
+    if ((numRows >= 2 ) && (numCols >= 2 )){
+      int numSel = 2;
+      std::vector<int> rowVec(rowSet.begin(),rowSet.end());
+      std::vector<int> colVec(colSet.begin(),colSet.end());
+      std::vector<int> rowSel = createUniqueRndIdx(0,numRows-1,numSel);
+      std::vector<int> colSel = createUniqueRndIdx(0,numCols-1,numSel);
+      for (int i = 0; i < numSel ; i++){
+	int rowIdx = rowVec[rowSel[i]];
+	int colIdx = colVec[colSel[i]];
+	rowPos[0].push_back(rowIdx);
+	colPos[0].push_back(colIdx);
+	classifiedRows[rowIdx] = true;
+	classifiedCols[colIdx] = true;
+	rowCurrClassVec.push_back(rowIdx);
+	colCurrClassVec.push_back(colIdx);
+	numClassifiedRows ++;
+	numClassifiedCols ++;
+	}
+      }else
     return 1;
-  
+  }
   //Clasify other rows
   int rowCurrClass = 0;
   while (numClassifiedRows < numRows){
     if (rowCurrClass == maxDepth)
       break;			 
+    int currClassification = 0;
     for (unsigned int i = 0; i < rowCurrClassVec.size();i++){
       Eigen::SparseMatrix<double> currNode = inputGraph.block(rowCurrClassVec[i],0,1,numRows+numCols);
       for (int k = 0; k < currNode.outerSize(); ++k)
@@ -630,18 +651,36 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	    classifiedRows[it.col()] = true;
 	    rowNextClassVec.push_back(it.col());
 	    numClassifiedRows ++;
+	    currClassification ++;
 	  }
 	}  
+    }
+    if (currClassification == 0){
+      //std::cout<<"Here is the problem"<<std::endl;
+      // plant a seed
+      int numSeeds = rowPos[rowCurrClass].size();
+      for (std::set<int>::iterator iter = rowSet.begin(); iter != rowSet.end(); ++ iter)
+	if (classifiedRows[*iter] == false){
+	  rowPos[rowCurrClass + 1].push_back(*iter);
+	  classifiedRows[*iter] = true;
+	  rowNextClassVec.push_back(*iter);
+	  numClassifiedRows ++;
+	  currClassification ++;
+	  if (currClassification == numSeeds)
+	    break;
+	}
     }
     rowCurrClass ++;
     rowCurrClassVec = rowNextClassVec;
     rowNextClassVec.clear();
   }
-   //Clasify other cols
+  
+  //Clasify other cols
   int colCurrClass = 0;
   while (numClassifiedCols < numCols){
     if (colCurrClass == maxDepth)
       break;
+    int currClassification = 0;
     for (unsigned int i = 0; i < colCurrClassVec.size();i++){
       Eigen::SparseMatrix<double> currNode = inputGraph.block(colCurrClassVec[i],0,1,numRows+numCols);
       for (int k = 0; k < currNode.outerSize(); ++k)
@@ -651,8 +690,24 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	    classifiedCols[it.col()] = true;
 	    colNextClassVec.push_back(it.col());
 	    numClassifiedCols ++;
+	    currClassification ++;
 	  }
 	} 
+    }
+    if (currClassification == 0){
+      //std::cout<<"Here is the problem"<<std::endl;
+      // plant a seed
+      int numSeeds = rowPos[rowCurrClass].size();
+      for (std::set<int>::iterator iter = colSet.begin(); iter != colSet.end(); ++ iter)
+	if (classifiedCols[*iter] == false){
+	  colPos[colCurrClass + 1].push_back(*iter);
+	  classifiedCols[*iter] = true;
+	  colNextClassVec.push_back(*iter);
+	  numClassifiedCols ++;
+	  currClassification ++;
+	  if (currClassification == numSeeds)
+	    break;
+	}
     }
     colCurrClass ++;
     colCurrClassVec = colNextClassVec;
@@ -808,6 +863,9 @@ int getBoundaryRowColIdx(const Eigen::SparseMatrix<double>  & graphData,const in
   
   std::sort(rowIdx.begin(),rowIdx.end());
   std::sort(colIdx.begin(),colIdx.end());
+  
+  std::cout<<numRows<<" "<<rowIdx.size()<<std::endl;
+  std::cout<<numCols<<" "<<colIdx.size()<<std::endl;
   return 0;
 }
 
@@ -888,7 +946,9 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
     Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
     lu.setThreshold(tol);
     rank = lu.rank();
-    if (rank > 0){
+    int largestPivot = std::abs((lu.matrixLU())(0,0));
+    //std::cout<<(lu.matrixLU())(0,0)<<" "<<tempK.norm()<<" "<<rank<<std::endl;
+    if ((rank > 0)/* && (largestPivot >= 1e-8)*/){
       V = ((lu.permutationP() * rowMatrix.transpose()).transpose()).leftCols(rank);
       Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
       V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();

@@ -18,7 +18,7 @@ void HODLR_Matrix::setDefaultValues(){
   matrixSize                   = 0; 
   matrixNumRows                = 0;
   matrixNumCols                = 0; 
-  boundaryDepth                = 1;
+  boundaryDepth                = 1000;
 
   LRStoredInTree         = false;
   createdRecLUfactorTree = false;
@@ -341,7 +341,7 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   }else if (HODLR_Root->LR_Method == "PS_Boundary"){
     
     assert(matrixDataAvail == true);
-    assert(matrixDataAvail_Sp == true);
+    //assert(matrixDataAvail_Sp == true);
     PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
     PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     HODLR_Root->topOffDiagK_Identity  = true;
@@ -395,14 +395,44 @@ void HODLR_Matrix::createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,
   int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
   int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1; 
 
-  HODLR_Root->topOffDiagRank   = rank;
-  HODLR_Root->bottOffDiagRank  = rank;
-  HODLR_Root->topOffDiagU      = Eigen::MatrixXd::Random(numRows_TopOffDiag,rank);
-  HODLR_Root->topOffDiagK      = Eigen::MatrixXd::Random(rank,rank);
-  HODLR_Root->topOffDiagV      = Eigen::MatrixXd::Random(numCols_TopOffDiag,rank);
-  HODLR_Root->bottOffDiagU     = Eigen::MatrixXd::Random(numRows_BottOffDiag,rank);
-  HODLR_Root->bottOffDiagK     = Eigen::MatrixXd::Random(rank,rank);
-  HODLR_Root->bottOffDiagV     = Eigen::MatrixXd::Random(numCols_BottOffDiag,rank);
+  //HODLR_Root->topOffDiagRank   = rank;
+  //HODLR_Root->bottOffDiagRank  = rank;
+  
+
+  
+  //HODLR_Root->topOffDiagU      = Eigen::MatrixXd::Random(numRows_TopOffDiag,rank);
+  //HODLR_Root->topOffDiagK      = Eigen::MatrixXd::Random(rank,rank);
+  //HODLR_Root->topOffDiagV      = Eigen::MatrixXd::Random(numCols_TopOffDiag,rank);
+  //HODLR_Root->bottOffDiagU     = Eigen::MatrixXd::Random(numRows_BottOffDiag,rank);
+  //HODLR_Root->bottOffDiagK     = Eigen::MatrixXd::Random(rank,rank);
+  //HODLR_Root->bottOffDiagV     = Eigen::MatrixXd::Random(numCols_BottOffDiag,rank);
+    
+
+  
+  HODLR_Root->topOffDiagRowIdx     = createUniqueRndIdx(0,numRows_TopOffDiag - 1,rank);
+  HODLR_Root->topOffDiagColIdx     = createUniqueRndIdx(0,numCols_TopOffDiag - 1,rank);
+  HODLR_Root->bottOffDiagRowIdx    = createUniqueRndIdx(0,numRows_BottOffDiag - 1,rank);
+  HODLR_Root->bottOffDiagColIdx    = createUniqueRndIdx(0,numCols_BottOffDiag - 1,rank);
+
+  Eigen::MatrixXd topOffDiagU      = Eigen::MatrixXd::Random(numRows_TopOffDiag, rank);
+  Eigen::MatrixXd topOffDiagV      = Eigen::MatrixXd::Random(numCols_TopOffDiag, rank);
+  Eigen::MatrixXd bottOffDiagU     = Eigen::MatrixXd::Random(numRows_BottOffDiag,rank);
+  Eigen::MatrixXd bottOffDiagV     = Eigen::MatrixXd::Random(numCols_BottOffDiag,rank);
+  
+  for (int i = 0; i < rank; i++)
+    for (int j = 0; i < rank; i++){
+      topOffDiagU(HODLR_Root->topOffDiagRowIdx[i],j)   = topOffDiagV(HODLR_Root->topOffDiagColIdx[j],i); 
+      bottOffDiagU(HODLR_Root->bottOffDiagRowIdx[i],j) = bottOffDiagV(HODLR_Root->bottOffDiagColIdx[j],i);  
+    }
+
+  HODLR_Root->topOffDiagRank  = PS_PseudoInverse(topOffDiagU,topOffDiagV,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->topOffDiagRowIdx,1e-15,"fullPivLU");
+  HODLR_Root->bottOffDiagRank = PS_PseudoInverse(bottOffDiagU,bottOffDiagV,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->bottOffDiagRowIdx,1e-15,"fullPivLU");
+
+  
+
+
+
+
   result.block(HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag) = HODLR_Root->topOffDiagU * HODLR_Root->topOffDiagK *  HODLR_Root->topOffDiagV.transpose(); 
   result.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag) = HODLR_Root->bottOffDiagU * HODLR_Root->bottOffDiagK *  HODLR_Root->bottOffDiagV.transpose(); 
   createExactHODLR(HODLR_Root->left ,rank,result);
@@ -1235,6 +1265,11 @@ int HODLR_Matrix::rows() const {
 int HODLR_Matrix::cols() const {
   return matrixNumCols;
 }
+
+double HODLR_Matrix:: norm(){
+  return block(0,0,rows(),cols()).norm();
+}
+
 HODLR_Tree::node* HODLR_Matrix::get_TreeRootNode(){
   return indexTree.rootNode;
 }
