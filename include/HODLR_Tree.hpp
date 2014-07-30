@@ -24,15 +24,15 @@ public:
     int topOffDiag_minRank;
     int bottOffDiag_minRank;
     bool isLeaf;
-    bool topOffDiagK_Identity;
-    bool bottOffDiagK_Identity;
+    //bool topOffDiagK_Identity;
+    //bool bottOffDiagK_Identity;
     std::string LR_Method;
     Eigen::MatrixXd topOffDiagU;
     Eigen::MatrixXd topOffDiagV;
-    Eigen::MatrixXd topOffDiagK;
+    //Eigen::MatrixXd topOffDiagK;
     Eigen::MatrixXd bottOffDiagU;
     Eigen::MatrixXd bottOffDiagV;
-    Eigen::MatrixXd bottOffDiagK;
+    //Eigen::MatrixXd bottOffDiagK;
     Eigen::MatrixXd leafMatrix;
     int topOffDiagRank;
     int bottOffDiagRank;
@@ -41,7 +41,7 @@ public:
     std::vector<int> bottOffDiagRowIdx;
     std::vector<int> bottOffDiagColIdx;
   };
-
+  
   HODLR_Tree();
   HODLR_Tree(const int matrixSize, const std::string LRMethod = "ACA");
   ~HODLR_Tree();

@@ -47,6 +47,8 @@ double logRKernel(const double r);
 
 std::vector<int> createUniqueRndIdx(const int min, const int max,const int n);
 
+std::vector<int> createSequentialVec(const int min,const int size);
+
 /* Function: makeMatrixFrom1DInterval
  * ----------------------------------
  * This function creates a dense interaction matrix given a set of row and column points given a kernel.

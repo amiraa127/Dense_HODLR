@@ -614,7 +614,6 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
       }
     }     
   if (numClassifiedRows == 0){
-    
     if ((numRows >= 2 ) && (numCols >= 2 )){
       int numSel = 2;
       std::vector<int> rowVec(rowSet.begin(),rowSet.end());
@@ -632,9 +631,9 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	colCurrClassVec.push_back(colIdx);
 	numClassifiedRows ++;
 	numClassifiedCols ++;
-	}
-      }else
-    return 1;
+      }
+    }else
+      return 1;
   }
   //Clasify other rows
   int rowCurrClass = 0;
@@ -657,7 +656,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
     }
     if (currClassification == 0){
       //std::cout<<"Here is the problem"<<std::endl;
-      // plant a seed
+      // plant a seed 
       int numSeeds = rowPos[rowCurrClass].size();
       for (std::set<int>::iterator iter = rowSet.begin(); iter != rowSet.end(); ++ iter)
 	if (classifiedRows[*iter] == false){
@@ -668,7 +667,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	  currClassification ++;
 	  if (currClassification == numSeeds)
 	    break;
-	}
+	    }
     }
     rowCurrClass ++;
     rowCurrClassVec = rowNextClassVec;
@@ -697,7 +696,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
     if (currClassification == 0){
       //std::cout<<"Here is the problem"<<std::endl;
       // plant a seed
-      int numSeeds = rowPos[rowCurrClass].size();
+      int numSeeds = colPos[colCurrClass].size();
       for (std::set<int>::iterator iter = colSet.begin(); iter != colSet.end(); ++ iter)
 	if (classifiedCols[*iter] == false){
 	  colPos[colCurrClass + 1].push_back(*iter);
@@ -707,7 +706,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
 	  currClassification ++;
 	  if (currClassification == numSeeds)
 	    break;
-	}
+	    }
     }
     colCurrClass ++;
     colCurrClassVec = colNextClassVec;
@@ -721,10 +720,16 @@ void createIdxFromBoundaryMap( std::map<int,std::vector<int> > & rowPos, std::ma
   rowIdx = rowPos[0];
   colIdx = colPos[0];
   
-  for (int i = 1; i <= (std::min(depth,(int)rowPos.size() - 1)); i++){
+  for (int i = 1; i <= (std::min(depth,(int)rowPos.size() - 1)); i++)
     rowIdx.insert(rowIdx.end(),rowPos[i].begin(),rowPos[i].end());
+
+
+    
+  for (int i = 1; i <= (std::min(depth,(int)colPos.size() - 1)); i++)
     colIdx.insert(colIdx.end(),colPos[i].begin(),colPos[i].end());
-  }
+
+
+
 
 }
 
@@ -864,13 +869,21 @@ int getBoundaryRowColIdx(const Eigen::SparseMatrix<double>  & graphData,const in
   std::sort(rowIdx.begin(),rowIdx.end());
   std::sort(colIdx.begin(),colIdx.end());
   
-  std::cout<<numRows<<" "<<rowIdx.size()<<std::endl;
-  std::cout<<numCols<<" "<<colIdx.size()<<std::endl;
+  //rowIdx = createSequentialVec(0,numRows); 
+  //colIdx = createSequentialVec(0,numCols);
+  //std::cout<<"rows "<<numRows<<" "<<rowIdx.size()<<std::endl;
+  //std::cout<<"cols "<<numCols<<" "<<colIdx.size()<<std::endl;
+  //std::cout<<"**"<<std::endl;
+  //assert(rowIdx.size() == numRows);
+  //assert(colIdx.size() == numCols);
   return 0;
 }
 
 
-int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
+//int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
+
+int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
+
   assert(U1.rows() == U2.rows());
   assert(V1.rows() == V2.rows());
   Eigen::MatrixXd Utot(U1.rows(),U1.cols() + U2.cols());
@@ -901,8 +914,9 @@ int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd
     Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
     assert(sigma.rows() * sigma.cols() > 0);
     ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
-    result_U = Q_U * sigma_W;
-    result_K = sigma_K;
+    //result_U = Q_U * sigma_W;
+    //result_K = sigma_K;
+    result_U = Q_U * sigma_W * sigma_K;
     result_V = Q_V * sigma_V;
     return sigma_K.rows();
   }else if (mode == "Compress_LU"){
@@ -915,15 +929,16 @@ int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd
     Eigen::MatrixXd sigma = V_U.transpose() * V_V;
     Eigen::MatrixXd sigma_W,sigma_V,sigma_K;
     ::SVD_LowRankApprox(sigma,tol,&sigma_W,&sigma_V,&sigma_K);
-    result_U = U_U * sigma_W;
-    result_K = sigma_K;
+    //result_U = U_U * sigma_W;
+    //result_K = sigma_K;
+    result_U = U_U * sigma_W * sigma_K;
     result_V = U_V * sigma_V;
     return sigma_K.rows();
   }else if (mode == "Exact"){
     int totRank = U1.cols() + U2.cols();
     result_U = Utot;
     result_V = Vtot;
-    result_K = Eigen::MatrixXd::Identity(totRank,totRank);
+    //result_K = Eigen::MatrixXd::Identity(totRank,totRank);
     return totRank;
   }else{
     std::cout<<"Error! Unknown operation mode"<<std::endl;
@@ -948,7 +963,7 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
     rank = lu.rank();
     int largestPivot = std::abs((lu.matrixLU())(0,0));
     //std::cout<<(lu.matrixLU())(0,0)<<" "<<tempK.norm()<<" "<<rank<<std::endl;
-    if ((rank > 0)/* && (largestPivot >= 1e-8)*/){
+    if ((rank > 0) && (largestPivot >= 1e-6)){
       V = ((lu.permutationP() * rowMatrix.transpose()).transpose()).leftCols(rank);
       Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
       V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();

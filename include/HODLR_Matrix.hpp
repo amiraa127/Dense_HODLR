@@ -41,8 +41,9 @@ public:
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
-
+  
   
   HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
 
@@ -142,6 +143,7 @@ private:
   bool freeMatrixMemory_Sp;
   bool matrixDataAvail;
   bool matrixDataAvail_Sp;
+  bool graphDataAvail;
   bool isSquareMatrix;
 
   double LR_Tolerance;
@@ -152,6 +154,7 @@ private:
   recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;
   Eigen::SparseMatrix<double> matrixData_Sp;
+  Eigen::SparseMatrix<double> graphData;
   Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
 
   std::string extendedSp_SavePath;
@@ -182,7 +185,8 @@ private:
   /**********************************Accessing Matrix Entries***************************/
   void fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j);
 
-  void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
+  //  void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_K,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
+  void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
 
   /******************************Memory Management Functions***********************************/ 
   void freeDenseMatMem();

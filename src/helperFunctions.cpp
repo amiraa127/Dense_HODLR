@@ -42,16 +42,23 @@ double logRKernel(const double r){
 
 
 std::vector<int> createUniqueRndIdx(const int min, const int max,const int n){
-  std::vector<int> idxVec;
   assert(max > min);
-  assert(n <= max - min + 1);
-  for (int i = min; i <= max; i++)
-    idxVec.push_back(i);
+  int seqVecSize = max - min + 1;
+  assert(n <= seqVecSize);
+  std::vector<int> idxVec = createSequentialVec(min,seqVecSize);
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
   std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + n);
   std::sort(extendIdxVec.begin(),extendIdxVec.end());
   return extendIdxVec;
+}
+
+std::vector<int> createSequentialVec(const int min,const int size){
+  std::vector<int> result(size);
+  for (int i = 0; i < size; i++)
+    result[i] = min + i;
+  return result;
+
 }
 
 /* Function: makeMatrixFrom1DInterval

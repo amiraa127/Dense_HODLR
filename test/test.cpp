@@ -13,7 +13,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  /*
+  
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -28,7 +28,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(assignment_Test_Simple);
   CPPUNIT_TEST(assignment_Test_ExtendedSp);
   CPPUNIT_TEST(blockExtraction_Test);
-  */
+  
 
   CPPUNIT_TEST(boundaryFinder_Test);
   CPPUNIT_TEST(boundaryFinder_lowRank_Test);

@@ -43,8 +43,8 @@ void HODLR_Tree::createDefaultTree(const int matrixSize){
   numLevels = 1;
   rootNode->topOffDiag_minRank  = -1;
   rootNode->bottOffDiag_minRank = -1;
-  rootNode->topOffDiagK_Identity = false;
-  rootNode->bottOffDiagK_Identity = false;
+  //rootNode->topOffDiagK_Identity = false;
+  //rootNode->bottOffDiagK_Identity = false;
 
   if ( matrixSize < sizeThreshold ){
     rootNode->isLeaf = true;
@@ -76,8 +76,8 @@ void HODLR_Tree::createDefaultTree(node* root){
   leftNode->currLevel = root->currLevel + 1;
   leftNode->topOffDiag_minRank  = -1;
   leftNode->bottOffDiag_minRank = -1;
-  leftNode->topOffDiagK_Identity = false;
-  leftNode->bottOffDiagK_Identity = false;
+  //leftNode->topOffDiagK_Identity = false;
+  //leftNode->bottOffDiagK_Identity = false;
 
   root->left = leftNode;
   
@@ -107,8 +107,8 @@ void HODLR_Tree::createDefaultTree(node* root){
   rightNode->currLevel = root->currLevel + 1;
   rightNode->topOffDiag_minRank  = -1;
   rightNode->bottOffDiag_minRank = -1;
-  rightNode->topOffDiagK_Identity = false;
-  rightNode->bottOffDiagK_Identity = false;
+  //rightNode->topOffDiagK_Identity = false;
+  //rightNode->bottOffDiagK_Identity = false;
 
   root->right = rightNode;
   
@@ -195,15 +195,15 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
   newNode->topOffDiag_minRank       = oldNode->topOffDiag_minRank;
   newNode->bottOffDiag_minRank      = oldNode->bottOffDiag_minRank;      
   newNode->isLeaf                   = oldNode->isLeaf;
-  newNode->topOffDiagK_Identity     = oldNode->topOffDiagK_Identity;
-  newNode->bottOffDiagK_Identity    = oldNode->bottOffDiagK_Identity; 
+  //newNode->topOffDiagK_Identity     = oldNode->topOffDiagK_Identity;
+  //newNode->bottOffDiagK_Identity    = oldNode->bottOffDiagK_Identity; 
   newNode->LR_Method                = oldNode->LR_Method;
   newNode->topOffDiagU              = oldNode->topOffDiagU;
   newNode->topOffDiagV              = oldNode->topOffDiagV;
-  newNode->topOffDiagK              = oldNode->topOffDiagK;
+  //newNode->topOffDiagK              = oldNode->topOffDiagK;
   newNode->bottOffDiagU             = oldNode->bottOffDiagU;
   newNode->bottOffDiagV             = oldNode->bottOffDiagV;
-  newNode->bottOffDiagK             = oldNode->bottOffDiagK;
+  //newNode->bottOffDiagK             = oldNode->bottOffDiagK;
   newNode->leafMatrix               = oldNode->leafMatrix;
   newNode->topOffDiagRank           = oldNode->topOffDiagRank;
   newNode->bottOffDiagRank          = oldNode->bottOffDiagRank;
@@ -224,8 +224,8 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
     newNode->left = leftCpy;
     newNode->right = rightCpy;
     rhs_nodeLevelVec[newNode->currLevel].push_back(newNode);
-    newNode->topOffDiagK_Identity  = oldNode->topOffDiagK_Identity;
-    newNode->bottOffDiagK_Identity = oldNode->bottOffDiagK_Identity;
+    //newNode->topOffDiagK_Identity  = oldNode->topOffDiagK_Identity;
+    //newNode->bottOffDiagK_Identity = oldNode->bottOffDiagK_Identity;
     copyNode(oldNode->left,leftCpy,rhs_nodeLevelVec,rhs_leafNodesVec);
     copyNode(oldNode->right,rightCpy,rhs_nodeLevelVec,rhs_leafNodesVec);
   }
@@ -267,8 +267,8 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
     HODLR_IndexRoot->splitIndex_i = user_IndexRoot->splitIndex;
     HODLR_IndexRoot->splitIndex_j = user_IndexRoot->splitIndex;
     nodeLevelVec_Assign(HODLR_IndexRoot->currLevel,HODLR_IndexRoot);
-    HODLR_IndexRoot->topOffDiagK_Identity  = false;
-    HODLR_IndexRoot->bottOffDiagK_Identity = false;
+    //HODLR_IndexRoot->topOffDiagK_Identity  = false;
+    //HODLR_IndexRoot->bottOffDiagK_Identity = false;
    
     int leftNodeSize = user_IndexRoot->splitIndex - min_i + 1;
     int rightNodeSize = max_i - user_IndexRoot->splitIndex;
@@ -289,8 +289,8 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
       leftNode->max_j = user_IndexRoot->splitIndex;
       leftNode->topOffDiag_minRank = -1;
       leftNode->bottOffDiag_minRank = -1;
-      leftNode->topOffDiagK_Identity = false;
-      leftNode->bottOffDiagK_Identity = false;
+      //leftNode->topOffDiagK_Identity = false;
+      //leftNode->bottOffDiagK_Identity = false;
       leftNode->LR_Method = def_LRMethod;
       if (leftNodeSize <= sizeThreshold){
 	leftNode->isLeaf = true;
@@ -316,8 +316,8 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
       rightNode->max_j = max_j;
       rightNode->topOffDiag_minRank = -1;
       rightNode->bottOffDiag_minRank = -1;
-      rightNode->topOffDiagK_Identity = false;
-      rightNode->bottOffDiagK_Identity = false;
+      //rightNode->topOffDiagK_Identity = false;
+      //rightNode->bottOffDiagK_Identity = false;
       rightNode->LR_Method = def_LRMethod;
       if (rightNodeSize <= sizeThreshold){
 	rightNode->isLeaf = true;
