@@ -24,15 +24,11 @@ public:
     int topOffDiag_minRank;
     int bottOffDiag_minRank;
     bool isLeaf;
-    //bool topOffDiagK_Identity;
-    //bool bottOffDiagK_Identity;
     std::string LR_Method;
     Eigen::MatrixXd topOffDiagU;
     Eigen::MatrixXd topOffDiagV;
-    //Eigen::MatrixXd topOffDiagK;
     Eigen::MatrixXd bottOffDiagU;
     Eigen::MatrixXd bottOffDiagV;
-    //Eigen::MatrixXd bottOffDiagK;
     Eigen::MatrixXd leafMatrix;
     int topOffDiagRank;
     int bottOffDiagRank;
