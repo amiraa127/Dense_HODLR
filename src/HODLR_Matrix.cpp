@@ -342,16 +342,22 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
   }else if (HODLR_Root->LR_Method == "PS_Cheby"){
     
     assert(matrixDataAvail ==  true);
-    Eigen::MatrixXd tempU,tempV,tempK;
+    //Eigen::MatrixXd tempU,tempV,tempK;
     //PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
     //PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
-    
+    /*
     PS_LowRankApprox(matrixData,tempU,tempV,tempK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
     HODLR_Root->topOffDiagU  = tempU * tempK;
     HODLR_Root->topOffDiagV  = tempV;
     PS_LowRankApprox(matrixData,tempU,tempV,tempK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
     HODLR_Root->bottOffDiagU = tempU * tempK;
     HODLR_Root->bottOffDiagV = tempV;
+    */
+    
+    PS_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,"Chebyshev",HODLR_Root->topOffDiag_minRank);
+    PS_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,"Chebyshev",HODLR_Root->bottOffDiag_minRank);
+      
+
 
   }else if (HODLR_Root->LR_Method == "SVD"){ 
     
@@ -371,13 +377,17 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     assert(matrixDataAvail_Sp == true);
     //PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->topOffDiagK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
     //PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
-    Eigen::MatrixXd tempU,tempV,tempK;
-    PS_LowRankApprox_Sp(matrixData_Sp,tempU,tempV,tempK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
-    HODLR_Root->topOffDiagU  = tempU * tempK;
-    HODLR_Root->topOffDiagV  = tempV;
-    PS_LowRankApprox_Sp(matrixData_Sp,tempU,tempV,tempK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
-    HODLR_Root->bottOffDiagU = tempU * tempK;
-    HODLR_Root->bottOffDiagV = tempV;
+    //Eigen::MatrixXd tempU,tempV,tempK;
+    //PS_LowRankApprox_Sp(matrixData_Sp,tempU,tempV,tempK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    //HODLR_Root->topOffDiagU  = tempU * tempK;
+    //HODLR_Root->topOffDiagV  = tempV;
+    //PS_LowRankApprox_Sp(matrixData_Sp,tempU,tempV,tempK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+    //HODLR_Root->bottOffDiagU = tempU * tempK;
+    //HODLR_Root->bottOffDiagV = tempV;
+    
+    PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank);
+    PS_LowRankApprox_Sp(matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank);
+   
     if (graphDataAvail){ 
       getBoundaryRowColIdx(graphData,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
       getBoundaryRowColIdx(graphData,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
@@ -393,13 +403,16 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->bottOffDiagK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     //HODLR_Root->topOffDiagK_Identity  = true;
     //HODLR_Root->bottOffDiagK_Identity = true;
-    Eigen::MatrixXd tempU,tempV,tempK;
-    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,tempU,tempV,tempK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
-    HODLR_Root->topOffDiagU  = tempU * tempK;
-    HODLR_Root->topOffDiagV  = tempV;
-    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,tempU,tempV,tempK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
-    HODLR_Root->bottOffDiagU = tempU * tempK;
-    HODLR_Root->bottOffDiagV = tempV;
+    //Eigen::MatrixXd tempU,tempV,tempK;
+    //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,tempU,tempV,tempK,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
+    //HODLR_Root->topOffDiagU  = tempU * tempK;
+    //HODLR_Root->topOffDiagV  = tempV;
+    //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,tempU,tempV,tempK,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
+    //HODLR_Root->bottOffDiagU = tempU * tempK;
+    //HODLR_Root->bottOffDiagV = tempV;
+    
+    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
+    PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
   
   }else{
     std::cout<<"Error!. Invalid low-rank approximation scheme ( "<<HODLR_Root->LR_Method<<")."<<std::endl;

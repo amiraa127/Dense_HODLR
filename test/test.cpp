@@ -813,16 +813,19 @@ public:
     }
     */
     
-    Eigen::MatrixXd W,K,V;
+    Eigen::MatrixXd W,V;
     int rank;
     int split = schurComplement.rows()/2;
     
-    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,1e-5,rank,1500);
+    //PS_Boundary_LowRankApprox(schurComplement,graph,W,V,K,split+1,0,schurComplement.rows() - split - 1,split + 1,1e-5,rank,1500);
+    PS_Boundary_LowRankApprox(schurComplement,graph,W,V,split+1,0,schurComplement.rows() - split - 1,split + 1,1e-5,rank,1500);
     
     std::cout<<rank<<std::endl;
     Eigen::MatrixXd LR_Matrix = schurComplement.block(split+1,0,schurComplement.rows() - split - 1,split+1);
     
-    double absError = (LR_Matrix - W*K*V.transpose()).norm();
+    //double absError = (LR_Matrix - W*K*V.transpose()).norm();
+   double absError = (LR_Matrix - W * V.transpose()).norm();
+    
     double relError = absError/LR_Matrix.norm();
     std::cout<<relError<<" "<<absError<<std::endl;
     

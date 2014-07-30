@@ -442,23 +442,35 @@ void analyzeRank(const std::string inputMatrixFileName,const std::string inputGr
   int nextRank  = -1;
   int depth     = 0;
   Eigen::MatrixXd currBlock = inputMatrix.block(min_i,min_j,numRows,numCols);
-  Eigen::MatrixXd U,V,K;
+  Eigen::MatrixXd U,V;
   std::vector<double> numPoints,boundaryError,SVDError,singularValues;
   std::vector<double> boundaryErrorComp1,boundaryErrorComp3,boundaryErrorComp5;
   while (currRank != nextRank){
     nextRank = currRank;
-    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,depth);
+    //PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,depth);
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,min_i,min_j,numRows,numCols,1e-15,currRank,depth);
     numPoints.push_back(currRank);
-    double relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    //double relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    double relError = (U * V.transpose() - currBlock).norm()/currBlock.norm();
     boundaryError.push_back(relError);
-    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-1,currRankComp1,depth);
-    relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    //PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-1,currRankComp1,depth);
+    //relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,min_i,min_j,numRows,numCols,1e-1,currRankComp1,depth);
+    relError = (U * V.transpose() - currBlock).norm()/currBlock.norm();
+    
     boundaryErrorComp1.push_back(relError);
-    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-3,currRankComp3,depth);
-    relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    //PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-3,currRankComp3,depth);
+    //relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();  
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,min_i,min_j,numRows,numCols,1e-3,currRankComp3,depth);
+    relError = (U * V.transpose() - currBlock).norm()/currBlock.norm();
+    
+
     boundaryErrorComp3.push_back(relError);
-    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-5,currRankComp5,depth);
-    relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    //PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-5,currRankComp5,depth);
+    //relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
+    PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,min_i,min_j,numRows,numCols,1e-5,currRankComp5,depth);
+    relError = (U * V.transpose() - currBlock).norm()/currBlock.norm();
+  
     boundaryErrorComp5.push_back(relError);
     depth ++;
   }
@@ -467,6 +479,7 @@ void analyzeRank(const std::string inputMatrixFileName,const std::string inputGr
   saveVectorAsText(outputFileName + "boundaryErrorCompVsBoundaryDistance1",boundaryErrorComp1);
   saveVectorAsText(outputFileName + "boundaryErrorCompVsBoundaryDistance3",boundaryErrorComp3);
   saveVectorAsText(outputFileName + "boundaryErrorCompVsBoundaryDistance5",boundaryErrorComp5);
+
   // Use svd to calculate the optimal low-rank approximation error
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(currBlock,Eigen::ComputeThinU|Eigen::ComputeThinV);
   Eigen::VectorXd s = svd.singularValues();
@@ -477,7 +490,7 @@ void analyzeRank(const std::string inputMatrixFileName,const std::string inputGr
     int rank = numPoints[i];
     U = svd.matrixU().leftCols(rank);
     V = svd.matrixV().leftCols(rank);
-    K = Eigen::MatrixXd::Zero(rank,rank);
+    Eigen::MatrixXd K = Eigen::MatrixXd::Zero(rank,rank);
     for (int j = 0; j < rank; j++)
       K(j,j) = singularValues[j];
     double relError = (U * K * V.transpose() - currBlock).norm()/currBlock.norm();
@@ -487,5 +500,7 @@ void analyzeRank(const std::string inputMatrixFileName,const std::string inputGr
   saveVectorAsText(outputFileName + "SingularValueDecay",singularValues);
 
   // Calculate distance from boundary vs pivot size
-  PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,matrixSize,outputFileName + "distanceFromBoundaryVsPivotSize");
+    //PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,K,min_i,min_j,numRows,numCols,1e-15,currRank,matrixSize,outputFileName + "distanceFromBoundaryVsPivotSize");
+  PS_Boundary_LowRankApprox(inputMatrix,inputGraph,U,V,min_i,min_j,numRows,numCols,1e-15,currRank,matrixSize,outputFileName + "distanceFromBoundaryVsPivotSize");
+
 }
