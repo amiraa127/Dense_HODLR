@@ -50,7 +50,7 @@ sizeSet = sorted(sizeSet)
 tolSet  = sorted(tolSet)
 # create SpeedvsSizePlots
 for tol in tolSet:
-    fileName = 'balde_speedVsSize_'+str(tol)
+    fileName = 'blade_speedVsSize_'+str(tol)
     filePath = os.path.join(root,fileName)
     f = open(filePath,'w')
     for size in sizeSet:

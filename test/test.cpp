@@ -183,7 +183,7 @@ public:
     // Create custom indexing tree
     user_IndexTree usrTree;
     usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 1498;
+    usrTree.rootNode->splitIndex = 1497;
     usrTree.rootNode->topOffDiag_minRank = -1;                                                               
     usrTree.rootNode->bottOffDiag_minRank = -1;
     usrTree.rootNode->LR_Method = "PS_Boundary";
@@ -194,38 +194,20 @@ public:
     usrTree.rootNode->left = leftNode;
     usrTree.rootNode->right = rightNode;
     
-    rightNode->splitIndex = 6497;
+    rightNode->splitIndex = 6496;
     rightNode->topOffDiag_minRank = -1;                                                               
     rightNode->bottOffDiag_minRank = -1;
     rightNode->LR_Method = "PS_Boundary";
     
 
-    leftNode->splitIndex = 749;
+    leftNode->splitIndex = 748;
     leftNode->topOffDiag_minRank = -1;                                                               
     leftNode->bottOffDiag_minRank = -1;
     leftNode->LR_Method = "PS_Boundary";
      
   
     usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 3998;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Boundary";
-    
-    
-    rightRightNode->splitIndex = 7868;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Boundary";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
+    usrTree.setChildren_NULL(rightNode);
 
     // Read input file 
     std::cout<<"         Reading input file....."<<std::endl;
@@ -328,7 +310,7 @@ public:
     // Create custom indexing tree
     user_IndexTree usrTree;
     usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 2098;
+    usrTree.rootNode->splitIndex = 2097;
     usrTree.rootNode->topOffDiag_minRank = -1;                                                               
     usrTree.rootNode->bottOffDiag_minRank = -1;
     usrTree.rootNode->LR_Method = "PS_Boundary";
@@ -339,38 +321,20 @@ public:
     usrTree.rootNode->left = leftNode;
     usrTree.rootNode->right = rightNode;
     
-    rightNode->splitIndex = 9097;
+    rightNode->splitIndex = 9096;
     rightNode->topOffDiag_minRank = -1;                                                               
     rightNode->bottOffDiag_minRank = -1;
     rightNode->LR_Method = "PS_Boundary";
     
 
-    leftNode->splitIndex = 1048;
+    leftNode->splitIndex = 1047;
     leftNode->topOffDiag_minRank = -1;                                                               
     leftNode->bottOffDiag_minRank = -1;
     leftNode->LR_Method = "PS_Boundary";
      
   
     usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 5597;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Boundary";
-    
-    
-    rightRightNode->splitIndex = 11016;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Boundary";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
+    usrTree.setChildren_NULL(rightNode);
 
     // Read input file 
     std::cout<<"         Reading input file....."<<std::endl;
@@ -474,7 +438,7 @@ public:
     // Create custom indexing tree
     user_IndexTree usrTree;
     usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 8998;
+    usrTree.rootNode->splitIndex = 8997;
     usrTree.rootNode->topOffDiag_minRank = -1;                                                               
     usrTree.rootNode->bottOffDiag_minRank = -1;
     usrTree.rootNode->LR_Method = "PS_Boundary";
@@ -485,38 +449,19 @@ public:
     usrTree.rootNode->left = leftNode;
     usrTree.rootNode->right = rightNode;
     
-    rightNode->splitIndex = 13932;
+    rightNode->splitIndex = 13931;
     rightNode->topOffDiag_minRank = -1;                                                               
     rightNode->bottOffDiag_minRank = -1;
     rightNode->LR_Method = "PS_Boundary";
     
 
-    leftNode->splitIndex = 4499;
+    leftNode->splitIndex = 4498;
     leftNode->topOffDiag_minRank = -1;                                                               
     leftNode->bottOffDiag_minRank = -1;
     leftNode->LR_Method = "PS_Boundary";
      
-  
     usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 11465;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Boundary";
-    
-    
-    rightRightNode->splitIndex = 15282;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Boundary";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
+    usrTree.setChildren_NULL(rightNode);
 
     // Read input file 
     std::cout<<"         Reading input file....."<<std::endl;

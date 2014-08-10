@@ -713,12 +713,8 @@ void createIdxFromBoundaryMap( std::map<int,std::vector<int> > & rowPos, std::ma
   for (int i = 1; i <= (std::min(depth,(int)rowPos.size() - 1)); i++)
     rowIdx.insert(rowIdx.end(),rowPos[i].begin(),rowPos[i].end());
 
-
-    
   for (int i = 1; i <= (std::min(depth,(int)colPos.size() - 1)); i++)
     colIdx.insert(colIdx.end(),colPos[i].begin(),colPos[i].end());
-
-
 
 
 }
