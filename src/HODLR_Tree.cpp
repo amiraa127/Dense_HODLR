@@ -159,12 +159,13 @@ void HODLR_Tree::printTree(const node* root) const{
 void HODLR_Tree::freeTree(node* root){
   if (root->isLeaf == true){
     delete root;
+    root = NULL;
     return;
   }
   freeTree(root->left);
   freeTree(root->right);
   delete root;
-  
+  root = NULL;
 }
 
 
@@ -339,10 +340,14 @@ void HODLR_Tree::correctIndices(){
   int offset_i,offset_j;
   offset_i = rootNode->min_i;
   offset_j = rootNode->min_j;
+  rootNode->currLevel = 0;
+  numLevels = 1;
   correctIndices(rootNode,offset_i,offset_j);
 }
 
 void HODLR_Tree::correctIndices(node* root,int offset_i,int offset_j){
+  if (root->currLevel > (numLevels - 1))
+    numLevels = root->currLevel + 1; 
   root->min_i -=  offset_i;
   root->min_j -=  offset_j;
   root->max_i -=  offset_i;
@@ -351,6 +356,8 @@ void HODLR_Tree::correctIndices(node* root,int offset_i,int offset_j){
     return;
   root->splitIndex_i -=  offset_i;
   root->splitIndex_j -=  offset_j;
+  root->left->currLevel = root->currLevel + 1;
+  root->right->currLevel = root->currLevel + 1;
   correctIndices(root->left,offset_i,offset_j);
   correctIndices(root->right,offset_i,offset_j);
 }

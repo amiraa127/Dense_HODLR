@@ -30,18 +30,18 @@ public:
   HODLR_Matrix();
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
-  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string LR_Method = "PS_Sparse");
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph);
   
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
-  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method = "PS_Sparse");
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
   
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
-  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
-  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree,std::string LR_Method = "PS_Sparse");
+  HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree,std::string LR_Method = "PS_Sparse");
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   
   
@@ -63,10 +63,15 @@ public:
   void set_minPivot(double minPivot);
   void set_def_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
-  void set_BoundaryDepth(int inputBoundaryDepth);
+  void set_BoundaryDepth(int inputBoundaryDepth);  
+  void set_TreeRootNode(HODLR_Tree::node* root);
+  void set_MatrixData(Eigen::MatrixXd & matrixData);
+  void set_MatrixData_Sp(Eigen::SparseMatrix<double> & matrixData_Sp);
+  void set_SquareFlag(bool isSquared_input);
+  void set_LRStorationFlag(bool LRStoredInTree_input);
+  void set_recLUFactorizedFlag(bool factorized);
 
   void saveExtendedSp(std::string savePath);
- 
   /************************************ Accessing Attributes ************************************/
   double get_recLU_FactorizationTime() const;
   double get_recLU_SolveTime() const;
@@ -83,6 +88,7 @@ public:
   int cols() const;
   double norm();
   HODLR_Tree::node* get_TreeRootNode();
+
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);
   Eigen::MatrixXd row(int row);
@@ -94,6 +100,8 @@ public:
 
   void keepTopDiag();
   void keepBottDiag();
+  void splitAtTop(HODLR_Matrix& topHODLR, HODLR_Matrix& bottHODLR);
+
 
   Eigen::MatrixXd& returnTopOffDiagU();
   Eigen::MatrixXd& returnTopOffDiagV();
@@ -109,7 +117,11 @@ public:
   void saveSolverInfo(const std::string outputFileName);
   
   void freeMatrixData();
+  void destroyAllData();
   void recalculateSize();
+  void correctIndices();
+  void initInfoVectors();
+
 private:
 
   int sizeThreshold;
@@ -137,7 +149,7 @@ private:
   std::vector<double> levelRankAverageVecCnt;
   
   bool LRStoredInTree;
-  bool createdRecLUfactorTree;
+  bool recLU_Factorized;
   bool assembled_ExtendedSp;
   bool saveExtendedSp_Matrix;
   bool freeMatrixMemory;

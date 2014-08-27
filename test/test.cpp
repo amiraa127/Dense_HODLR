@@ -13,7 +13,7 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  
+  /*
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
@@ -28,7 +28,8 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(assignment_Test_Simple);
   CPPUNIT_TEST(assignment_Test_ExtendedSp);
   CPPUNIT_TEST(blockExtraction_Test);
-  
+  */
+  CPPUNIT_TEST(splitAtTop_Test);
 
   CPPUNIT_TEST(boundaryFinder_Test);
   CPPUNIT_TEST(boundaryFinder_lowRank_Test);
@@ -666,6 +667,19 @@ public:
     CPPUNIT_ASSERT((extract_Row - exact_Matrix.row(50)).norm() < 1e-16);
     CPPUNIT_ASSERT((extract_Col - exact_Matrix.col(6532)).norm() < 1e-16);
   }
+  
+  void splitAtTop_Test(){
+    int matrixSize = 10000;
+    HODLR_Matrix sampleMatrix;
+    Eigen::MatrixXd parentMatrix = sampleMatrix.createExactHODLR(10,matrixSize,30);
+    HODLR_Matrix topDiag,bottDiag;
+    sampleMatrix.splitAtTop(topDiag,bottDiag);
+    int topDiagSize = topDiag.get_MatrixSize();
+    std::cout<<(parentMatrix.topLeftCorner(topDiagSize,topDiagSize) - topDiag.block(0,0,topDiagSize,topDiagSize)).norm()<<std::endl;
+
+
+  }
+
 
   void boundaryFinder_Test(){
     Eigen::MatrixXd inputMatrix = Eigen::MatrixXd::Zero(12,12);
