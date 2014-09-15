@@ -7,6 +7,7 @@
 #include "recLU_FactorTree.hpp"
 #include "lowRank.hpp"
 #include "matrixIO.hpp"
+#include "kernel.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <string>
@@ -35,6 +36,7 @@ public:
   
   
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
+  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold);
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method = "PS_Sparse");
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
   
@@ -154,9 +156,11 @@ private:
   bool saveExtendedSp_Matrix;
   bool freeMatrixMemory;
   bool freeMatrixMemory_Sp;
+  bool freeGraphMemmory;
   bool matrixDataAvail;
   bool matrixDataAvail_Sp;
   bool graphDataAvail;
+  bool kernelDataAvail;
   bool isSquareMatrix;
 
   double LR_Tolerance;
@@ -169,6 +173,7 @@ private:
   Eigen::SparseMatrix<double> matrixData_Sp;
   Eigen::SparseMatrix<double> graphData;
   Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+  kernelMatrix kernelMatrixData;
 
   std::string extendedSp_SavePath;
 

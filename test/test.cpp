@@ -2,12 +2,19 @@
 #include "user_IndexTree.hpp"
 #include "helperFunctions.hpp"
 #include "matrixIO.hpp"
+#include "kernel.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/TestCase.h>
 #include <cppunit/TestCaller.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 /*This file contains various tests for the HODLR_Solver package*/
+double quadraticKernel(int i, int j, void* pointsCoordPtr){
+  if (i == j)
+    return 0;
+  double r = (*(Eigen::VectorXd*)pointsCoordPtr)(i) - (*(Eigen::VectorXd*)pointsCoordPtr)(j);
+  return r * r + 1;
+}
 
 class HODLR_Solver_Test: public CppUnit::TestCase
 {
@@ -28,13 +35,14 @@ class HODLR_Solver_Test: public CppUnit::TestCase
   CPPUNIT_TEST(assignment_Test_Simple);
   CPPUNIT_TEST(assignment_Test_ExtendedSp);
   CPPUNIT_TEST(blockExtraction_Test);
-  */
+  
   CPPUNIT_TEST(splitAtTop_Test);
 
   CPPUNIT_TEST(boundaryFinder_Test);
   CPPUNIT_TEST(boundaryFinder_lowRank_Test);
-
-
+  */
+  CPPUNIT_TEST(kernelSolver_Test);
+ 
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -676,8 +684,6 @@ public:
     sampleMatrix.splitAtTop(topDiag,bottDiag);
     int topDiagSize = topDiag.get_MatrixSize();
     std::cout<<(parentMatrix.topLeftCorner(topDiagSize,topDiagSize) - topDiag.block(0,0,topDiagSize,topDiagSize)).norm()<<std::endl;
-
-
   }
 
 
@@ -816,7 +822,19 @@ public:
     std::cout<<schurComplement.rows()<<std::endl;
     
   }
-    
+
+  void kernelSolver_Test(){
+    int numPoints = 10000;
+    Eigen::VectorXd X = Eigen::VectorXd::LinSpaced(Eigen::Sequential,numPoints,-2,2);
+    HODLR_Matrix kernelHODLR(numPoints,numPoints,quadraticKernel,&X,30);
+    kernelMatrix exactMatrixKernel(numPoints,numPoints,quadraticKernel,&X);
+    Eigen::MatrixXd exactMatrix = exactMatrixKernel.block(0,0,numPoints,numPoints);
+    Eigen::VectorXd inputF = exactMatrix * X;
+    Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);
+    Eigen::VectorXd difference = solverSoln - X;
+    double relError = difference.norm()/X.norm();
+    std::cout<<relError<<std::endl;
+  }
 
 };   
 

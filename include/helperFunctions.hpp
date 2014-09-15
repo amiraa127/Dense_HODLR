@@ -45,6 +45,7 @@ double logRKernel(const double r);
 
 /**************************************************************************************/
 
+
 std::vector<int> createUniqueRndIdx(const int min, const int max,const int n);
 
 std::vector<int> createSequentialVec(const int min,const int size);
