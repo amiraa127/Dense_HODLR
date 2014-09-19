@@ -1,16 +1,17 @@
 #ifndef HELPERFUNCTIONS_HODLR_SOLVER_HPP
 #define HELPERFUNCTIONS_HODLR_SOLVER_HPP
 
+#include "HODLR_Matrix.hpp"
 #include <fstream>
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <vector>
 #include <cmath>
-#include "HODLR_Matrix.hpp"
 #include <ctime>
 #include <random>
 #include <chrono>
+#include <algorithm>
 /******************Pre-programmed radial basis function kernels:**********************/
 
 //1+r^2

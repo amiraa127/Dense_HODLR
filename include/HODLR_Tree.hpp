@@ -50,7 +50,7 @@ public:
   void printTree() const; 
 
   void set_sizeThreshold(const int input_sizeThreshold);
-  void set_def_LRMethod(const std::string input_LRMethod);
+  void set_LRMethod(const std::string input_LRMethod);
 
   int get_sizeThreshold()const;
   int get_numLevels()const;
@@ -77,7 +77,7 @@ private:
   void userTree_To_HODLRTree(const int currLevel,const int min_i,const int max_i,const int min_j,const int max_j,const user_IndexTree::node* user_IndexRoot, node* HODLR_IndexRoot);
   
   void nodeLevelVec_Assign(unsigned int level,node* root);
-
+  void set_LRMethod(node* root,const std::string input_LRMethod);
 };
 
 

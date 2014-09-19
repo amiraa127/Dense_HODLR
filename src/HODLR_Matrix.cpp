@@ -18,6 +18,7 @@ void HODLR_Matrix::setDefaultValues(){
   matrixSize                   = 0; 
   matrixNumRows                = 0;
   matrixNumCols                = 0; 
+  constLeafSize                = 0;
   boundaryDepth                = 1;
 
   LRStoredInTree         = false;
@@ -32,7 +33,11 @@ void HODLR_Matrix::setDefaultValues(){
   graphDataAvail         = false;
   kernelDataAvail        = false;
   isSquareMatrix         = false;
-  
+
+  isLeafConst            = false;
+  constLeafSet           = false;
+  constLeafFactorized    = false;
+
   printLevelRankInfo     = false;
   printLevelAccuracy     = false;
   printLevelInfo         = false;
@@ -63,7 +68,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string 
   sizeThreshold = 30;
   matrixDataAvail_Sp = true;
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  indexTree.set_def_LRMethod(LR_Method);
+  indexTree.set_LRMethod(LR_Method);
   matrixSize    = inputMatrix.rows();
   matrixNumRows = inputMatrix.rows();
   matrixNumCols = inputMatrix.cols();
@@ -83,7 +88,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
   matrixSize     = inputMatrix.rows();
   matrixNumRows  = inputMatrix.rows();
   matrixNumCols  = inputMatrix.cols();
-  indexTree.set_def_LRMethod("PS_Boundary");
+  indexTree.set_LRMethod("PS_Boundary");
  
 }
 
@@ -127,7 +132,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSiz
   matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_def_LRMethod(LR_Method);
+  indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail_Sp = true;
@@ -147,7 +152,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
   matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_def_LRMethod("PS_Boundary");
+  indexTree.set_LRMethod("PS_Boundary");
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail     = true;
@@ -156,6 +161,26 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
   //freeGraphMemmory      = true;
 }
 
+HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
+  setDefaultValues();
+  isSquareMatrix = (numRows == numCols);
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
+  assert(numCols == inputGraph.cols());
+  assert(numRows == inputGraph.rows());
+  graphData           = inputGraph;
+  kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
+  matrixSize          = numRows;
+  matrixNumRows       = numRows;
+  matrixNumCols       = numCols;
+  sizeThreshold       = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.set_LRMethod("PS_Boundary");
+  indexTree.createDefaultTree(matrixSize);
+  initializeInfoVecotrs(indexTree.get_numLevels());
+  kernelDataAvail     = true;
+  graphDataAvail      = true;
+}
+ 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
   setDefaultValues();
   isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
@@ -181,10 +206,25 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSi
   matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_def_LRMethod(LR_Method);
+  indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail_Sp = true;
+}
+
+HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold,user_IndexTree &input_IndexTree){
+  setDefaultValues();
+  isSquareMatrix = (numRows == numCols);
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
+  kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
+  matrixSize          = numRows;
+  matrixNumRows       = numRows;
+  matrixNumCols       = numCols;
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
+  initializeInfoVecotrs(indexTree.get_numLevels());
+  kernelDataAvail = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::SparseMatrix<double> & inputGraph,int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
@@ -198,7 +238,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::Spar
   matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_def_LRMethod(LR_Method);
+  indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail_Sp = true;
@@ -219,7 +259,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
   matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_def_LRMethod("PS_Boundary");
+  indexTree.set_LRMethod("PS_Boundary");
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail = true;
@@ -328,12 +368,40 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     double startTime = clock();
     int numRows = HODLR_Root->max_i - HODLR_Root->min_i + 1;
     int numCols = HODLR_Root->max_j - HODLR_Root->min_j + 1;
-    if (matrixDataAvail_Sp == true)
-      HODLR_Root->leafMatrix = Eigen::MatrixXd(matrixData_Sp.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols));
-    else if (matrixDataAvail == true)
-      HODLR_Root->leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
-    else if (kernelDataAvail == true)
-      HODLR_Root->leafMatrix = kernelMatrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+    if (matrixDataAvail_Sp == true){
+      if (isLeafConst == true){
+	if (constLeafSet == false){
+	  constLeaf = Eigen::MatrixXd(matrixData_Sp.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols));
+	  constLeafSet = true;
+	  constLeafSize = numRows;
+	}
+	assert(numRows == constLeafSize);
+      }else
+	HODLR_Root->leafMatrix = Eigen::MatrixXd(matrixData_Sp.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols));
+    }else if (matrixDataAvail == true){
+      if (isLeafConst == true){
+	if (constLeafSet == false){
+	  constLeaf = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+	  constLeafSet = true;
+	  constLeafSize = numRows;
+	}
+	assert(numRows == constLeafSize);
+      }else
+	HODLR_Root->leafMatrix = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+    }else if (kernelDataAvail == true){
+      if (isLeafConst == true){
+	if (constLeafSet == false){
+	  constLeaf = kernelMatrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+	  constLeafSet = true;
+	  constLeafSize = numRows;
+	}
+	assert(numRows == constLeafSize);
+      }else
+	HODLR_Root->leafMatrix = kernelMatrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,numRows,numCols);
+    }else{
+      std::cout<<"Error! No matrix data available."<<std::endl;
+      exit(EXIT_FAILURE);
+    }
     double endTime = clock();
     LR_ComputationLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
     return;
@@ -363,8 +431,8 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
       fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
       fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
     }else if (kernelDataAvail == true){
-      fullPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
-      fullPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
+      fullPivACA_LowRankApprox(kernelMatrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,minPivot);
+      fullPivACA_LowRankApprox(kernelMatrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,minPivot);
     }else{
       std::cout<<"Error! No matrix data available."<<std::endl;
       exit(EXIT_FAILURE);
@@ -430,11 +498,11 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     assert(graphDataAvail == true);  
     if (matrixDataAvail == true){
-      PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
-      PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
+      PS_Boundary_LowRankApprox(matrixData,graphData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
+      PS_Boundary_LowRankApprox(matrixData,graphData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     } else if (kernelDataAvail == true){
-      PS_Boundary_LowRankApprox(kernelMatrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
-      PS_Boundary_LowRankApprox(kernelMatrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
+      PS_Boundary_LowRankApprox(kernelMatrixData,graphData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
+      PS_Boundary_LowRankApprox(kernelMatrixData,graphData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     }else{
       std::cout<<"Error! No matrix data available."<<std::endl;
       exit(EXIT_FAILURE);
@@ -528,8 +596,17 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
     factorRoot->isLeaf = true;
     factorRoot->left   = NULL;
     factorRoot->right  = NULL;  
-    factorRoot->LU     = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->leafMatrix);
-    Eigen::MatrixXd result = factorRoot->LU.solve(input_RHS); 
+    Eigen::MatrixXd result;
+    if (isLeafConst == true){
+      if (constLeafFactorized == false){
+	constLeafLU = Eigen::PartialPivLU<Eigen::MatrixXd>(constLeaf);
+	constLeafFactorized = true;
+      }
+      result = constLeafLU.solve(input_RHS);
+    }else{
+      factorRoot->LU = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->leafMatrix);
+      result = factorRoot->LU.solve(input_RHS); 
+    }
     double endTime = clock();
     recLU_FactorLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
     return result;
@@ -551,48 +628,67 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   factorRoot->left = leftFactorRoot;
   Eigen::MatrixXd topDiagSoln = recLU_Factorize(topDiagRHS,HODLR_Root->left,leftFactorRoot);
   Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
-  Eigen::MatrixXd topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
-  factorRoot->topDiagSoln_LR = topDiagSoln_LR;
+  //Eigen::MatrixXd topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
+  //factorRoot->topDiagSoln_LR = topDiagSoln_LR;
+   //Eigen::MatrixXd topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
+  factorRoot->topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
+  
   
   // Factorize and Solve for bottom diagonal matrix
   int bottOffDiag_LR_Cols = HODLR_Root->bottOffDiagU.cols();
   int bottDiagRHS_Cols = parentRHS_Cols + bottOffDiag_LR_Cols;
   Eigen::MatrixXd bottDiagRHS = Eigen::MatrixXd::Zero(bottDiagSize,bottDiagRHS_Cols);
   bottDiagRHS.leftCols(parentRHS_Cols) = input_RHS.bottomRows(bottDiagSize);
-  bottDiagRHS.rightCols(bottOffDiag_LR_Cols)   = HODLR_Root->bottOffDiagU;
+  bottDiagRHS.rightCols(bottOffDiag_LR_Cols) = HODLR_Root->bottOffDiagU;
  
   recLU_FactorTree::node* rightFactorRoot = new recLU_FactorTree::node;
   rightFactorRoot->isLeaf = false;
   factorRoot->right = rightFactorRoot;
   Eigen::MatrixXd bottDiagSoln = recLU_Factorize(bottDiagRHS,HODLR_Root->right,rightFactorRoot);
   Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
-  Eigen::MatrixXd bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
-  factorRoot->bottDiagSoln_LR = bottDiagSoln_LR;
+  //Eigen::MatrixXd bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
+  //factorRoot->bottDiagSoln_LR = bottDiagSoln_LR;
+  factorRoot->bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
+ 
 
   // Update the remaining of the matrix(generate Schur complement (S matrix));
   double startTime = clock();
   int Sdim = HODLR_Root->topOffDiagRank + HODLR_Root->bottOffDiagRank;  
-  Eigen::MatrixXd S = Eigen::MatrixXd::Zero(Sdim,Sdim);
+  Eigen::MatrixXd S  = Eigen::MatrixXd::Zero(Sdim,Sdim);
+
   Eigen::MatrixXd IC = Eigen::MatrixXd::Identity(HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiagRank);
   Eigen::MatrixXd IB = Eigen::MatrixXd::Identity(HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiagRank);
   
   S.topLeftCorner(IC.rows(),IC.cols()) = IC;
   S.bottomRightCorner(IB.rows(),IB.cols()) = IB;
   
-  S.topRightCorner(IC.rows(),IB.cols())   = (HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_LR);
-  S.bottomLeftCorner(IB.rows(),IC.cols()) = (HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_LR);
-  
+  //S.topRightCorner(IC.rows(),IB.cols())   = (HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_LR);
+  //S.bottomLeftCorner(IB.rows(),IC.cols()) = (HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_LR);
+ 
+  //S.topRightCorner(IC.rows(),IB.cols())   = (HODLR_Root->bottOffDiagV.transpose() * factorRoot->topDiagSoln_LR);
+  //S.bottomLeftCorner(IB.rows(),IC.cols()) = (HODLR_Root->topOffDiagV.transpose()  * factorRoot->bottDiagSoln_LR);
+
+  S.topRightCorner(HODLR_Root->bottOffDiagRank,HODLR_Root->topOffDiagRank)   = (HODLR_Root->bottOffDiagV.transpose() * factorRoot->topDiagSoln_LR);
+  S.bottomLeftCorner(HODLR_Root->topOffDiagRank,HODLR_Root->bottOffDiagRank) = (HODLR_Root->topOffDiagV.transpose()  * factorRoot->bottDiagSoln_LR);
+
   factorRoot->LU = Eigen::PartialPivLU<Eigen::MatrixXd>(S);
  
   Eigen::MatrixXd schurRHS = Eigen::MatrixXd::Zero(Sdim,parentRHS_Cols);
-  schurRHS.topRows(IC.rows())    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
-  schurRHS.bottomRows(IB.rows()) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
+  //schurRHS.topRows(IC.rows())    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
+  //schurRHS.bottomRows(IB.rows()) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
+
+  schurRHS.topRows(HODLR_Root->bottOffDiagRank)    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
+  schurRHS.bottomRows(HODLR_Root->topOffDiagRank)  = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
 
   Eigen::MatrixXd y = factorRoot->LU.solve(schurRHS);  
   Eigen::MatrixXd result(topDiagSize + bottDiagSize,input_RHS.cols());
 
-  result.topRows(topDiagSize)     = topDiagSoln_pRHS  - topDiagSoln_LR  * y.bottomRows(IB.rows());
-  result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - bottDiagSoln_LR * y.topRows(IC.rows());
+  //result.topRows(topDiagSize)     = topDiagSoln_pRHS  - topDiagSoln_LR  * y.bottomRows(IB.rows());
+  //result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - bottDiagSoln_LR * y.topRows(IC.rows());
+  
+  result.topRows(topDiagSize)     = topDiagSoln_pRHS  - factorRoot->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
+  result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - factorRoot->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
+
 
   double endTime = clock();
   recLU_FactorLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
@@ -604,7 +700,11 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
   // Base case
   if (HODLR_Root->isLeaf == true){
       double startTime = clock();
-      Eigen::MatrixXd result = factorRoot->LU.solve(input_RHS);
+      Eigen::MatrixXd result;
+      if (isLeafConst == true)
+	result = constLeafLU.solve(input_RHS);
+      else
+	result = factorRoot->LU.solve(input_RHS);
       double endTime = clock();
       recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
       return result;
@@ -1068,7 +1168,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   set_LRTolerance(init_LRTolerance);
 
   std::string prev_LRMethod = indexTree.get_def_LRMethod(); 
-  set_def_LRMethod(input_LRMethod);
+  set_LRMethod(input_LRMethod);
 
   bool save_printResultInfo = printResultInfo;
   printResultInfo = false;
@@ -1134,7 +1234,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   
   // restore previous state;
   //set_LRTolerance(prev_LRTolerance);
-  //set_def_LRMethod(prev_LRMethod);
+  //set_LRMethod(prev_LRMethod);
   return solution;
 }
   
@@ -1192,14 +1292,13 @@ void HODLR_Matrix::set_minPivot(double input_minPivot){
   }
 }
 
-void HODLR_Matrix::set_def_LRMethod(std::string input_LRMethod){
+void HODLR_Matrix::set_LRMethod(std::string input_LRMethod){
   if ((matrixDataAvail == false) && (matrixDataAvail_Sp == false) && (kernelDataAvail == false)){
     std::cout<<"Error! Matrix data has been deleted from memory!"<<std::endl;
     exit(EXIT_FAILURE);
   }
-  
   if (indexTree.get_def_LRMethod() != input_LRMethod){
-    indexTree.set_def_LRMethod(input_LRMethod);
+    indexTree.set_LRMethod(input_LRMethod);
     reset_attributes();
   }
 }
@@ -1232,6 +1331,10 @@ void HODLR_Matrix::set_SquareFlag(bool isSquared_input){
 
 void HODLR_Matrix::set_LRStorationFlag(bool LRStoredInTree_input){
   LRStoredInTree = LRStoredInTree_input;
+}
+
+void HODLR_Matrix::set_LeafConst(){
+  isLeafConst = true;
 }
 
 void HODLR_Matrix::saveExtendedSp(std::string savePath){

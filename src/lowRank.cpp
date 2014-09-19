@@ -22,8 +22,12 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
   int numColsW = 2;
   int numColsV = 2;
 
-  Eigen::MatrixXd tempW(numRows,numColsW);
-  Eigen::MatrixXd tempV(numCols,numColsV);
+  //Eigen::MatrixXd tempW(numRows,numColsW);
+  //Eigen::MatrixXd tempV(numCols,numColsV);
+ 
+  W = Eigen::MatrixXd(numRows,numColsW);
+  V = Eigen::MatrixXd(numCols,numColsV);
+  
   Eigen::VectorXd colMaxValues(numCols);
   Eigen::VectorXi colMaxIdx(numCols);
   Eigen::MatrixXd residualMatrix = matrixData.block(min_i,min_j,numRows,numCols);
@@ -36,8 +40,12 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
     if ( k == numColsW - 1){
       numColsW = 2 * numColsW;
       numColsV = 2 * numColsV;
-      tempW.conservativeResize(Eigen::NoChange,numColsW);
-      tempV.conservativeResize(Eigen::NoChange,numColsV);
+      //tempW.conservativeResize(Eigen::NoChange,numColsW);
+      //tempV.conservativeResize(Eigen::NoChange,numColsV);
+      
+      W.conservativeResize(Eigen::NoChange,numColsW);
+      V.conservativeResize(Eigen::NoChange,numColsV);
+    
     }
 
     // Find largest pivot in the residual matrix
@@ -53,12 +61,18 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
     }
     double currPivot = 1/maxValue;
     // Write to W & V
-    tempW.col(k) = currPivot * residualMatrix.col(currColIdx);
-    tempV.col(k) = residualMatrix.row(currRowIdx);
+    //tempW.col(k) = currPivot * residualMatrix.col(currColIdx);
+    //tempV.col(k) = residualMatrix.row(currRowIdx);
 
+    W.col(k) = currPivot * residualMatrix.col(currColIdx);
+    V.col(k) = residualMatrix.row(currRowIdx);
+
+    
     // Update residual matrix
-    residualMatrix -= tempW.col(k) * tempV.col(k).transpose();
+    //residualMatrix -= tempW.col(k) * tempV.col(k).transpose();
+    residualMatrix -= W.col(k) * V.col(k).transpose();
  
+    
     // Calculate epsilon
     epsilon = residualMatrix.norm()/origMatrixNorm;
     
@@ -90,10 +104,14 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
     } 
     return epsilon;
   }
-  
-  W = tempW.leftCols(calculatedRank);
-  V = tempV.leftCols(calculatedRank);
+    
+  //W = tempW.leftCols(calculatedRank);
+  //V = tempV.leftCols(calculatedRank);
 
+  W.conservativeResize(Eigen::NoChange,calculatedRank);
+  V.conservativeResize(Eigen::NoChange,calculatedRank);
+
+  
   return epsilon;
 }
 

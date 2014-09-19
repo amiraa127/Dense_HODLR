@@ -372,9 +372,19 @@ void HODLR_Tree::set_sizeThreshold(const int input_sizeThreshold){
   }
 }
 
-void HODLR_Tree::set_def_LRMethod(const std::string input_LRMethod){
+void HODLR_Tree::set_LRMethod(const std::string input_LRMethod){
   def_LRMethod = input_LRMethod;
+  if (rootNode != NULL)
+    set_LRMethod(rootNode,input_LRMethod);
   return;
+}
+
+void HODLR_Tree::set_LRMethod(node* root,const std::string input_LRMethod){
+  root->LR_Method = input_LRMethod;
+  if (root->isLeaf == true)
+    return;
+  set_LRMethod(root->left,input_LRMethod);
+  set_LRMethod(root->right,input_LRMethod);
 }
 
 int HODLR_Tree::get_sizeThreshold()const{
