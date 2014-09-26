@@ -368,6 +368,65 @@ get_KDTree_Sorted(
     }
 }
 
+void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStartIdx,user_IndexTree::node* usrTreeNode,int pointsPerSphere){
+ 
+  ///	Get the total number of points.  
+  usrTreeNode->topOffDiag_minRank = -1;
+  usrTreeNode->bottOffDiag_minRank = -1;
+  usrTreeNode->LR_Method = "partialPiv_ACA";
+  
+  unsigned N = locations.rows();
+  if (N == 1) {
+    usrTreeNode->left = NULL;
+    usrTreeNode->right = NULL;
+    usrTreeNode->splitIndex = -1;
+    return;
+  }
+  
+  ///	Number of points in the left cluster.
+  unsigned Nleft  = N/2;
+
+  ///	Number of points in the right cluster.
+  unsigned Nright = N - Nleft;
+
+  ///   Detremine splitIndex
+  int splitIdx = NDIM * pointsPerSphere *(Nleft + globalStartIdx) - 1;
+  usrTreeNode->splitIndex = splitIdx;
+  
+  ///	Dimension of the space.
+  unsigned nDimensions = locations.cols();
+  
+  ///	Merge sort on the input locations based on the coordinate index%2.
+  mergeSort(locations, index%nDimensions);
+  
+  user_IndexTree::node* left  = new user_IndexTree::node;
+  user_IndexTree::node* right = new user_IndexTree::node;
+  usrTreeNode->left  = left;
+  usrTreeNode->right = right;
+  
+  ///	Obtain the left and right locations.
+  Eigen::MatrixXd leftLocations  = locations.block(0,0,Nleft,nDimensions);
+  Eigen::MatrixXd rightLocations = locations.block(Nleft,0,Nright,nDimensions);
+    
+  ///	Sort the left and right locations based on a KDTree.
+  get_KDTree_Sorted(leftLocations, index+1,globalStartIdx,usrTreeNode->left,pointsPerSphere);
+  get_KDTree_Sorted(rightLocations, index+1,globalStartIdx + Nleft,usrTreeNode->right,pointsPerSphere);
+  
+  ///	Output the locations.
+  locations.block(0,0,Nleft,nDimensions) = leftLocations;
+  locations.block(Nleft,0,Nright,nDimensions)  = rightLocations;
+
+}
+
+user_IndexTree get_KDTree_Sorted(Eigen::MatrixXd& locations,int pointsPerSphere){
+  user_IndexTree result;
+  result.rootNode = new user_IndexTree::node;
+  int numPoints = locations.rows();
+  get_KDTree_Sorted(locations,0,0,result.rootNode,pointsPerSphere);
+  return result;
+}
+
+
 class hodlr_mobility : public HODLR_Matrix {
 public:
     hodlr_mobility( 
@@ -378,7 +437,7 @@ public:
 	X = inX;
     }
   
-    double get_Matrix_Entry(const unsigned i, const unsigned j) 
+  double get_Matrix_Entry(const unsigned i, const unsigned j) 
     {
 	//check if RPY or FIT Mobility matrix to generate
 	if (isRPY) return get_RPY_Matrix_Entry(X, d_DX, i, j);

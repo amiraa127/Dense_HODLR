@@ -42,32 +42,29 @@ int main(int arc, char**argv)
     std::cout<<"Wrong input file name"<<std::endl;
     exit(1);
   }
-  int N; //number of blobs
+  int pointsPerSphere; //number of blobs
   std::string line;
   double DX;//grid resoultion step
   
   getline(myfile,line);
   std::istringstream n_line(line);
-  n_line >> N;
+  n_line >> pointsPerSphere;
   n_line >> DX;
   //allocate space for positions of all blobs
-  double *X=new double[3*N];
+  double *X = new double[3 * pointsPerSphere];
 
-  for (int row=0;row<N;row++)
-  {
-      if (!std::getline(myfile,line)) 
-      {
-	  std::cout <<"Error in input file particle.vertex"<<std::endl;
-	  exit(1);
-      }
-      std::istringstream iss(line);
-      for (int rdir=0;rdir<3;rdir++) 
-      {
-	  iss>>X[row*3+rdir];
+  for (int row=0;row < pointsPerSphere;row++){
+    if (!std::getline(myfile,line)) {
+      std::cout <<"Error in input  file particle.vertex"<<std::endl;
+      exit(1);
+    } 
+    std::istringstream iss(line);
+    for (int rdir=0;rdir<3;rdir++){
+	iss>>X[row*3+rdir];
       }
   }
   myfile.close();
-
+  
   double length = strtod(argv[2],NULL);
   int size[3];
   size[0] = strtol(argv[3],NULL,10); // Number of markers x
@@ -75,83 +72,53 @@ int main(int arc, char**argv)
   size[2] = strtol(argv[5],NULL,10); // Number of markers z
 
 
-  std::cout<<"Total number of vertices is "<<N*size[0]*size[1]*size[2]<<std::endl;
-  int matrixSize  = N * size[0] * size[1] * size[2] * 3;
+  std::cout<<"Total number of vertices is "<<pointsPerSphere * size[0] * size[1] * size[2]<<std::endl;
+  int matrixSize  = pointsPerSphere * size[0] * size[1] * size[2] * 3;
   double* globalX = new double[matrixSize];
   int numSpheres  = size[0] * size[1] * size[2];
-  int diagBlkSize = N * 3;
-  int globalX_Idx = 0;
-
+  int diagBlkSize = pointsPerSphere * 3;
+  int sphereIdx   = 0;
+  Eigen::MatrixXd sphereCenters(numSpheres,NDIM + 1);
   for(int ipart=0;ipart<size[0];ipart++) 
     for(int jpart=0;jpart<size[1];jpart++) 
       for(int kpart=0;kpart<size[2];kpart++) 
 	{
 	  double offset[3];
+	  
 	  offset[0]=center[0]+((double)ipart-size[0]/2.0)*length;
 	  offset[1]=center[1]+((double)jpart-size[1]/2.0)*length;
 	  offset[2]=center[2]+((double)kpart-size[2]/2.0)*length;
-	  
-	  for (int row=0;row<N;row++)
+	  for (int rdir = 0; rdir < NDIM; rdir++)
+	    sphereCenters(sphereIdx,rdir) = offset[rdir];
+	  sphereCenters(sphereIdx,NDIM) = sphereIdx;
+	  sphereIdx ++;
+	  /*
+	    for (int row = 0;row < pointsPerSphere;row++)
 	    for (int rdir=0;rdir<3;rdir++){
-	      globalX[globalX_Idx] = X[row*3+rdir]+offset[rdir];
-		  globalX_Idx++;
+	    globalX[globalX_Idx] = X[row*3+rdir]+offset[rdir];
+	    globalX_Idx++;
 	    }
+	  */
 	}
-  
+ 
+ 
   kernelDataInput RPY_Matrix_Input;
   RPY_Matrix_Input.X =  globalX;
   RPY_Matrix_Input.DX = DX;
-
-  /*
-  user_IndexTree usrTree;
-  usrTree.rootNode = new user_IndexTree::node;
-  user_IndexTree::node* currParent = usrTree.rootNode;
-  for (int i = 1 ; i < (numSpheres - 1); i++){
-    currParent->splitIndex = i * diagBlkSize - 1; 
-    currParent->topOffDiag_minRank  = -1;                                                               
-    currParent->bottOffDiag_minRank = -1;
-    currParent->LR_Method = "partialPiv_ACA";
-    user_IndexTree::node* leftNode   = new user_IndexTree::node;
-    leftNode->splitIndex = -1;
-    leftNode->topOffDiag_minRank  = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "partialPiv_ACA";
-    currParent->left = leftNode;  
-    user_IndexTree::node* nextParent = new user_IndexTree::node;
-    currParent->right = nextParent;
-    currParent = nextParent;
-  }
-  currParent->splitIndex = (numSpheres - 1) * diagBlkSize - 1;
-  currParent->topOffDiag_minRank  = -1;                                                               
-  currParent->bottOffDiag_minRank = -1;
-  currParent->LR_Method = "partialPiv_ACA";
-  usrTree.setChildren_NULL(currParent);
-  
-  
-  HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree); 
-  Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-  kernelMatrix exactMatrixKernel(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input);
-  Eigen::VectorXd inputF = exactMatrixKernel * exactSoln;
-  kernelHODLR.printResultInfo = true;
-  std::cout<<"Solving"<<std::endl;
-  kernelHODLR.set_LeafConst();
-  Eigen::VectorXd solverSoln = kernelHODLR.iterative_Solve(inputF,10,1e-10,1e-2,"partialPiv_ACA","recLU");
-  Eigen::VectorXd difference = solverSoln - exactSoln;
-  double relError = difference.norm()/exactSoln.norm();
-  std::cout<<relError<<std::endl;
-  */
-
   
   int numPoints = matrixSize/3;
   //Sorting according to HODLR.
+  /*
   Eigen::MatrixXd XX(numPoints, NDIM+1);
   
   for (int i = 0; i < matrixSize; ++i){
     XX(i/NDIM,i%NDIM) = globalX[i];
     XX(i/NDIM,NDIM)   = i/NDIM;
   }
-  get_KDTree_Sorted(XX,0);
-  
+  get_KDTree_Sorted(XX,0);*/
+  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere);
+
+  /*
   int *permut=new int[matrixSize];
   for (int i = 0; i < matrixSize; ++i) 
     permut[((int)XX(i/NDIM,NDIM))*NDIM+i%NDIM] = i;
@@ -160,20 +127,35 @@ int main(int arc, char**argv)
   for (int i = 0; i < matrixSize; ++i){
     globalX[i]=XX(i/NDIM,i%NDIM);
   }
- 
+  */  
+  int globalX_Idx = 0;
+  
+  for (int i = 0; i < numSpheres; i++){
+    for (int row = 0;row < pointsPerSphere;row++)
+      for (int rdir = 0;rdir < 3;rdir++){
+	globalX[globalX_Idx] = X[row * 3 + rdir] + sphereCenters(i,rdir);
+	globalX_Idx++;
+      } 
+  }
+
+  
   
   Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-  HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1); 
+  //HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1); 
+  HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree); 
   kernelMatrix exactMatrixKernel(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input);
   Eigen::VectorXd inputF = exactMatrixKernel * exactSoln;
   kernelHODLR.printResultInfo = true;
   std::cout<<"Solving"<<std::endl;
-  kernelHODLR.set_LRTolerance(1e-3);
+  kernelHODLR.set_LRTolerance(1e-4);
+  kernelHODLR.set_LeafConst();
   Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);
   //Eigen::VectorXd solverSoln = kernelHODLR.iterative_Solve(inputF,1,1e-10,1e-3,"partialPiv_ACA","recLU");
   Eigen::VectorXd difference = solverSoln - exactSoln;
   double relError = difference.norm()/exactSoln.norm();
   std::cout<<relError<<std::endl;
+  
+
 
   delete[] X;
   delete[] globalX;
