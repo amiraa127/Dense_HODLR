@@ -50,6 +50,7 @@ int main(int arc, char**argv)
   std::istringstream n_line(line);
   n_line >> pointsPerSphere;
   n_line >> DX;
+
   //allocate space for positions of all blobs
   double *X = new double[3 * pointsPerSphere];
 
@@ -92,13 +93,6 @@ int main(int arc, char**argv)
 	    sphereCenters(sphereIdx,rdir) = offset[rdir];
 	  sphereCenters(sphereIdx,NDIM) = sphereIdx;
 	  sphereIdx ++;
-	  /*
-	    for (int row = 0;row < pointsPerSphere;row++)
-	    for (int rdir=0;rdir<3;rdir++){
-	    globalX[globalX_Idx] = X[row*3+rdir]+offset[rdir];
-	    globalX_Idx++;
-	    }
-	  */
 	}
  
  
@@ -107,27 +101,11 @@ int main(int arc, char**argv)
   RPY_Matrix_Input.DX = DX;
   
   int numPoints = matrixSize/3;
-  //Sorting according to HODLR.
-  /*
-  Eigen::MatrixXd XX(numPoints, NDIM+1);
-  
-  for (int i = 0; i < matrixSize; ++i){
-    XX(i/NDIM,i%NDIM) = globalX[i];
-    XX(i/NDIM,NDIM)   = i/NDIM;
-  }
-  get_KDTree_Sorted(XX,0);*/
-  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere);
 
-  /*
-  int *permut=new int[matrixSize];
-  for (int i = 0; i < matrixSize; ++i) 
-    permut[((int)XX(i/NDIM,NDIM))*NDIM+i%NDIM] = i;
+  //Sorting according to HODLR.
+
+  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere);
   
-  //Reorder X according to HODLR
-  for (int i = 0; i < matrixSize; ++i){
-    globalX[i]=XX(i/NDIM,i%NDIM);
-  }
-  */  
   int globalX_Idx = 0;
   
   for (int i = 0; i < numSpheres; i++){
@@ -139,23 +117,19 @@ int main(int arc, char**argv)
   }
 
   
-  
   Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-  //HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1); 
   HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree); 
   kernelMatrix exactMatrixKernel(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input);
-  Eigen::VectorXd inputF = exactMatrixKernel * exactSoln;
-  kernelHODLR.printResultInfo = true;
+  Eigen::VectorXd inputF = exactMatrixKernel * exactSoln; // Computing the RHS 
+  kernelHODLR.printResultInfo = true; // Comment this line out if you don't want the l2 error
   std::cout<<"Solving"<<std::endl;
-  kernelHODLR.set_LRTolerance(1e-4);
+  kernelHODLR.set_LRTolerance(1e-4); // Low-rank approximation tolerance
   kernelHODLR.set_LeafConst();
   Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);
-  //Eigen::VectorXd solverSoln = kernelHODLR.iterative_Solve(inputF,1,1e-10,1e-3,"partialPiv_ACA","recLU");
   Eigen::VectorXd difference = solverSoln - exactSoln;
   double relError = difference.norm()/exactSoln.norm();
   std::cout<<relError<<std::endl;
   
-
 
   delete[] X;
   delete[] globalX;
