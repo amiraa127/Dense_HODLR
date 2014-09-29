@@ -18,7 +18,7 @@
 #include <ctime>
 #include <memory>
 
-/* Author : Amir Aminfar ---> aminfar@stanford.edu */
+
 class HODLR_Matrix{
 
 public:
@@ -28,33 +28,122 @@ public:
   bool printLevelInfo;
   bool printResultInfo;
   
-  /************************************ Constructors *********************************/
+  
+  /** \addtogroup Constructors
+   *  The HODLR matrix class provides a variety of options for initialization.
+   *  I'm planning to merge some of these constructors into a single constructor. However, you can be sure that the constructors will never be depreciated.
+   *  @{
+   */
+
+  /**
+   * Default constructor.
+   */
   HODLR_Matrix();
   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
+  
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a sparse matrix.
+   * It also sets the default low-rank approximation method to PS_Sparse.
+   */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string LR_Method = "PS_Sparse");
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph);
   
-  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold);
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold);
+  
+ 
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method = "PS_Sparse");
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
+  
+
+ 
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
   
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree);
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold,user_IndexTree &input_IndexTree);
 
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree,std::string LR_Method = "PS_Sparse");
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree,std::string LR_Method = "PS_Sparse");
+  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   
-  
+   
+  /**
+   * \param[in] inputMatrix
+   * This constructor initializes the class with a dense matrix. 
+   */
   HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
+  /** @} */
+
 
   ~HODLR_Matrix();
   
   /************************************* Create HODLR Structure ***************************************/
+    
   void storeLRinTree();
 
   /************************************* Solve Methods **********************************/
@@ -218,11 +307,18 @@ private:
   /******************************Memory Management Functions***********************************/ 
   void freeDenseMatMem();
   void freeSparseMatMem();
+  
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
 
 };
+
+/** \class HODLR_Matrix HODLR_Matrix.hpp "include/HODLR_Matrix.hpp"
+ *  \brief This is the main HODLR class that includes all the fast HODLR solvers.
+ *
+ *  This class can be used as a sibling of the Eigen::MatrixXd class in cases where access to matrix entries is required.
+ */
 
 
 #endif
