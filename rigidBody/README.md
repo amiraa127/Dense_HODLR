@@ -28,3 +28,5 @@ e_l2 = ||A * x_HODLR - F|| / ||F||
 e_a  = ||x_HODLR - x_e|| / ||x_e||
 ```
 The dumb matrix vector product used to calculate both `F` and `e_l2` is the most time consuming part of the calculation.
+
+Note also that currently, we are using the partial pivoting ACA algorithm for the low-rank approximations of this problem.

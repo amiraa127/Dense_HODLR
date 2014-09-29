@@ -23,6 +23,7 @@ title={A Fast Block Low-Rank Dense Solver with Applications to Finite-Element Ma
 journal={arXiv:1403.5337},
 
 year={2014}
+
 }
 
 ####Code
