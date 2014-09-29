@@ -11,7 +11,7 @@ Follow the instruction on building the package as explained in the root director
 where `d` is the lattice parameter and `N_x`, `N_y` and `N_z` are the grid dimensions in the x, y and z coordinates respectively. 
 
 ####Note
-You might notice that the solver takes some time. This is because we are interested in both the actual error and the relative l2 error. Hence, we take an arbitary `x_e` to be the solution. We then compute the right hand side `F` using a dumb (N^2) matrix vector multiplication module:
+You might notice that the solver takes some time. This is because we calculate both the actual error and the relative l2 error. Hence, we take an arbitary `x_e` to be the solution. We then compute the right hand side `F` using a dumb (N^2) matrix vector multiplication module:
 ```
 F = A * x_e
 ```
@@ -25,6 +25,6 @@ The l2 and actual error are calculates as follows:
 
 ```
 e_l2 = ||A * x_HODLR - F|| / ||F||
-e_a  = ||x_HODLR-x_e|| / ||x_e||
+e_a  = ||x_HODLR - x_e|| / ||x_e||
 ```
-The dumb matrix vector products used to calculate both `F` and `e_l2` are the most time consuming part of the calculation.
+The dumb matrix vector product used to calculate both `F` and `e_l2` is the most time consuming part of the calculation.

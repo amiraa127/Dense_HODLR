@@ -54,7 +54,7 @@ This program is free software; you can redistribute it and/or modify it under th
 
 ####Build
 
-The easiest way to build the library is to use CMAKE [link](http://www.cmake.org). Go to the project directory and run:
+The easiest way to build the library is to use [CMake](http://www.cmake.org). Go to the project directory and run:
 ```
 mkdir build
 cd build
