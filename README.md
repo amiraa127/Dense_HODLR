@@ -33,7 +33,7 @@ author = {{A}minfar, {A}mirhossein},
 
 title = {A fast direct solver for HODLR matrices},
 
- dense linear syhowpublished = {https://github.com/amiraa127/Dense_HODLR},
+howpublished = {https://github.com/amiraa127/Dense_HODLR},
 
 year = {2014}
 
