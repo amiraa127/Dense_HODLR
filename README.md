@@ -5,7 +5,7 @@ This software package is a highly felxible HODLR solver that can be used in a va
 
 A variety of low-rank approximation methods (SVD, partial pivoting ACA, full pivoting ACA, BDLR, etc.) are available. Furthermore, the package also accepts any custom HODLR partitioning from the user which is very handy in many applications. 
 
-h3.Author :  
+h3. Author :  
 
 
 Amirhossein Aminfar: amir_aa127@yahoo.co.uk
@@ -14,7 +14,7 @@ h3.Citation:
 
 If you use the implementation or any part of the implementation in your work, kindly cite as follows:
 
-h3.Article:
+h3. Article:
 
 @article{aminfar2014fast,
 
@@ -27,7 +27,7 @@ journal={arXiv:1403.5337},
 year={2014}
 }
 
-h3.Code
+h3. Code
 
 @MISC{aminfar2014HODLR,
 
@@ -41,7 +41,7 @@ year = {2014}
 
 }
 
-h3.Version 1.00
+h3. Version 1.00
 
 Date: September 30th, 2014
 
@@ -49,7 +49,7 @@ Copyleft 2014: Amirhossein Aminfar
 
 Developed by Amirhossein Aminfar
 
-h3.License
+h3. License
 
 
 This program is free software; you can redistribute it and/or modify it under the terms of MPL2 license. The Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
