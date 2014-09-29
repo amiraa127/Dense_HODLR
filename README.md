@@ -52,3 +52,12 @@ Developed by Amirhossein Aminfar
 
 This program is free software; you can redistribute it and/or modify it under the terms of MPL2 license. The Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+####Build
+
+The easiest way to build the library is to use CMAKE [link](http://www.cmake.org). Go to the project directory and run:
+```
+mkdir build
+cd build
+cmake ../
+make
+```
