@@ -8,8 +8,7 @@ This package is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-%% Copyleft © 2013 Amirhossein Aminfar. All lefts reserved.
- 
+%% Copyleft © 2013 Amirhossein Aminfar. All lefts reserved.          
 %% Contact: amir_aa127@yahoo.co.uk (Amir)
 
 %% This program is a free software; you can redistribute it and/or modify it under the terms of MPL2 license.
