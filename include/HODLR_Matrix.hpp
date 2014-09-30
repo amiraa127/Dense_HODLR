@@ -19,6 +19,10 @@
 #include <memory>
 
 
+/**
+ * \author Amirhossein Aminfar
+ */
+
 class HODLR_Matrix{
 
 public:
@@ -42,15 +46,15 @@ public:
   
   /**
    * \param[in] inputMatrix : Preallocated Dense Matrix.
-   * This constructor initializes the class with a dense matrix. 
+   * \brief This constructor initializes the class with a dense matrix. 
    */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
   
   /**
    * \param[in] inputMatrix : Preallocated Dense Matrix.
    * \param[in] LR_Method   : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations.
-   * \note {Only use "PS_Sparse" or "identifyBoundary" as low-rank approximation methods when initializing the class with a sparse matrix.}
-   * This constructor initializes the class with a sparse matrix.
+   * \note Only use "PS_Sparse" or "identifyBoundary" as low-rank approximation methods when initializing the class with a sparse matrix.
+   * \brief This constructor initializes the class with a sparse matrix.
    * It also sets the default low-rank approximation method to PS_Sparse by default.
    */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string LR_Method = "PS_Sparse");
@@ -317,7 +321,7 @@ private:
 
 };
 
-/** \class HODLR_Matrix HODLR_Matrix.hpp "include/HODLR_Matrix.hpp"
+/** \class HODLR_Matrix HODLR_Matrix.hpp 
  *  \brief This is the main HODLR class that includes all the fast HODLR solvers.
  *
  *  This class can be used as a sibling of the Eigen::MatrixXd class in cases where access to matrix entries is required.
