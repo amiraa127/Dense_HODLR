@@ -41,21 +41,24 @@ public:
   HODLR_Matrix();
   
   /**
-   * \param[in] inputMatrix
+   * \param[in] inputMatrix : Preallocated Dense Matrix.
    * This constructor initializes the class with a dense matrix. 
    */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix);
   
   /**
-   * \param[in] inputMatrix
+   * \param[in] inputMatrix : Preallocated Dense Matrix.
+   * \param[in] LR_Method   : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations.
+   * \note {Only use "PS_Sparse" or "identifyBoundary" as low-rank approximation methods when initializing the class with a sparse matrix.}
    * This constructor initializes the class with a sparse matrix.
-   * It also sets the default low-rank approximation method to PS_Sparse.
+   * It also sets the default low-rank approximation method to PS_Sparse by default.
    */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string LR_Method = "PS_Sparse");
   
    
   /**
-   * \param[in] inputMatrix
+   * \param[in] inputMatrix : 
+   * \param[in] inputGraph  :
    * This constructor initializes the class with a dense matrix. 
    */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph);
@@ -76,7 +79,7 @@ public:
   
  
   /**
-   * \param[in] inputMatrix
+   * c\param[in] inputMatrix
    * This constructor initializes the class with a dense matrix. 
    */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method = "PS_Sparse");
