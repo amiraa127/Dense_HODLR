@@ -93,15 +93,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>This is the main HODLR class that includes all the fast HODLR solvers.  
  <a href="class_h_o_d_l_r___matrix.html#details">More...</a></p>
 
-<p><code>#include &quot;<a class="el" href="_h_o_d_l_r___matrix_8hpp_source.html">include/HODLR_Matrix.hpp</a>&quot;</code></p>
+<p><code>#include &lt;<a class="el" href="_h_o_d_l_r___matrix_8hpp_source.html">HODLR_Matrix.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ga2ff895e3fad96da8d19403ad8d4c892a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a> ()</td></tr>
 <tr class="separator:ga2ff895e3fad96da8d19403ad8d4c892a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5308e6b19bb3152f7700409e3d8893be"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga5308e6b19bb3152f7700409e3d8893be">HODLR_Matrix</a> (Eigen::MatrixXd &amp;inputMatrix)</td></tr>
+<tr class="memdesc:ga5308e6b19bb3152f7700409e3d8893be"><td class="mdescLeft">&#160;</td><td class="mdescRight">This constructor initializes the class with a dense matrix.  <a href="group___constructors.html#ga5308e6b19bb3152f7700409e3d8893be">More...</a><br /></td></tr>
 <tr class="separator:ga5308e6b19bb3152f7700409e3d8893be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5c240a2ff227af85ffc9eb28da957935"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga5c240a2ff227af85ffc9eb28da957935">HODLR_Matrix</a> (Eigen::SparseMatrix&lt; double &gt; &amp;inputMatrix, std::string LR_Method=&quot;PS_Sparse&quot;)</td></tr>
+<tr class="memdesc:ga5c240a2ff227af85ffc9eb28da957935"><td class="mdescLeft">&#160;</td><td class="mdescRight">This constructor initializes the class with a sparse matrix. It also sets the default low-rank approximation method to PS_Sparse by default.  <a href="group___constructors.html#ga5c240a2ff227af85ffc9eb28da957935">More...</a><br /></td></tr>
 <tr class="separator:ga5c240a2ff227af85ffc9eb28da957935"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga893ade32dee01930b8ce0d65f21f3a11"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga893ade32dee01930b8ce0d65f21f3a11">HODLR_Matrix</a> (Eigen::MatrixXd &amp;inputMatrix, Eigen::SparseMatrix&lt; double &gt; &amp;inputGraph)</td></tr>
 <tr class="separator:ga893ade32dee01930b8ce0d65f21f3a11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -307,6 +309,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>printResultInfo</b></
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This is the main HODLR class that includes all the fast HODLR solvers. </p>
+<dl class="section author"><dt>Author</dt><dd>Amirhossein Aminfar</dd></dl>
 <p>This class can be used as a sibling of the Eigen::MatrixXd class in cases where access to matrix entries is required. </p>
 </div><hr/>The documentation for this class was generated from the following files:<ul>
 <li>include/<a class="el" href="_h_o_d_l_r___matrix_8hpp_source.html">HODLR_Matrix.hpp</a></li>
@@ -315,7 +318,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>printResultInfo</b></
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 30 2014 02:29:23 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 30 2014 02:34:38 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

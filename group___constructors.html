@@ -86,8 +86,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2ff895e3fad96da8d19403ad8d4c892a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix::HODLR_Matrix</a> ()</td></tr>
 <tr class="separator:ga2ff895e3fad96da8d19403ad8d4c892a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5308e6b19bb3152f7700409e3d8893be"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga5308e6b19bb3152f7700409e3d8893be">HODLR_Matrix::HODLR_Matrix</a> (Eigen::MatrixXd &amp;inputMatrix)</td></tr>
+<tr class="memdesc:ga5308e6b19bb3152f7700409e3d8893be"><td class="mdescLeft">&#160;</td><td class="mdescRight">This constructor initializes the class with a dense matrix.  <a href="#ga5308e6b19bb3152f7700409e3d8893be">More...</a><br /></td></tr>
 <tr class="separator:ga5308e6b19bb3152f7700409e3d8893be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5c240a2ff227af85ffc9eb28da957935"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga5c240a2ff227af85ffc9eb28da957935">HODLR_Matrix::HODLR_Matrix</a> (Eigen::SparseMatrix&lt; double &gt; &amp;inputMatrix, std::string LR_Method=&quot;PS_Sparse&quot;)</td></tr>
+<tr class="memdesc:ga5c240a2ff227af85ffc9eb28da957935"><td class="mdescLeft">&#160;</td><td class="mdescRight">This constructor initializes the class with a sparse matrix. It also sets the default low-rank approximation method to PS_Sparse by default.  <a href="#ga5c240a2ff227af85ffc9eb28da957935">More...</a><br /></td></tr>
 <tr class="separator:ga5c240a2ff227af85ffc9eb28da957935"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga893ade32dee01930b8ce0d65f21f3a11"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___constructors.html#ga893ade32dee01930b8ce0d65f21f3a11">HODLR_Matrix::HODLR_Matrix</a> (Eigen::MatrixXd &amp;inputMatrix, Eigen::SparseMatrix&lt; double &gt; &amp;inputGraph)</td></tr>
 <tr class="separator:ga893ade32dee01930b8ce0d65f21f3a11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,9 +148,11 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>This constructor initializes the class with a dense matrix. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputMatrix</td><td>: Preallocated Dense Matrix. This constructor initializes the class with a dense matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputMatrix</td><td>: Preallocated Dense Matrix. </td></tr>
   </table>
   </dd>
 </dl>
@@ -178,6 +182,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>This constructor initializes the class with a sparse matrix. It also sets the default low-rank approximation method to PS_Sparse by default. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">inputMatrix</td><td>: Preallocated Dense Matrix. </td></tr>
@@ -185,7 +191,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>{Only use "PS_Sparse" or "identifyBoundary" as low-rank approximation methods when initializing the class with a sparse matrix.} This constructor initializes the class with a sparse matrix. It also sets the default low-rank approximation method to PS_Sparse by default. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Only use "PS_Sparse" or "identifyBoundary" as low-rank approximation methods when initializing the class with a sparse matrix. </dd></dl>
 
 </div>
 </div>
@@ -693,7 +699,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 30 2014 02:29:23 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 30 2014 02:34:38 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

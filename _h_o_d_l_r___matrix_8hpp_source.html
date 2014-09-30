@@ -108,245 +108,245 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="class_h_o_d_l_r___matrix.html">   22</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>{</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  <span class="keywordtype">bool</span> printLevelRankInfo;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="keywordtype">bool</span> printLevelAccuracy;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="keywordtype">bool</span> printLevelInfo;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  <span class="keywordtype">bool</span> printResultInfo;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>();</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;   </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;   </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold);</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;   </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,<span class="keywordtype">int</span> inputSizeThreshold);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;   </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold);</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold);</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;   </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;   </div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;   </div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  </div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;   </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  </div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;   </div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;   </div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keyword">const</span> <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a> &amp; rhs); <span class="comment">//Copy Constructor</span></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="comment"></span>  ~<a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>();</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  </div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  <span class="comment">/************************************* Create HODLR Structure ***************************************/</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    </div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  <span class="keywordtype">void</span> storeLRinTree();</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  <span class="comment">/************************************* Solve Methods **********************************/</span></div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  Eigen::MatrixXd recLU_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS);</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordtype">void</span> recLU_Compute();</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;  Eigen::MatrixXd extendedSp_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS);</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  Eigen::MatrixXd iterative_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS, <span class="keyword">const</span> <span class="keywordtype">int</span> maxIterations, <span class="keyword">const</span> <span class="keywordtype">double</span> stop_tolerance,<span class="keyword">const</span> <span class="keywordtype">double</span> init_LRTolerance,<span class="keyword">const</span> std::string input_LR_Method, <span class="keyword">const</span> std::string directSolve_Method);</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  <span class="comment">/************************************* Attribute Modification **********************************/</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  <span class="keywordtype">void</span> set_LRTolerance(<span class="keywordtype">double</span> tolerance);  </div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  <span class="keywordtype">void</span> set_minPivot(<span class="keywordtype">double</span> minPivot);</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <span class="keywordtype">void</span> set_LRMethod(std::string input_LRMethod);</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  <span class="keywordtype">void</span> set_FreeMatrixMemory(<span class="keywordtype">bool</span> inputVal);</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  <span class="keywordtype">void</span> set_BoundaryDepth(<span class="keywordtype">int</span> inputBoundaryDepth);  </div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="keywordtype">void</span> set_TreeRootNode(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* root);</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <span class="keywordtype">void</span> set_MatrixData(Eigen::MatrixXd &amp; matrixData);</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  <span class="keywordtype">void</span> set_MatrixData_Sp(Eigen::SparseMatrix&lt;double&gt; &amp; matrixData_Sp);</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="keywordtype">void</span> set_SquareFlag(<span class="keywordtype">bool</span> isSquared_input);</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <span class="keywordtype">void</span> set_LRStorationFlag(<span class="keywordtype">bool</span> LRStoredInTree_input);</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordtype">void</span> set_recLUFactorizedFlag(<span class="keywordtype">bool</span> factorized);</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keywordtype">void</span> set_LeafConst();</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <span class="keywordtype">void</span> saveExtendedSp(std::string savePath);</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="comment">/************************************ Accessing Attributes ************************************/</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="keywordtype">double</span> get_recLU_FactorizationTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordtype">double</span> get_recLU_SolveTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordtype">double</span> get_recLU_TotalTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_AssemblyTime() <span class="keyword">const</span>; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_FactorizationTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_SolveTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_TotalTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordtype">double</span> get_LR_ComputationTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keywordtype">double</span> get_totalIter_SolveTime() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <span class="keywordtype">double</span> get_MatrixSize() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <span class="keywordtype">int</span> rows() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keywordtype">int</span> cols() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <span class="keywordtype">double</span> norm();</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* get_TreeRootNode();</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="comment">/************************************ Acessing HODLR Entries *******************************/</span></div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  Eigen::MatrixXd block(<span class="keywordtype">int</span> min_i,<span class="keywordtype">int</span> min_j,<span class="keywordtype">int</span> numRows,<span class="keywordtype">int</span> numCols);</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  Eigen::MatrixXd row(<span class="keywordtype">int</span> row);</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  Eigen::MatrixXd col(<span class="keywordtype">int</span> col);</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  </div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>  topDiag();</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a> bottDiag();</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <span class="keywordtype">void</span> keepTopDiag();</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  <span class="keywordtype">void</span> keepBottDiag();</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keywordtype">void</span> splitAtTop(<a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>&amp; topHODLR, <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>&amp; bottHODLR);</div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="class_h_o_d_l_r___matrix.html">   26</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>{</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="keywordtype">bool</span> printLevelRankInfo;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keywordtype">bool</span> printLevelAccuracy;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="keywordtype">bool</span> printLevelInfo;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="keywordtype">bool</span> printResultInfo;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>();</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;   </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph);</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;   </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  </div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;   </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,<span class="keywordtype">int</span> inputSizeThreshold);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;   </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;   </div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  </div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;   </div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keywordtype">int</span> numRows, <span class="keywordtype">int</span> numCols,<span class="keywordtype">double</span> (*inputKernel)(<span class="keywordtype">int</span> i,<span class="keywordtype">int</span> j,<span class="keywordtype">void</span>* inputKernelData),<span class="keywordtype">void</span>* inputKernelData,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;   </div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  </div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;   </div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::SparseMatrix&lt;double&gt; &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree,std::string LR_Method = <span class="stringliteral">&quot;PS_Sparse&quot;</span>);</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;   </div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(Eigen::MatrixXd &amp;inputMatrix,Eigen::SparseMatrix&lt;double&gt; &amp;inputGraph,<span class="keywordtype">int</span> inputSizeThreshold,<a class="code" href="classuser___index_tree.html">user_IndexTree</a> &amp;input_IndexTree);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  </div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;   </div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  <a class="code" href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix</a>(<span class="keyword">const</span> <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a> &amp; rhs); <span class="comment">//Copy Constructor</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;<span class="comment"></span>  ~<a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>();</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  </div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  <span class="comment">/************************************* Create HODLR Structure ***************************************/</span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    </div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordtype">void</span> storeLRinTree();</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <span class="comment">/************************************* Solve Methods **********************************/</span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  Eigen::MatrixXd recLU_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS);</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  <span class="keywordtype">void</span> recLU_Compute();</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  Eigen::MatrixXd extendedSp_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  Eigen::MatrixXd iterative_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS, <span class="keyword">const</span> <span class="keywordtype">int</span> maxIterations, <span class="keyword">const</span> <span class="keywordtype">double</span> stop_tolerance,<span class="keyword">const</span> <span class="keywordtype">double</span> init_LRTolerance,<span class="keyword">const</span> std::string input_LR_Method, <span class="keyword">const</span> std::string directSolve_Method);</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  <span class="comment">/************************************* Attribute Modification **********************************/</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  <span class="keywordtype">void</span> set_LRTolerance(<span class="keywordtype">double</span> tolerance);  </div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="keywordtype">void</span> set_minPivot(<span class="keywordtype">double</span> minPivot);</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <span class="keywordtype">void</span> set_LRMethod(std::string input_LRMethod);</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  <span class="keywordtype">void</span> set_FreeMatrixMemory(<span class="keywordtype">bool</span> inputVal);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="keywordtype">void</span> set_BoundaryDepth(<span class="keywordtype">int</span> inputBoundaryDepth);  </div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <span class="keywordtype">void</span> set_TreeRootNode(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* root);</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordtype">void</span> set_MatrixData(Eigen::MatrixXd &amp; matrixData);</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keywordtype">void</span> set_MatrixData_Sp(Eigen::SparseMatrix&lt;double&gt; &amp; matrixData_Sp);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <span class="keywordtype">void</span> set_SquareFlag(<span class="keywordtype">bool</span> isSquared_input);</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <span class="keywordtype">void</span> set_LRStorationFlag(<span class="keywordtype">bool</span> LRStoredInTree_input);</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordtype">void</span> set_recLUFactorizedFlag(<span class="keywordtype">bool</span> factorized);</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="keywordtype">void</span> set_LeafConst();</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordtype">void</span> saveExtendedSp(std::string savePath);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="comment">/************************************ Accessing Attributes ************************************/</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <span class="keywordtype">double</span> get_recLU_FactorizationTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="keywordtype">double</span> get_recLU_SolveTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="keywordtype">double</span> get_recLU_TotalTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_AssemblyTime() <span class="keyword">const</span>; </div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_FactorizationTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_SolveTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  <span class="keywordtype">double</span> get_extendedSp_TotalTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <span class="keywordtype">double</span> get_LR_ComputationTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keywordtype">double</span> get_totalIter_SolveTime() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <span class="keywordtype">double</span> get_MatrixSize() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="keywordtype">int</span> rows() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="keywordtype">int</span> cols() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keywordtype">double</span> norm();</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* get_TreeRootNode();</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="comment">/************************************ Acessing HODLR Entries *******************************/</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  Eigen::MatrixXd block(<span class="keywordtype">int</span> min_i,<span class="keywordtype">int</span> min_j,<span class="keywordtype">int</span> numRows,<span class="keywordtype">int</span> numCols);</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  Eigen::MatrixXd row(<span class="keywordtype">int</span> row);</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  Eigen::MatrixXd col(<span class="keywordtype">int</span> col);</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160; </div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>  topDiag();</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a> bottDiag();</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagU();</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagV();</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagK();</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagU();</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagV();</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagK();</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="comment">/******************************** Check ******************************************************/</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <span class="keywordtype">void</span> check_Structure();</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  Eigen::MatrixXd createExactHODLR(<span class="keyword">const</span> <span class="keywordtype">int</span> rank,<span class="keywordtype">int</span> input_MatrixSize,<span class="keyword">const</span> <span class="keywordtype">int</span> inpt_SizeThreshold);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="keywordtype">void</span> keepTopDiag();</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="keywordtype">void</span> keepBottDiag();</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordtype">void</span> splitAtTop(<a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>&amp; topHODLR, <a class="code" href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a>&amp; bottHODLR);</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagU();</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagV();</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  Eigen::MatrixXd&amp; returnTopOffDiagK();</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagU();</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagV();</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  Eigen::MatrixXd&amp; returnBottOffDiagK();</div>
 <div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  <span class="keywordtype">void</span> saveSolverInfo(<span class="keyword">const</span> std::string outputFileName);</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  </div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keywordtype">void</span> freeMatrixData();</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <span class="keywordtype">void</span> destroyAllData();</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keywordtype">void</span> recalculateSize();</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <span class="keywordtype">void</span> correctIndices();</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="keywordtype">void</span> initInfoVectors();</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="keywordtype">int</span> sizeThreshold;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  <span class="keywordtype">int</span> extendedSp_Size;</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;  <span class="keywordtype">int</span> matrixSize;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keywordtype">int</span> matrixNumRows;</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keywordtype">int</span> matrixNumCols;</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keywordtype">int</span> constLeafSize;</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="keywordtype">double</span> recLU_FactorizationTime;</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  <span class="keywordtype">double</span> recLU_SolveTime;</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  <span class="keywordtype">double</span> recLU_TotalTime;</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;  <span class="keywordtype">double</span> LR_ComputationTime;</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  <span class="keywordtype">double</span> extendedSp_AssemblyTime;</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  <span class="keywordtype">double</span> extendedSp_FactorizationTime;</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="keywordtype">double</span> extendedSp_SolveTime;</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;  <span class="keywordtype">double</span> extendedSp_TotalTime;</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  <span class="keywordtype">double</span> totalIter_SolveTime;</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    </div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;  std::vector&lt;double&gt; LR_ComputationLevelTimeVec;</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  std::vector&lt;double&gt; recLU_FactorLevelTimeVec;</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  std::vector&lt;double&gt; recLU_SolveLevelTimeVec;</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  std::vector&lt;double&gt; iter_IterTimeVec;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  std::vector&lt;double&gt; iter_IterAccuracyVec;</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  std::vector&lt;double&gt; levelRankAverageVec;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  std::vector&lt;double&gt; levelRankAverageVecCnt;</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;  </div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="keywordtype">bool</span> LRStoredInTree;</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <span class="keywordtype">bool</span> recLU_Factorized;</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;  <span class="keywordtype">bool</span> assembled_ExtendedSp;</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  <span class="keywordtype">bool</span> saveExtendedSp_Matrix;</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <span class="keywordtype">bool</span> freeMatrixMemory;</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <span class="keywordtype">bool</span> freeMatrixMemory_Sp;</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <span class="keywordtype">bool</span> freeGraphMemmory;</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordtype">bool</span> matrixDataAvail;</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordtype">bool</span> matrixDataAvail_Sp;</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  <span class="keywordtype">bool</span> graphDataAvail;</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  <span class="keywordtype">bool</span> kernelDataAvail;</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  <span class="keywordtype">bool</span> isSquareMatrix;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  <span class="keywordtype">bool</span> isLeafConst;</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  <span class="keywordtype">bool</span> constLeafSet;</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <span class="keywordtype">bool</span> constLeafFactorized;</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">double</span> LR_Tolerance;</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="keywordtype">double</span> minPivot;</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="keywordtype">int</span> boundaryDepth;</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  <span class="comment">/******************************** Check ******************************************************/</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="keywordtype">void</span> check_Structure();</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  Eigen::MatrixXd createExactHODLR(<span class="keyword">const</span> <span class="keywordtype">int</span> rank,<span class="keywordtype">int</span> input_MatrixSize,<span class="keyword">const</span> <span class="keywordtype">int</span> inpt_SizeThreshold);</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keywordtype">void</span> saveSolverInfo(<span class="keyword">const</span> std::string outputFileName);</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  </div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="keywordtype">void</span> freeMatrixData();</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  <span class="keywordtype">void</span> destroyAllData();</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  <span class="keywordtype">void</span> recalculateSize();</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  <span class="keywordtype">void</span> correctIndices();</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="keywordtype">void</span> initInfoVectors();</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keywordtype">int</span> sizeThreshold;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keywordtype">int</span> extendedSp_Size;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keywordtype">int</span> matrixSize;</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="keywordtype">int</span> matrixNumRows;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  <span class="keywordtype">int</span> matrixNumCols;</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  <span class="keywordtype">int</span> constLeafSize;</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  <span class="keywordtype">double</span> recLU_FactorizationTime;</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  <span class="keywordtype">double</span> recLU_SolveTime;</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="keywordtype">double</span> recLU_TotalTime;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;  <span class="keywordtype">double</span> LR_ComputationTime;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  <span class="keywordtype">double</span> extendedSp_AssemblyTime;</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;  <span class="keywordtype">double</span> extendedSp_FactorizationTime;</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;  <span class="keywordtype">double</span> extendedSp_SolveTime;</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  <span class="keywordtype">double</span> extendedSp_TotalTime;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <span class="keywordtype">double</span> totalIter_SolveTime;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    </div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  std::vector&lt;double&gt; LR_ComputationLevelTimeVec;</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  std::vector&lt;double&gt; recLU_FactorLevelTimeVec;</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  std::vector&lt;double&gt; recLU_SolveLevelTimeVec;</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;  std::vector&lt;double&gt; iter_IterTimeVec;</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  std::vector&lt;double&gt; iter_IterAccuracyVec;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  std::vector&lt;double&gt; levelRankAverageVec;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;  std::vector&lt;double&gt; levelRankAverageVecCnt;</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  </div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <span class="keywordtype">bool</span> LRStoredInTree;</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <span class="keywordtype">bool</span> recLU_Factorized;</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <span class="keywordtype">bool</span> assembled_ExtendedSp;</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordtype">bool</span> saveExtendedSp_Matrix;</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordtype">bool</span> freeMatrixMemory;</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  <span class="keywordtype">bool</span> freeMatrixMemory_Sp;</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  <span class="keywordtype">bool</span> freeGraphMemmory;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  <span class="keywordtype">bool</span> matrixDataAvail;</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  <span class="keywordtype">bool</span> matrixDataAvail_Sp;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  <span class="keywordtype">bool</span> graphDataAvail;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <span class="keywordtype">bool</span> kernelDataAvail;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  <span class="keywordtype">bool</span> isSquareMatrix;</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  <span class="keywordtype">bool</span> isLeafConst;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">bool</span> constLeafSet;</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="keywordtype">bool</span> constLeafFactorized;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;</div>
 <div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <a class="code" href="class_h_o_d_l_r___tree.html">HODLR_Tree</a> indexTree;</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <a class="code" href="classrec_l_u___factor_tree.html">recLU_FactorTree</a> recLUfactorTree;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  Eigen::MatrixXd matrixData;</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  Eigen::SparseMatrix&lt;double&gt; matrixData_Sp;</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  Eigen::SparseMatrix&lt;double&gt; graphData;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  Eigen::SparseLU&lt;Eigen::SparseMatrix&lt;double&gt; &gt; extendedSp_Solver;</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  Eigen::MatrixXd constLeaf;</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  Eigen::PartialPivLU&lt;Eigen::MatrixXd&gt; constLeafLU;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <a class="code" href="classkernel_matrix.html">kernelMatrix</a> kernelMatrixData;</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  std::string extendedSp_SavePath;</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <span class="keywordtype">void</span> setDefaultValues();</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  <span class="keywordtype">void</span> reset_attributes();</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  <span class="keywordtype">void</span> initializeInfoVecotrs(<span class="keywordtype">int</span> numLevels);</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordtype">double</span> LR_Tolerance;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <span class="keywordtype">double</span> minPivot;</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <span class="keywordtype">int</span> boundaryDepth;</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  <a class="code" href="class_h_o_d_l_r___tree.html">HODLR_Tree</a> indexTree;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  <a class="code" href="classrec_l_u___factor_tree.html">recLU_FactorTree</a> recLUfactorTree;</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  Eigen::MatrixXd matrixData;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  Eigen::SparseMatrix&lt;double&gt; matrixData_Sp;</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  Eigen::SparseMatrix&lt;double&gt; graphData;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  Eigen::SparseLU&lt;Eigen::SparseMatrix&lt;double&gt; &gt; extendedSp_Solver;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  Eigen::MatrixXd constLeaf;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  Eigen::PartialPivLU&lt;Eigen::MatrixXd&gt; constLeafLU;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <a class="code" href="classkernel_matrix.html">kernelMatrix</a> kernelMatrixData;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  std::string extendedSp_SavePath;</div>
 <div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  <span class="comment">/****************************recLU Solver Functions*******************************/</span></div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160; </div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keywordtype">void</span> storeLRinTree(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;  <span class="keywordtype">void</span> recLU_Factorize();</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;  Eigen::MatrixXd recLU_Factorize(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS,<span class="keyword">const</span> <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <a class="code" href="structrec_l_u___factor_tree_1_1node.html">recLU_FactorTree::node</a>* factorRoot);</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;  Eigen::MatrixXd recLU_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS,<span class="keyword">const</span> <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <span class="keyword">const</span> <a class="code" href="structrec_l_u___factor_tree_1_1node.html">recLU_FactorTree::node</a>* factorRoot);</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="comment">/**************************extendedSp Solver Functions***************************/</span></div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  <span class="keywordtype">void</span> findNodesAtLevel(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <span class="keyword">const</span> <span class="keywordtype">int</span> level, std::vector&lt;HODLR_Tree::node*&gt; &amp; outputVector);</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  <span class="keywordtype">void</span> findLeafNodes(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, std::vector&lt;HODLR_Tree::node*&gt;&amp; outputVector);</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordtype">void</span> insertDenseBlockIntoSpMatrix(std::vector&lt;Eigen::Triplet&lt;double,int&gt; &gt; &amp; Sp_TripletVec, <span class="keyword">const</span> Eigen::MatrixXd &amp; denseMatrix, <span class="keyword">const</span> <span class="keywordtype">int</span> start_i, <span class="keyword">const</span> <span class="keywordtype">int</span> start_j);</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;  <span class="keywordtype">void</span> insertIdentityIntoSpMatrix(std::vector&lt;Eigen::Triplet&lt;double,int&gt; &gt; &amp; Sp_TripletVec, <span class="keyword">const</span> <span class="keywordtype">int</span> startIndex_i,<span class="keyword">const</span>  <span class="keywordtype">int</span> startIndex_j, <span class="keyword">const</span> <span class="keywordtype">int</span> matrixSize, <span class="keyword">const</span> <span class="keywordtype">int</span> constant);</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  <span class="keywordtype">int</span> sumRanks(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  Eigen::SparseMatrix&lt;double&gt; assembleExtendedSPMatrix();</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  </div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  <span class="comment">/***************************Iterative Solver Functions****************************/</span></div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  Eigen::MatrixXd oneStep_Iterate(<span class="keyword">const</span> Eigen::MatrixXd &amp;  prevStep_result,<span class="keyword">const</span> Eigen::MatrixXd &amp; RHS,<span class="keyword">const</span> Eigen::MatrixXd &amp; initSolveGuess,Eigen::MatrixXd &amp; prevStep_Product,<span class="keyword">const</span> std::string directSolve_Method);</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <span class="comment">/**********************************Accessing Matrix Entries***************************/</span></div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  <span class="keywordtype">void</span> fill_Block(Eigen::MatrixXd &amp; blkMatrix,<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* root,<span class="keywordtype">int</span> min_i,<span class="keywordtype">int</span> min_j,<span class="keywordtype">int</span> max_i,<span class="keywordtype">int</span> max_j);</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keywordtype">void</span> fill_BlockWithLRProduct(Eigen::MatrixXd &amp; blkMatrix,<span class="keywordtype">int</span> LR_Min_i,<span class="keywordtype">int</span> LR_Min_j, <span class="keywordtype">int</span> LR_numRows, <span class="keywordtype">int</span> LR_numCols,Eigen::MatrixXd &amp; LR_U,Eigen::MatrixXd &amp; LR_V,<span class="keywordtype">int</span> blk_Min_i,<span class="keywordtype">int</span> blk_Min_j);</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  <span class="keywordtype">void</span> setDefaultValues();</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  <span class="keywordtype">void</span> reset_attributes();</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keywordtype">void</span> initializeInfoVecotrs(<span class="keywordtype">int</span> numLevels);</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;  <span class="comment">/****************************recLU Solver Functions*******************************/</span></div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  <span class="keywordtype">void</span> storeLRinTree(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keywordtype">void</span> recLU_Factorize();</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  Eigen::MatrixXd recLU_Factorize(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS,<span class="keyword">const</span> <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <a class="code" href="structrec_l_u___factor_tree_1_1node.html">recLU_FactorTree::node</a>* factorRoot);</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  Eigen::MatrixXd recLU_Solve(<span class="keyword">const</span> Eigen::MatrixXd &amp; input_RHS,<span class="keyword">const</span> <a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <span class="keyword">const</span> <a class="code" href="structrec_l_u___factor_tree_1_1node.html">recLU_FactorTree::node</a>* factorRoot);</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;  <span class="comment">/**************************extendedSp Solver Functions***************************/</span></div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  <span class="keywordtype">void</span> findNodesAtLevel(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, <span class="keyword">const</span> <span class="keywordtype">int</span> level, std::vector&lt;HODLR_Tree::node*&gt; &amp; outputVector);</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  <span class="keywordtype">void</span> findLeafNodes(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root, std::vector&lt;HODLR_Tree::node*&gt;&amp; outputVector);</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  <span class="keywordtype">void</span> insertDenseBlockIntoSpMatrix(std::vector&lt;Eigen::Triplet&lt;double,int&gt; &gt; &amp; Sp_TripletVec, <span class="keyword">const</span> Eigen::MatrixXd &amp; denseMatrix, <span class="keyword">const</span> <span class="keywordtype">int</span> start_i, <span class="keyword">const</span> <span class="keywordtype">int</span> start_j);</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  <span class="keywordtype">void</span> insertIdentityIntoSpMatrix(std::vector&lt;Eigen::Triplet&lt;double,int&gt; &gt; &amp; Sp_TripletVec, <span class="keyword">const</span> <span class="keywordtype">int</span> startIndex_i,<span class="keyword">const</span>  <span class="keywordtype">int</span> startIndex_j, <span class="keyword">const</span> <span class="keywordtype">int</span> matrixSize, <span class="keyword">const</span> <span class="keywordtype">int</span> constant);</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  <span class="keywordtype">int</span> sumRanks(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  Eigen::SparseMatrix&lt;double&gt; assembleExtendedSPMatrix();</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  </div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <span class="comment">/***************************Iterative Solver Functions****************************/</span></div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  Eigen::MatrixXd oneStep_Iterate(<span class="keyword">const</span> Eigen::MatrixXd &amp;  prevStep_result,<span class="keyword">const</span> Eigen::MatrixXd &amp; RHS,<span class="keyword">const</span> Eigen::MatrixXd &amp; initSolveGuess,Eigen::MatrixXd &amp; prevStep_Product,<span class="keyword">const</span> std::string directSolve_Method);</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;</div>
 <div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  <span class="comment">/******************************Memory Management Functions***********************************/</span> </div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordtype">void</span> freeDenseMatMem();</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <span class="keywordtype">void</span> freeSparseMatMem();</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  </div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <span class="comment">/******************************** Check ******************************************************/</span></div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordtype">void</span> check_Structure(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;  <span class="keywordtype">void</span> createExactHODLR(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root,<span class="keyword">const</span> <span class="keywordtype">int</span> rank,Eigen::MatrixXd &amp; result);</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;};</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  <span class="comment">/**********************************Accessing Matrix Entries***************************/</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordtype">void</span> fill_Block(Eigen::MatrixXd &amp; blkMatrix,<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* root,<span class="keywordtype">int</span> min_i,<span class="keywordtype">int</span> min_j,<span class="keywordtype">int</span> max_i,<span class="keywordtype">int</span> max_j);</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <span class="keywordtype">void</span> fill_BlockWithLRProduct(Eigen::MatrixXd &amp; blkMatrix,<span class="keywordtype">int</span> LR_Min_i,<span class="keywordtype">int</span> LR_Min_j, <span class="keywordtype">int</span> LR_numRows, <span class="keywordtype">int</span> LR_numCols,Eigen::MatrixXd &amp; LR_U,Eigen::MatrixXd &amp; LR_V,<span class="keywordtype">int</span> blk_Min_i,<span class="keywordtype">int</span> blk_Min_j);</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <span class="comment">/******************************Memory Management Functions***********************************/</span> </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordtype">void</span> freeDenseMatMem();</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;  <span class="keywordtype">void</span> freeSparseMatMem();</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  </div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;  <span class="comment">/******************************** Check ******************************************************/</span></div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  <span class="keywordtype">void</span> check_Structure(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;  <span class="keywordtype">void</span> createExactHODLR(<a class="code" href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a>* HODLR_Root,<span class="keyword">const</span> <span class="keywordtype">int</span> rank,Eigen::MatrixXd &amp; result);</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;};</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="struct_h_o_d_l_r___tree_1_1node_html"><div class="ttname"><a href="struct_h_o_d_l_r___tree_1_1node.html">HODLR_Tree::node</a></div><div class="ttdef"><b>Definition:</b> HODLR_Tree.hpp:14</div></div>
 <div class="ttc" id="class_h_o_d_l_r___tree_html"><div class="ttname"><a href="class_h_o_d_l_r___tree.html">HODLR_Tree</a></div><div class="ttdef"><b>Definition:</b> HODLR_Tree.hpp:11</div></div>
 <div class="ttc" id="classrec_l_u___factor_tree_html"><div class="ttname"><a href="classrec_l_u___factor_tree.html">recLU_FactorTree</a></div><div class="ttdef"><b>Definition:</b> recLU_FactorTree.hpp:8</div></div>
 <div class="ttc" id="structrec_l_u___factor_tree_1_1node_html"><div class="ttname"><a href="structrec_l_u___factor_tree_1_1node.html">recLU_FactorTree::node</a></div><div class="ttdef"><b>Definition:</b> recLU_FactorTree.hpp:11</div></div>
 <div class="ttc" id="classuser___index_tree_html"><div class="ttname"><a href="classuser___index_tree.html">user_IndexTree</a></div><div class="ttdef"><b>Definition:</b> user_IndexTree.hpp:7</div></div>
-<div class="ttc" id="class_h_o_d_l_r___matrix_html"><div class="ttname"><a href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a></div><div class="ttdoc">This is the main HODLR class that includes all the fast HODLR solvers. </div><div class="ttdef"><b>Definition:</b> HODLR_Matrix.hpp:22</div></div>
+<div class="ttc" id="class_h_o_d_l_r___matrix_html"><div class="ttname"><a href="class_h_o_d_l_r___matrix.html">HODLR_Matrix</a></div><div class="ttdoc">This is the main HODLR class that includes all the fast HODLR solvers. </div><div class="ttdef"><b>Definition:</b> HODLR_Matrix.hpp:26</div></div>
 <div class="ttc" id="classkernel_matrix_html"><div class="ttname"><a href="classkernel_matrix.html">kernelMatrix</a></div><div class="ttdef"><b>Definition:</b> kernel.hpp:6</div></div>
 <div class="ttc" id="group___constructors_html_ga2ff895e3fad96da8d19403ad8d4c892a"><div class="ttname"><a href="group___constructors.html#ga2ff895e3fad96da8d19403ad8d4c892a">HODLR_Matrix::HODLR_Matrix</a></div><div class="ttdeci">HODLR_Matrix()</div><div class="ttdef"><b>Definition:</b> HODLR_Matrix.cpp:49</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 30 2014 02:29:23 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 30 2014 02:34:38 for HOLDER_PAC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>
