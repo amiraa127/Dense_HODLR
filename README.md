@@ -62,3 +62,7 @@ cd build
 cmake ../
 make
 ```
+
+####Documrntation
+
+The documentation for this package is currently located at http://amiraa127.github.io/Dense_HODLR/. It's currently incomplete but I will add material to it gradually.
