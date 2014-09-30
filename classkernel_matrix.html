@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.7"/>
-<title>HOLDER_PAC: Main Page</title>
+<title>HOLDER_PAC: kernelMatrix Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -36,9 +36,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -58,7 +58,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +79,41 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="classkernel_matrix-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">HOLDER_PAC Documentation</div>  </div>
+<div class="title">kernelMatrix Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:abbec573744fca7a48a7805440a726aa3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abbec573744fca7a48a7805440a726aa3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>kernelMatrix</b> (int input_NumRows, int input_NumCols, double(*input_Kernel)(int i, int j, void *kernelData), void *input_KernelData)</td></tr>
+<tr class="separator:abbec573744fca7a48a7805440a726aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d289846793b276b0cfe909c292debe7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0d289846793b276b0cfe909c292debe7"></a>
+Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>block</b> (const int min_i, const int min_j, const int numRows, const int numCols) const </td></tr>
+<tr class="separator:a0d289846793b276b0cfe909c292debe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1d1369874fafee0ffa7e163cffb4a05"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad1d1369874fafee0ffa7e163cffb4a05"></a>
+Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>operator*</b> (const Eigen::MatrixXd &amp;X) const </td></tr>
+<tr class="separator:ad1d1369874fafee0ffa7e163cffb4a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16fa8c23b5679c2b748a428840ea8051"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16fa8c23b5679c2b748a428840ea8051"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (const int nRow, const int nCol) const </td></tr>
+<tr class="separator:a16fa8c23b5679c2b748a428840ea8051"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa569c76366eaa0426bb117bb63fdfe8a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa569c76366eaa0426bb117bb63fdfe8a"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>rows</b> () const </td></tr>
+<tr class="separator:aa569c76366eaa0426bb117bb63fdfe8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11d3be3111c675e35f6fff0a258ab545"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a11d3be3111c675e35f6fff0a258ab545"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>cols</b> () const </td></tr>
+<tr class="separator:a11d3be3111c675e35f6fff0a258ab545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>include/<a class="el" href="kernel_8hpp_source.html">kernel.hpp</a></li>
+<li>src/kernel.cpp</li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
