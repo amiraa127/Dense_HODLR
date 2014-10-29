@@ -103,9 +103,9 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
 }
 
 template <typename T>
-double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int minPivot){
+double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int maxRank,const int minPivot){
   
-  int maxRank = std::min(numRows,numCols);
+  int rankUpperBound = std::min(numRows,numCols);
   int numColsW = 2;
   int numColsV = 2;
 
@@ -127,8 +127,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
   int nextRowIndex  = 0;
   int k = 0;
   
-  while (((epsilon > tolerance) || (k < minRank)) && (k < maxRank)){
-    
+  while (((epsilon > tolerance) || (k < minRank)) && (k < rankUpperBound)){
     if ( k == numColsW - 1){
       numColsW = 2 * numColsW;
       numColsV = 2 * numColsV;
@@ -211,6 +210,8 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
     // Set Values for next iteration
     currRowIndex = nextRowIndex;
     k++;
+    if (k == maxRank)
+      break;
   }
   calculatedRank = k;
   // Return zero for zero matrix
@@ -222,7 +223,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
   }
   
   // Return the original matrix if rank is equal to matrix dimensions
-  if (k >= maxRank - 1){
+  if (k >= rankUpperBound - 1){
     // Return original matrix
     // Skinny matrix
     if (numCols <= numRows){
@@ -908,8 +909,8 @@ void dummyFunction(){
 
 template void SVD_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1);
 template void SVD_LowRankApprox<kernelMatrix>(const kernelMatrix & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1);
-template double partialPivACA_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
-template double partialPivACA_LowRankApprox<kernelMatrix>(const kernelMatrix & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
+template double partialPivACA_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int maxRank = -1,const int minPivot = 0);
+template double partialPivACA_LowRankApprox<kernelMatrix>(const kernelMatrix & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int maxRank = -1,const int minPivot = 0);
 template double fullPivACA_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
 template double fullPivACA_LowRankApprox<kernelMatrix>(const kernelMatrix & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
 template void PS_Boundary_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,const Eigen::SparseMatrix<double> graphData,Eigen::MatrixXd & W, Eigen::MatrixXd & V,const int min_i, const int min_j, const int numRows, const int numCols,const double tolerance,int & calculatedRank, const int maxDepth = 2,const std::string savePath = "none");  

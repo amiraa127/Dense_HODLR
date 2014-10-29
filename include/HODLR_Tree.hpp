@@ -23,6 +23,8 @@ public:
     int splitIndex_j;
     int topOffDiag_minRank;
     int bottOffDiag_minRank;
+    int topOffDiag_maxRank;
+    int bottOffDiag_maxRank;
     bool isLeaf;
     std::string LR_Method;
     Eigen::MatrixXd topOffDiagU;

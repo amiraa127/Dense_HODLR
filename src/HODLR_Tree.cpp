@@ -43,6 +43,9 @@ void HODLR_Tree::createDefaultTree(const int matrixSize){
   numLevels = 1;
   rootNode->topOffDiag_minRank  = -1;
   rootNode->bottOffDiag_minRank = -1;
+  rootNode->topOffDiag_maxRank  = -1;
+  rootNode->bottOffDiag_maxRank = -1;
+
   if ( matrixSize < sizeThreshold ){
     rootNode->isLeaf = true;
     leafNodesVec.push_back(rootNode);
@@ -73,6 +76,8 @@ void HODLR_Tree::createDefaultTree(node* root){
   leftNode->currLevel = root->currLevel + 1;
   leftNode->topOffDiag_minRank  = -1;
   leftNode->bottOffDiag_minRank = -1;
+  leftNode->topOffDiag_maxRank  = -1;
+  leftNode->bottOffDiag_maxRank = -1;
 
   root->left = leftNode;
   
@@ -102,6 +107,9 @@ void HODLR_Tree::createDefaultTree(node* root){
   rightNode->currLevel = root->currLevel + 1;
   rightNode->topOffDiag_minRank  = -1;
   rightNode->bottOffDiag_minRank = -1;
+  rightNode->topOffDiag_maxRank  = -1;
+  rightNode->bottOffDiag_maxRank = -1;
+
   root->right = rightNode;
   
   if (bottDiagSize > sizeThreshold){
@@ -187,6 +195,8 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
   newNode->splitIndex_j             = oldNode->splitIndex_j; 
   newNode->topOffDiag_minRank       = oldNode->topOffDiag_minRank;
   newNode->bottOffDiag_minRank      = oldNode->bottOffDiag_minRank;      
+  newNode->topOffDiag_maxRank       = oldNode->topOffDiag_maxRank;
+  newNode->bottOffDiag_maxRank      = oldNode->bottOffDiag_maxRank;      
   newNode->isLeaf                   = oldNode->isLeaf;
   newNode->LR_Method                = oldNode->LR_Method;
   newNode->topOffDiagU              = oldNode->topOffDiagU;
@@ -234,8 +244,10 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
     HODLR_IndexRoot->left = NULL;
     HODLR_IndexRoot->right = NULL;
     HODLR_IndexRoot->currLevel = currLevel;
-    HODLR_IndexRoot->topOffDiag_minRank = user_IndexRoot->topOffDiag_minRank;
+    HODLR_IndexRoot->topOffDiag_minRank  = user_IndexRoot->topOffDiag_minRank;
     HODLR_IndexRoot->bottOffDiag_minRank = user_IndexRoot->bottOffDiag_minRank;
+    HODLR_IndexRoot->topOffDiag_maxRank  = user_IndexRoot->topOffDiag_maxRank;
+    HODLR_IndexRoot->bottOffDiag_maxRank = user_IndexRoot->bottOffDiag_maxRank;
     HODLR_IndexRoot->LR_Method = user_IndexRoot->LR_Method;
     HODLR_IndexRoot->splitIndex_i = -1;
     HODLR_IndexRoot->splitIndex_j = -1;
@@ -248,8 +260,11 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
     HODLR_IndexRoot->max_i = max_i;
     HODLR_IndexRoot->max_j = max_j;
     HODLR_IndexRoot->currLevel = currLevel;
-    HODLR_IndexRoot->topOffDiag_minRank = user_IndexRoot->topOffDiag_minRank;
+    HODLR_IndexRoot->topOffDiag_minRank  = user_IndexRoot->topOffDiag_minRank;
     HODLR_IndexRoot->bottOffDiag_minRank = user_IndexRoot->bottOffDiag_minRank;
+    HODLR_IndexRoot->topOffDiag_maxRank  = user_IndexRoot->topOffDiag_maxRank;
+    HODLR_IndexRoot->bottOffDiag_maxRank = user_IndexRoot->bottOffDiag_maxRank;
+
     HODLR_IndexRoot->LR_Method = user_IndexRoot->LR_Method;
     HODLR_IndexRoot->splitIndex_i = user_IndexRoot->splitIndex;
     HODLR_IndexRoot->splitIndex_j = user_IndexRoot->splitIndex;
@@ -272,8 +287,11 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
       leftNode->min_j = min_j;
       leftNode->max_i = user_IndexRoot->splitIndex;
       leftNode->max_j = user_IndexRoot->splitIndex;
-      leftNode->topOffDiag_minRank = -1;
+      leftNode->topOffDiag_minRank  = -1;
       leftNode->bottOffDiag_minRank = -1;
+      leftNode->topOffDiag_maxRank  = -1;
+      leftNode->bottOffDiag_maxRank = -1;
+    
       leftNode->LR_Method = def_LRMethod;
       if (leftNodeSize <= sizeThreshold){
 	leftNode->isLeaf = true;
@@ -297,8 +315,12 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
       rightNode->min_j = user_IndexRoot->splitIndex + 1;
       rightNode->max_i = max_i;
       rightNode->max_j = max_j;
-      rightNode->topOffDiag_minRank = -1;
+      rightNode->topOffDiag_minRank  = -1;
       rightNode->bottOffDiag_minRank = -1;
+      rightNode->topOffDiag_maxRank  = -1;
+      rightNode->bottOffDiag_maxRank = -1;
+
+
       rightNode->LR_Method = def_LRMethod;
       if (rightNodeSize <= sizeThreshold){
 	rightNode->isLeaf = true;

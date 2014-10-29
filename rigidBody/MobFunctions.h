@@ -368,11 +368,14 @@ get_KDTree_Sorted(
     }
 }
 
-void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStartIdx,user_IndexTree::node* usrTreeNode,int pointsPerSphere){
+void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStartIdx,user_IndexTree::node* usrTreeNode,int pointsPerSphere,int rankUpperBound){
  
   ///	Get the total number of points.  
-  usrTreeNode->topOffDiag_minRank = -1;
-  usrTreeNode->bottOffDiag_minRank = -1;
+  usrTreeNode->topOffDiag_minRank  = -1;
+  usrTreeNode->bottOffDiag_minRank = -1; 
+  usrTreeNode->topOffDiag_maxRank  = rankUpperBound;
+  usrTreeNode->bottOffDiag_maxRank = rankUpperBound;
+
   usrTreeNode->LR_Method = "partialPiv_ACA";
   
   unsigned N = locations.rows();
@@ -409,8 +412,8 @@ void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStart
   Eigen::MatrixXd rightLocations = locations.block(Nleft,0,Nright,nDimensions);
     
   ///	Sort the left and right locations based on a KDTree.
-  get_KDTree_Sorted(leftLocations, index+1,globalStartIdx,usrTreeNode->left,pointsPerSphere);
-  get_KDTree_Sorted(rightLocations, index+1,globalStartIdx + Nleft,usrTreeNode->right,pointsPerSphere);
+  get_KDTree_Sorted(leftLocations, index+1,globalStartIdx,usrTreeNode->left,pointsPerSphere,rankUpperBound);
+  get_KDTree_Sorted(rightLocations, index+1,globalStartIdx + Nleft,usrTreeNode->right,pointsPerSphere,rankUpperBound);
   
   ///	Output the locations.
   locations.block(0,0,Nleft,nDimensions) = leftLocations;
@@ -418,11 +421,11 @@ void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStart
 
 }
 
-user_IndexTree get_KDTree_Sorted(Eigen::MatrixXd& locations,int pointsPerSphere){
+user_IndexTree get_KDTree_Sorted(Eigen::MatrixXd& locations,int pointsPerSphere,int rankUpperBound){
   user_IndexTree result;
   result.rootNode = new user_IndexTree::node;
   int numPoints = locations.rows();
-  get_KDTree_Sorted(locations,0,0,result.rootNode,pointsPerSphere);
+  get_KDTree_Sorted(locations,0,0,result.rootNode,pointsPerSphere,rankUpperBound);
   return result;
 }
 
