@@ -1312,7 +1312,7 @@ void HODLR_Matrix::set_BoundaryDepth(int inputBoundaryDepth){
   boundaryDepth = inputBoundaryDepth;
 }
 
-
+/*
 void HODLR_Matrix::set_TreeRootNode(HODLR_Tree::node* root){
   indexTree.rootNode = root;
 }
@@ -1332,7 +1332,7 @@ void HODLR_Matrix::set_SquareFlag(bool isSquared_input){
 void HODLR_Matrix::set_LRStorationFlag(bool LRStoredInTree_input){
   LRStoredInTree = LRStoredInTree_input;
 }
-
+*/
 void HODLR_Matrix::set_LeafConst(){
   isLeafConst = true;
 }
@@ -1544,40 +1544,55 @@ Eigen::MatrixXd& HODLR_Matrix::returnBottOffDiagV(){
   return indexTree.rootNode->bottOffDiagV;
 }
 
-void HODLR_Matrix::splitAtTop(HODLR_Matrix& topHODLR, HODLR_Matrix& bottHODLR){
-  assert(isSquareMatrix == true);
-  storeLRinTree();
-  if (indexTree.rootNode->isLeaf == true)
+void splitAtTop(HODLR_Matrix& self,HODLR_Matrix& topHODLR, HODLR_Matrix& bottHODLR){
+  assert(self.isSquareMatrix == true);
+  self.storeLRinTree();
+  if (self.indexTree.rootNode->isLeaf == true)
     return;
-  topHODLR.set_TreeRootNode(indexTree.rootNode->left);
-  bottHODLR.set_TreeRootNode(indexTree.rootNode->right);
-  int topDiagSize = indexTree.rootNode->splitIndex_i - indexTree.rootNode->min_i + 1;  
-  int bottDiagSize = indexTree.rootNode->max_i - indexTree.rootNode->splitIndex_i;
-  if (matrixDataAvail == true){
-    Eigen::MatrixXd topBlk  = matrixData.topLeftCorner(topDiagSize,topDiagSize);
-    Eigen::MatrixXd bottBlk = matrixData.bottomRightCorner(bottDiagSize,bottDiagSize); 
-    topHODLR.set_MatrixData(topBlk);
-    bottHODLR.set_MatrixData(bottBlk);
+  //topHODLR.set_TreeRootNode(indexTree.rootNode->left);
+  //bottHODLR.set_TreeRootNode(indexTree.rootNode->right);
+  topHODLR.indexTree.rootNode  = self.indexTree.rootNode->left;
+  bottHODLR.indexTree.rootNode = self.indexTree.rootNode->right; 
+  int topDiagRows  = self.indexTree.rootNode->splitIndex_i - self.indexTree.rootNode->min_i + 1;  
+  int topDiagCols  = self.indexTree.rootNode->splitIndex_j - self.indexTree.rootNode->min_j + 1;
+  int bottDiagRows = self.indexTree.rootNode->max_i - self.indexTree.rootNode->splitIndex_i;
+  int bottDiagCols = self.indexTree.rootNode->max_j - self.indexTree.rootNode->splitIndex_j;
+  if (self.matrixDataAvail == true){
+    Eigen::MatrixXd topBlk  = self.matrixData.topLeftCorner(topDiagRows,topDiagCols);
+    Eigen::MatrixXd bottBlk = self.matrixData.bottomRightCorner(bottDiagRows,bottDiagCols); 
+    //topHODLR.set_MatrixData(topBlk);
+    //bottHODLR.set_MatrixData(bottBlk);
+    topHODLR.matrixData  = topBlk;
+    bottHODLR.matrixData = bottBlk;
   }  
-  if (matrixDataAvail_Sp == true){
-    Eigen::SparseMatrix<double> topBlk  = matrixData_Sp.topLeftCorner(topDiagSize,topDiagSize);
-    Eigen::SparseMatrix<double> bottBlk = matrixData_Sp.bottomRightCorner(bottDiagSize,bottDiagSize); 
-    topHODLR.set_MatrixData_Sp (topBlk);
-    bottHODLR.set_MatrixData_Sp(bottBlk);
+  if (self.matrixDataAvail_Sp == true){
+    Eigen::SparseMatrix<double> topBlk  = self.matrixData_Sp.topLeftCorner(topDiagCols,topDiagRows);
+    Eigen::SparseMatrix<double> bottBlk = self.matrixData_Sp.bottomRightCorner(bottDiagRows,bottDiagCols); 
+    //topHODLR.set_MatrixData_Sp (topBlk);
+    //bottHODLR.set_MatrixData_Sp(bottBlk);
+    topHODLR.matrixData_Sp = topBlk;
+    bottHODLR.matrixData_Sp = bottBlk;
   }
+  
   topHODLR.correctIndices();
   bottHODLR.correctIndices();
   topHODLR.recalculateSize();
+  
   bottHODLR.recalculateSize();
   topHODLR.initInfoVectors();
   bottHODLR.initInfoVectors();
   
-  topHODLR.set_SquareFlag(true);
-  bottHODLR.set_SquareFlag(true);
-  topHODLR.set_LRStorationFlag(true);
-  bottHODLR.set_LRStorationFlag(true);
-  delete indexTree.rootNode;
-  indexTree.rootNode = NULL;
+  //topHODLR.set_SquareFlag(true);
+  //bottHODLR.set_SquareFlag(true);
+  //topHODLR.set_LRStorationFlag(true);
+  //bottHODLR.set_LRStorationFlag(true);
+  topHODLR.isSquareMatrix  = (topDiagRows == topDiagCols);
+  bottHODLR.isSquareMatrix = (bottDiagRows == bottDiagCols);
+  topHODLR.LRStoredInTree = true;
+  bottHODLR.LRStoredInTree = true;
+  
+  delete self.indexTree.rootNode;
+  self.indexTree.rootNode = NULL;
 }
 
 HODLR_Matrix  HODLR_Matrix::topDiag(){

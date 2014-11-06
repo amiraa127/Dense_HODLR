@@ -1,6 +1,20 @@
 #ifndef HODLR_MATRIX_HPP
 #define HODLR_MATRIX_HPP
 
+//Standard C++
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
+//External Dependencies
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+//Custom Dependencies
 #include "HODLR_Tree.hpp"
 #include "helperFunctions.hpp"
 #include "user_IndexTree.hpp"
@@ -8,15 +22,6 @@
 #include "lowRank.hpp"
 #include "matrixIO.hpp"
 #include "kernel.hpp"
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <string>
-#include <cmath>
-#include <vector>
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <memory>
 
 
 /**
@@ -165,11 +170,11 @@ public:
   void set_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
   void set_BoundaryDepth(int inputBoundaryDepth);  
-  void set_TreeRootNode(HODLR_Tree::node* root);
-  void set_MatrixData(Eigen::MatrixXd & matrixData);
-  void set_MatrixData_Sp(Eigen::SparseMatrix<double> & matrixData_Sp);
-  void set_SquareFlag(bool isSquared_input);
-  void set_LRStorationFlag(bool LRStoredInTree_input);
+  //void set_TreeRootNode(HODLR_Tree::node* root);
+  //void set_MatrixData(Eigen::MatrixXd & matrixData);
+  //void set_MatrixData_Sp(Eigen::SparseMatrix<double> & matrixData_Sp);
+  //void set_SquareFlag(bool isSquared_input);
+  //void set_LRStorationFlag(bool LRStoredInTree_input);
   void set_recLUFactorizedFlag(bool factorized);
   void set_LeafConst();
 
@@ -202,7 +207,7 @@ public:
 
   void keepTopDiag();
   void keepBottDiag();
-  void splitAtTop(HODLR_Matrix& topHODLR, HODLR_Matrix& bottHODLR);
+  friend void splitAtTop(HODLR_Matrix& self,HODLR_Matrix& topHODLR, HODLR_Matrix& bottHODLR);
 
 
   Eigen::MatrixXd& returnTopOffDiagU();
