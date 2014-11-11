@@ -471,10 +471,7 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     if (graphDataAvail == true){ 
       getBoundaryRowColIdx(graphData,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
       getBoundaryRowColIdx(graphData,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
-      //debug code
-      //std::cout<<"LR : "<<numRows_TopOffDiag<<" "<<HODLR_Root->topOffDiagRowIdx.size()<<std::endl;
-      //std::cout<<"     "<<numCols_TopOffDiag<<" "<<HODLR_Root->topOffDiagColIdx.size()<<std::endl;
-      //
+     
     } else if (matrixDataAvail_Sp == true){
       getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
       getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
@@ -1412,21 +1409,12 @@ Eigen::MatrixXd HODLR_Matrix::col(int col){
 Eigen::MatrixXd HODLR_Matrix::block(int min_i,int min_j,int numRows,int numCols){
   
   if (matrixDataAvail == true){
-    //debug code
-    //std::cout<<"dense data"<<std::endl;
-    //
     return matrixData.block(min_i,min_j,numRows,numCols);
   }else  if(matrixDataAvail_Sp == true){
-    //debug code
-    //std::cout<<"sparse data"<<std::endl;
-    //
     return Eigen::MatrixXd(matrixData_Sp.block(min_i,min_j,numRows,numCols));    
   }else if (kernelDataAvail == true){
     return kernelMatrixData.block(min_i,min_j,numRows,numCols);
   }else if (LRStoredInTree == true){
-    //debug code
-    //std::cout<<"LR data"<<std::endl;
-    //
     int max_i = min_i + numRows - 1;
     int max_j = min_j + numCols - 1;
     Eigen::MatrixXd blkMatrix = Eigen::MatrixXd::Zero(numRows,numCols);
