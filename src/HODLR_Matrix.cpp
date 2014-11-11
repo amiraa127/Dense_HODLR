@@ -471,6 +471,10 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     if (graphDataAvail == true){ 
       getBoundaryRowColIdx(graphData,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
       getBoundaryRowColIdx(graphData,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
+      //debug code
+      //std::cout<<"LR : "<<numRows_TopOffDiag<<" "<<HODLR_Root->topOffDiagRowIdx.size()<<std::endl;
+      //std::cout<<"     "<<numCols_TopOffDiag<<" "<<HODLR_Root->topOffDiagColIdx.size()<<std::endl;
+      //
     } else if (matrixDataAvail_Sp == true){
       getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,boundaryDepth,HODLR_Root->topOffDiagRowIdx,HODLR_Root->topOffDiagColIdx);
       getBoundaryRowColIdx(matrixData_Sp,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,boundaryDepth,HODLR_Root->bottOffDiagRowIdx,HODLR_Root->bottOffDiagColIdx);
@@ -536,6 +540,8 @@ Eigen::MatrixXd HODLR_Matrix::createExactHODLR(const int rank,int input_MatrixSi
   matrixDataAvail = false;
   createExactHODLR(indexTree.rootNode,rank,result);
   LRStoredInTree = true;
+  matrixData = result;
+  matrixDataAvail = true;
   return result;
 
 }
@@ -628,9 +634,6 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   factorRoot->left = leftFactorRoot;
   Eigen::MatrixXd topDiagSoln = recLU_Factorize(topDiagRHS,HODLR_Root->left,leftFactorRoot);
   Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
-  //Eigen::MatrixXd topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
-  //factorRoot->topDiagSoln_LR = topDiagSoln_LR;
-   //Eigen::MatrixXd topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
   factorRoot->topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
   
   
@@ -646,8 +649,6 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   factorRoot->right = rightFactorRoot;
   Eigen::MatrixXd bottDiagSoln = recLU_Factorize(bottDiagRHS,HODLR_Root->right,rightFactorRoot);
   Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
-  //Eigen::MatrixXd bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
-  //factorRoot->bottDiagSoln_LR = bottDiagSoln_LR;
   factorRoot->bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
  
 
@@ -662,29 +663,18 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   S.topLeftCorner(IC.rows(),IC.cols()) = IC;
   S.bottomRightCorner(IB.rows(),IB.cols()) = IB;
   
-  //S.topRightCorner(IC.rows(),IB.cols())   = (HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_LR);
-  //S.bottomLeftCorner(IB.rows(),IC.cols()) = (HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_LR);
- 
-  //S.topRightCorner(IC.rows(),IB.cols())   = (HODLR_Root->bottOffDiagV.transpose() * factorRoot->topDiagSoln_LR);
-  //S.bottomLeftCorner(IB.rows(),IC.cols()) = (HODLR_Root->topOffDiagV.transpose()  * factorRoot->bottDiagSoln_LR);
-
   S.topRightCorner(HODLR_Root->bottOffDiagRank,HODLR_Root->topOffDiagRank)   = (HODLR_Root->bottOffDiagV.transpose() * factorRoot->topDiagSoln_LR);
   S.bottomLeftCorner(HODLR_Root->topOffDiagRank,HODLR_Root->bottOffDiagRank) = (HODLR_Root->topOffDiagV.transpose()  * factorRoot->bottDiagSoln_LR);
 
   factorRoot->LU = Eigen::PartialPivLU<Eigen::MatrixXd>(S);
  
   Eigen::MatrixXd schurRHS = Eigen::MatrixXd::Zero(Sdim,parentRHS_Cols);
-  //schurRHS.topRows(IC.rows())    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
-  //schurRHS.bottomRows(IB.rows()) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
 
   schurRHS.topRows(HODLR_Root->bottOffDiagRank)    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
   schurRHS.bottomRows(HODLR_Root->topOffDiagRank)  = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
 
   Eigen::MatrixXd y = factorRoot->LU.solve(schurRHS);  
   Eigen::MatrixXd result(topDiagSize + bottDiagSize,input_RHS.cols());
-
-  //result.topRows(topDiagSize)     = topDiagSoln_pRHS  - topDiagSoln_LR  * y.bottomRows(IB.rows());
-  //result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - bottDiagSoln_LR * y.topRows(IC.rows());
   
   result.topRows(topDiagSize)     = topDiagSoln_pRHS  - factorRoot->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
   result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - factorRoot->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
@@ -1312,27 +1302,6 @@ void HODLR_Matrix::set_BoundaryDepth(int inputBoundaryDepth){
   boundaryDepth = inputBoundaryDepth;
 }
 
-/*
-void HODLR_Matrix::set_TreeRootNode(HODLR_Tree::node* root){
-  indexTree.rootNode = root;
-}
- 
-void HODLR_Matrix::set_MatrixData(Eigen::MatrixXd & input_MatrixData){
-  matrixData = input_MatrixData;
-}
-
-void HODLR_Matrix::set_MatrixData_Sp(Eigen::SparseMatrix<double> & input_MatrixData_Sp){
-  matrixData_Sp = input_MatrixData_Sp;
-}
-
-void HODLR_Matrix::set_SquareFlag(bool isSquared_input){
-  isSquareMatrix = isSquared_input;
-}
-
-void HODLR_Matrix::set_LRStorationFlag(bool LRStoredInTree_input){
-  LRStoredInTree = LRStoredInTree_input;
-}
-*/
 void HODLR_Matrix::set_LeafConst(){
   isLeafConst = true;
 }
@@ -1374,7 +1343,6 @@ void HODLR_Matrix::recalculateSize(){
 void HODLR_Matrix::correctIndices(){
   if (indexTree.rootNode != NULL)
     indexTree.correctIndices();
-
 }
 
 double HODLR_Matrix::get_recLU_FactorizationTime() const{
@@ -1427,11 +1395,11 @@ int HODLR_Matrix::cols() const {
 double HODLR_Matrix:: norm(){
   return block(0,0,rows(),cols()).norm();
 }
-
+/*
 HODLR_Tree::node* HODLR_Matrix::get_TreeRootNode(){
   return indexTree.rootNode;
 }
-
+*/
 /************************************ Acessing HODLR Entries *******************************/
 Eigen::MatrixXd HODLR_Matrix::row(int row){
   return block(row,0,1,matrixNumCols);
@@ -1444,12 +1412,21 @@ Eigen::MatrixXd HODLR_Matrix::col(int col){
 Eigen::MatrixXd HODLR_Matrix::block(int min_i,int min_j,int numRows,int numCols){
   
   if (matrixDataAvail == true){
+    //debug code
+    //std::cout<<"dense data"<<std::endl;
+    //
     return matrixData.block(min_i,min_j,numRows,numCols);
   }else  if(matrixDataAvail_Sp == true){
+    //debug code
+    //std::cout<<"sparse data"<<std::endl;
+    //
     return Eigen::MatrixXd(matrixData_Sp.block(min_i,min_j,numRows,numCols));    
   }else if (kernelDataAvail == true){
     return kernelMatrixData.block(min_i,min_j,numRows,numCols);
   }else if (LRStoredInTree == true){
+    //debug code
+    //std::cout<<"LR data"<<std::endl;
+    //
     int max_i = min_i + numRows - 1;
     int max_j = min_j + numCols - 1;
     Eigen::MatrixXd blkMatrix = Eigen::MatrixXd::Zero(numRows,numCols);
@@ -1549,8 +1526,6 @@ void splitAtTop(HODLR_Matrix& self,HODLR_Matrix& topHODLR, HODLR_Matrix& bottHOD
   self.storeLRinTree();
   if (self.indexTree.rootNode->isLeaf == true)
     return;
-  //topHODLR.set_TreeRootNode(indexTree.rootNode->left);
-  //bottHODLR.set_TreeRootNode(indexTree.rootNode->right);
   topHODLR.indexTree.rootNode  = self.indexTree.rootNode->left;
   bottHODLR.indexTree.rootNode = self.indexTree.rootNode->right; 
   int topDiagRows  = self.indexTree.rootNode->splitIndex_i - self.indexTree.rootNode->min_i + 1;  
@@ -1560,16 +1535,12 @@ void splitAtTop(HODLR_Matrix& self,HODLR_Matrix& topHODLR, HODLR_Matrix& bottHOD
   if (self.matrixDataAvail == true){
     Eigen::MatrixXd topBlk  = self.matrixData.topLeftCorner(topDiagRows,topDiagCols);
     Eigen::MatrixXd bottBlk = self.matrixData.bottomRightCorner(bottDiagRows,bottDiagCols); 
-    //topHODLR.set_MatrixData(topBlk);
-    //bottHODLR.set_MatrixData(bottBlk);
     topHODLR.matrixData  = topBlk;
     bottHODLR.matrixData = bottBlk;
   }  
   if (self.matrixDataAvail_Sp == true){
     Eigen::SparseMatrix<double> topBlk  = self.matrixData_Sp.topLeftCorner(topDiagCols,topDiagRows);
     Eigen::SparseMatrix<double> bottBlk = self.matrixData_Sp.bottomRightCorner(bottDiagRows,bottDiagCols); 
-    //topHODLR.set_MatrixData_Sp (topBlk);
-    //bottHODLR.set_MatrixData_Sp(bottBlk);
     topHODLR.matrixData_Sp = topBlk;
     bottHODLR.matrixData_Sp = bottBlk;
   }
@@ -1582,10 +1553,6 @@ void splitAtTop(HODLR_Matrix& self,HODLR_Matrix& topHODLR, HODLR_Matrix& bottHOD
   topHODLR.initInfoVectors();
   bottHODLR.initInfoVectors();
   
-  //topHODLR.set_SquareFlag(true);
-  //bottHODLR.set_SquareFlag(true);
-  //topHODLR.set_LRStorationFlag(true);
-  //bottHODLR.set_LRStorationFlag(true);
   topHODLR.isSquareMatrix  = (topDiagRows == topDiagCols);
   bottHODLR.isSquareMatrix = (bottDiagRows == bottDiagCols);
   topHODLR.LRStoredInTree = true;
@@ -1652,12 +1619,33 @@ void HODLR_Matrix::keepBottDiag(){
   recalculateSize();
 }
 
+double HODLR_Matrix::calcAbsDiff(){
 
+  assert(LRStoredInTree == true);
+  if (matrixDataAvail){
+    matrixDataAvail = false;
+    double result = (matrixData - block(0,0,rows(),cols())).norm();
+    matrixDataAvail = true;
+    return result;
+  }else if (matrixDataAvail_Sp){
+    matrixDataAvail_Sp = false;
+    double result = (Eigen::MatrixXd(matrixData_Sp) - block(0,0,rows(),cols())).norm();
+    matrixDataAvail_Sp = true;
+    return result;
+  }else if (kernelDataAvail){
+    kernelDataAvail = false;
+    double result =  (kernelMatrixData.block(0,0,rows(),cols()) - block(0,0,rows(),cols())).norm();
+    kernelDataAvail = true;
+    return result;
+  }else{
+    std::cout<<"Error! No matrix data avilable."<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
 void HODLR_Matrix::check_Structure(){
   assert(indexTree.rootNode != NULL);
   assert(LRStoredInTree    == true);
   check_Structure(indexTree.rootNode);
-
 }
 
 void HODLR_Matrix::check_Structure(HODLR_Tree::node* HODLR_Root){

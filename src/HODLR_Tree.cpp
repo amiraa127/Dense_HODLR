@@ -230,12 +230,13 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
 
 void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const int max_i,const int min_j,const int max_j,const user_IndexTree::node* user_IndexRoot, node* HODLR_IndexRoot){   
 
-  int matrixSize = max_i - min_i + 1;
+  //int matrixSize = max_i - min_i + 1;
  
   if (currLevel > (numLevels - 1))
     numLevels = currLevel + 1;
- 
-  if (matrixSize <= sizeThreshold){
+  /*
+  // This block might be completely unnecessary
+  if ((matrixSize <= sizeThreshold) && (currLevel > 0)){
     HODLR_IndexRoot->isLeaf = true;
     HODLR_IndexRoot->min_i = min_i;
     HODLR_IndexRoot->min_j = min_j;
@@ -253,7 +254,7 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
     HODLR_IndexRoot->splitIndex_j = -1;
     leafNodesVec.push_back(HODLR_IndexRoot);
     return;
-  }
+    }*/
     HODLR_IndexRoot->isLeaf = false;
     HODLR_IndexRoot->min_i = min_i;
     HODLR_IndexRoot->min_j = min_j;

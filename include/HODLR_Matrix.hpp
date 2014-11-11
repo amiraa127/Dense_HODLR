@@ -157,7 +157,7 @@ public:
   /************************************* Create HODLR Structure ***************************************/
     
   void storeLRinTree();
-
+  
   /************************************* Solve Methods **********************************/
   Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS);
   void recLU_Compute();
@@ -194,14 +194,13 @@ public:
   int rows() const;
   int cols() const;
   double norm();
-  HODLR_Tree::node* get_TreeRootNode();
+  //HODLR_Tree::node* get_TreeRootNode();
 
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);
   Eigen::MatrixXd row(int row);
   Eigen::MatrixXd col(int col);
  
-  
   HODLR_Matrix  topDiag();
   HODLR_Matrix bottDiag();
 
@@ -219,6 +218,7 @@ public:
 
   /******************************** Check ******************************************************/
   void check_Structure();
+  double calcAbsDiff();
   Eigen::MatrixXd createExactHODLR(const int rank,int input_MatrixSize,const int inpt_SizeThreshold);
 
   void saveSolverInfo(const std::string outputFileName);
@@ -324,6 +324,12 @@ private:
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
 
+  /******************************** Friend Functions *******************************************/
+  friend void extendAddUpdate(HODLR_Matrix & parentHODLR, std::vector<Eigen::MatrixXd*> D_Array,std::vector<HODLR_Matrix*> D_HODLR_Array,std::vector<Eigen::MatrixXd*> U_Array,std::vector<Eigen::MatrixXd*> V_Array,std::vector<std::vector<int> > & updateIdxVec_Array_D,std::vector<std::vector<int> > & updateIdxVec_Array_D_HODLR,double tol,std::string mode);
+  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode);
+  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & U,Eigen::MatrixXd & V,std::vector<int>& updateIdxVec,double tol,std::string mode);
+  friend HODLR_Matrix extend(std::vector<int> & extendIdxVec, int parentSize, HODLR_Matrix & childHODLR);
+  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,double tol,std::string mode);
 };
 
 /** \class HODLR_Matrix HODLR_Matrix.hpp 
