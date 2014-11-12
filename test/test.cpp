@@ -681,7 +681,8 @@ public:
     HODLR_Matrix sampleMatrix;
     Eigen::MatrixXd parentMatrix = sampleMatrix.createExactHODLR(10,matrixSize,30);
     HODLR_Matrix topDiag,bottDiag;
-    sampleMatrix.splitAtTop(topDiag,bottDiag);
+    //sampleMatrix.splitAtTop(topDiag,bottDiag);
+    splitAtTop(sampleMatrix,topDiag,bottDiag);
     int topDiagSize = topDiag.get_MatrixSize();
     std::cout<<(parentMatrix.topLeftCorner(topDiagSize,topDiagSize) - topDiag.block(0,0,topDiagSize,topDiagSize)).norm()<<std::endl;
   }
