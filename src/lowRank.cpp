@@ -855,7 +855,7 @@ int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_V,const Eigen::Ma
   }
 }
 
-//int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Eigen::MatrixXd & U, Eigen::MatrixXd & V,Eigen::MatrixXd & K,std::vector<int> rowIdxVec,const  double tol,const std::string mode){
+
 int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Eigen::MatrixXd & U, Eigen::MatrixXd & V,std::vector<int> rowIdxVec,const  double tol,const std::string mode){
   int numRowsSelect = rowMatrix.cols();
   int numColsSelect = colMatrix.cols();
@@ -871,16 +871,6 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
     Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
     lu.setThreshold(tol);
     rank = lu.rank();
-    //debug code
-    //std::cout<<"numRowsSelect = "<<numRowsSelect<<" "<<"numColsSelect = "<<numColsSelect<<" rank  = "<<rank<<std::endl;
-    //std::cout<<"Rank Info  "<<(lu.matrixLU())(0,0)<<" "<<(lu.matrixLU())(rank-1,rank-1)<<std::endl;
-    //std::cout<<"Normm check "<<colMatrix.norm() - rowMatrix.norm()<<std::endl;
-    //if (std::abs((lu.matrixLU())(rank+1,rank+1))>tol){
-    //  std::cout<<"newRank "<<(lu.matrixLU())(rank+1,rank+1)<<std::endl;
-    //  rank ++;
-    //}
-    
-    //int largestPivot = std::abs((lu.matrixLU())(0,0));
     double largestPivot = std::abs((lu.matrixLU())(0,0));
     
     if ((rank > 0) && (largestPivot >= 1e-6)){
@@ -889,44 +879,16 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
       V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
       U = (colMatrix * lu.permutationQ()).leftCols(rank);
     }else{
-      //debug code
-      //std::cout<<"shouldnt be here"<<std::endl;
-      //
       U = Eigen::MatrixXd::Zero(colMatrix.rows(),1);
       V = Eigen::MatrixXd::Zero(rowMatrix.rows(),1);
       rank = 1;
     }
-    //debug code
-    //std::cout<<"Rank Info  "<<(lu.matrixLU())(0,0)<<" "<<(lu.matrixLU())(rank-1,rank-1)<<std::endl;
-    //std::cout<<"cond info  "<<largestPivot<<" "<<"cond "<<(largestPivot >= 1e-6)<<std::endl;
-    //std::cout<<"Entr Norm "<<colMatrix.norm() - rowMatrix.norm()<<std::endl;
-    //std::cout<<"exit norm "<<colMatrix.norm() - (U*V.transpose()).norm()<<std::endl;
-    //std::cout<<"**************"<<std::endl;
-    //
   }else{
     std::cout<<"Error! Unknown operation mode"<<std::endl;
     exit(EXIT_FAILURE);
   }
   return rank;
 }
-
-/*
-void dummyFunction(){
-  Eigen::MatrixXd dummy,W,V,K;
-  int calculatedRank;
-  kernelMatrix dummyKernel;
-  Eigen::SparseMatrix<double> dummyGraph;
-  
-  SVD_LowRankApprox<Eigen::MatrixXd>(dummy,W,V,K,0,0,0,0,0,calculatedRank);
-  SVD_LowRankApprox<kernelMatrix>(dummyKernel,W,V,K,0,0,0,0,0,calculatedRank);
-  partialPivACA_LowRankApprox<Eigen::MatrixXd>(dummy,W,V,0,0,0,0,0,calculatedRank);
-  partialPivACA_LowRankApprox<kernelMatrix>(dummyKernel,W,V,0,0,0,0,0,calculatedRank);
-  fullPivACA_LowRankApprox<Eigen::MatrixXd>(dummy,W,V,0,0,0,0,0,calculatedRank);
-  fullPivACA_LowRankApprox<kernelMatrix>(dummyKernel,W,V,0,0,0,0,0,calculatedRank);
-  PS_Boundary_LowRankApprox<Eigen::MatrixXd>(dummy,dummyGraph,W,V,0,0,0,0,0,calculatedRank);
-  PS_Boundary_LowRankApprox<kernelMatrix>(dummyKernel,dummyGraph,W,V,0,0,0,0,0,calculatedRank); 
-}
-*/
 
 template void SVD_LowRankApprox<Eigen::MatrixXd>(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1);
 template void SVD_LowRankApprox<kernelMatrix>(const kernelMatrix & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1);
