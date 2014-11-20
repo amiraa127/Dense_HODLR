@@ -229,100 +229,123 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
 }
 
 void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const int max_i,const int min_j,const int max_j,const user_IndexTree::node* user_IndexRoot, node* HODLR_IndexRoot){   
-
-  //int matrixSize = max_i - min_i + 1;
- 
+  
+  int matrixSize = max_i - min_i + 1;
+  
   if (currLevel > (numLevels - 1))
     numLevels = currLevel + 1;
- 
-    HODLR_IndexRoot->isLeaf = false;
+  
+  if ((matrixSize <= sizeThreshold) && (currLevel > 0)){
+    HODLR_IndexRoot->isLeaf = true;
     HODLR_IndexRoot->min_i = min_i;
     HODLR_IndexRoot->min_j = min_j;
     HODLR_IndexRoot->max_i = max_i;
     HODLR_IndexRoot->max_j = max_j;
+    HODLR_IndexRoot->left = NULL;
+    HODLR_IndexRoot->right = NULL;
     HODLR_IndexRoot->currLevel = currLevel;
     HODLR_IndexRoot->topOffDiag_minRank  = user_IndexRoot->topOffDiag_minRank;
     HODLR_IndexRoot->bottOffDiag_minRank = user_IndexRoot->bottOffDiag_minRank;
     HODLR_IndexRoot->topOffDiag_maxRank  = user_IndexRoot->topOffDiag_maxRank;
     HODLR_IndexRoot->bottOffDiag_maxRank = user_IndexRoot->bottOffDiag_maxRank;
-
     HODLR_IndexRoot->LR_Method = user_IndexRoot->LR_Method;
-    HODLR_IndexRoot->splitIndex_i = user_IndexRoot->splitIndex;
-    HODLR_IndexRoot->splitIndex_j = user_IndexRoot->splitIndex;
-    nodeLevelVec_Assign(HODLR_IndexRoot->currLevel,HODLR_IndexRoot);
-   
-    int leftNodeSize = user_IndexRoot->splitIndex - min_i + 1;
-    int rightNodeSize = max_i - user_IndexRoot->splitIndex;
-    assert(leftNodeSize > 0);
-    assert(rightNodeSize > 0);
+    HODLR_IndexRoot->splitIndex_i = -1;
+    HODLR_IndexRoot->splitIndex_j = -1;
+    leafNodesVec.push_back(HODLR_IndexRoot);
+    return;
+  }
 
-    //handle children
-    node* leftNode = new node;  
-    node* rightNode = new node;  
-    HODLR_IndexRoot->left = leftNode;
-    HODLR_IndexRoot->right = rightNode;
-    if ((user_IndexRoot->left == NULL) && (user_IndexRoot->right ==NULL)){
-      //create default left node
-      leftNode->currLevel = currLevel + 1;
-      leftNode->min_i = min_i;
-      leftNode->min_j = min_j;
-      leftNode->max_i = user_IndexRoot->splitIndex;
-      leftNode->max_j = user_IndexRoot->splitIndex;
-      leftNode->topOffDiag_minRank  = -1;
-      leftNode->bottOffDiag_minRank = -1;
-      leftNode->topOffDiag_maxRank  = -1;
-      leftNode->bottOffDiag_maxRank = -1;
+  HODLR_IndexRoot->isLeaf = false;
+  HODLR_IndexRoot->min_i = min_i;
+  HODLR_IndexRoot->min_j = min_j;
+  HODLR_IndexRoot->max_i = max_i;
+  HODLR_IndexRoot->max_j = max_j;
+  HODLR_IndexRoot->currLevel = currLevel;
+  HODLR_IndexRoot->topOffDiag_minRank  = user_IndexRoot->topOffDiag_minRank;
+  HODLR_IndexRoot->bottOffDiag_minRank = user_IndexRoot->bottOffDiag_minRank;
+  HODLR_IndexRoot->topOffDiag_maxRank  = user_IndexRoot->topOffDiag_maxRank;
+  HODLR_IndexRoot->bottOffDiag_maxRank = user_IndexRoot->bottOffDiag_maxRank;
+  
+  HODLR_IndexRoot->LR_Method = user_IndexRoot->LR_Method;
+  HODLR_IndexRoot->splitIndex_i = user_IndexRoot->splitIndex;
+  HODLR_IndexRoot->splitIndex_j = user_IndexRoot->splitIndex;
+  nodeLevelVec_Assign(HODLR_IndexRoot->currLevel,HODLR_IndexRoot);
+  
+  int leftNodeSize = user_IndexRoot->splitIndex - min_i + 1;
+  int rightNodeSize = max_i - user_IndexRoot->splitIndex;
+  
+  assert(leftNodeSize > 0);
+  assert(rightNodeSize > 0);
+  
+  //handle children
+  node* leftNode = new node;  
+  node* rightNode = new node;  
+  HODLR_IndexRoot->left = leftNode;
+  HODLR_IndexRoot->right = rightNode;
+  
+  if ((user_IndexRoot->left == NULL) && (user_IndexRoot->right == NULL)){
+    std::cout<<"here"<<std::endl;
+    //create default left node
+    leftNode->currLevel = currLevel + 1;
+    leftNode->min_i = min_i;
+    leftNode->min_j = min_j;
+    leftNode->max_i = user_IndexRoot->splitIndex;
+    leftNode->max_j = user_IndexRoot->splitIndex;
+    leftNode->topOffDiag_minRank  = -1;
+    leftNode->bottOffDiag_minRank = -1;
+    leftNode->topOffDiag_maxRank  = -1;
+    leftNode->bottOffDiag_maxRank = -1;
     
-      leftNode->LR_Method = def_LRMethod;
-      if (leftNodeSize <= sizeThreshold){
-	leftNode->isLeaf = true;
-	leftNode->splitIndex_i = -1;
-	leftNode->splitIndex_j = -1;
-	leftNode->left = NULL;
-	leftNode->right = NULL;
-	leafNodesVec.push_back(leftNode);
-	if (leftNode->currLevel  > (numLevels - 1))
-	  numLevels = leftNode->currLevel + 1;
-      }else{
-	leftNode->isLeaf = false;
-	leftNode->splitIndex_i = min_i + leftNodeSize/2 - 1;
-	leftNode->splitIndex_j = min_j + leftNodeSize/2 - 1;
-	nodeLevelVec_Assign(leftNode->currLevel,leftNode);
-	createDefaultTree(leftNode);
-      }
-      //create default right node
-      rightNode->currLevel = currLevel + 1;
-      rightNode->min_i = user_IndexRoot->splitIndex + 1;
-      rightNode->min_j = user_IndexRoot->splitIndex + 1;
-      rightNode->max_i = max_i;
-      rightNode->max_j = max_j;
-      rightNode->topOffDiag_minRank  = -1;
-      rightNode->bottOffDiag_minRank = -1;
-      rightNode->topOffDiag_maxRank  = -1;
-      rightNode->bottOffDiag_maxRank = -1;
-
-
-      rightNode->LR_Method = def_LRMethod;
-      if (rightNodeSize <= sizeThreshold){
-	rightNode->isLeaf = true;
-	rightNode->splitIndex_i = -1;
-	rightNode->splitIndex_j = -1;
-	rightNode->left = NULL;
-	rightNode->right = NULL;
-	leafNodesVec.push_back(rightNode);
-	if (rightNode->currLevel  > (numLevels - 1))
-	  numLevels = rightNode->currLevel + 1;
-      }else{
-	rightNode->isLeaf = false;
-	rightNode->splitIndex_i = user_IndexRoot->splitIndex + rightNodeSize/2;
-	rightNode->splitIndex_j = user_IndexRoot->splitIndex + rightNodeSize/2;
-	nodeLevelVec_Assign(rightNode->currLevel,rightNode);
-	createDefaultTree(rightNode);
-      }
+    leftNode->LR_Method = def_LRMethod;
+    if (leftNodeSize <= sizeThreshold){
+      leftNode->isLeaf = true;
+      leftNode->splitIndex_i = -1;
+      leftNode->splitIndex_j = -1;
+      leftNode->left = NULL;
+      leftNode->right = NULL;
+      leafNodesVec.push_back(leftNode);
+      if (leftNode->currLevel  > (numLevels - 1))
+	numLevels = leftNode->currLevel + 1;
     }else{
-      userTree_To_HODLRTree(currLevel + 1,min_i,user_IndexRoot->splitIndex,min_j,user_IndexRoot->splitIndex,user_IndexRoot->left,HODLR_IndexRoot->left); 
-      userTree_To_HODLRTree(currLevel + 1,user_IndexRoot->splitIndex+1,max_i,user_IndexRoot->splitIndex + 1,max_j,user_IndexRoot->right,HODLR_IndexRoot->right); 
-    }  
+      leftNode->isLeaf = false;
+      leftNode->splitIndex_i = min_i + leftNodeSize/2 - 1;
+      leftNode->splitIndex_j = min_j + leftNodeSize/2 - 1;
+      nodeLevelVec_Assign(leftNode->currLevel,leftNode);
+      createDefaultTree(leftNode);
+    }
+    //create default right node
+    rightNode->currLevel = currLevel + 1;
+    rightNode->min_i = user_IndexRoot->splitIndex + 1;
+    rightNode->min_j = user_IndexRoot->splitIndex + 1;
+    rightNode->max_i = max_i;
+    rightNode->max_j = max_j;
+    rightNode->topOffDiag_minRank  = -1;
+    rightNode->bottOffDiag_minRank = -1;
+    rightNode->topOffDiag_maxRank  = -1;
+    rightNode->bottOffDiag_maxRank = -1;
+    
+    
+    rightNode->LR_Method = def_LRMethod;
+    if (rightNodeSize <= sizeThreshold){
+      rightNode->isLeaf = true;
+      rightNode->splitIndex_i = -1;
+      rightNode->splitIndex_j = -1;
+      rightNode->left = NULL;
+      rightNode->right = NULL;
+      leafNodesVec.push_back(rightNode);
+      if (rightNode->currLevel  > (numLevels - 1))
+	numLevels = rightNode->currLevel + 1;
+    }else{
+      rightNode->isLeaf = false;
+      rightNode->splitIndex_i = user_IndexRoot->splitIndex + rightNodeSize/2;
+      rightNode->splitIndex_j = user_IndexRoot->splitIndex + rightNodeSize/2;
+      nodeLevelVec_Assign(rightNode->currLevel,rightNode);
+      createDefaultTree(rightNode);
+    }
+  }else{
+    userTree_To_HODLRTree(currLevel + 1,min_i,user_IndexRoot->splitIndex,min_j,user_IndexRoot->splitIndex,user_IndexRoot->left,HODLR_IndexRoot->left); 
+    userTree_To_HODLRTree(currLevel + 1,user_IndexRoot->splitIndex+1,max_i,user_IndexRoot->splitIndex + 1,max_j,user_IndexRoot->right,HODLR_IndexRoot->right); 
+  }  
   
 }
   
