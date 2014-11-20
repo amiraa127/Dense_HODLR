@@ -105,6 +105,13 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
 template <typename T>
 double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank,const int maxRank,const int minPivot){
   
+  if (maxRank == 0){
+    W = Eigen::MatrixXd::Zero(numRows,1);
+    V = Eigen::MatrixXd::Zero(numCols,1);
+    calculatedRank = 1;
+    return 1;
+  }
+ 
   int rankUpperBound = std::min(numRows,numCols);
   int numColsW = 2;
   int numColsV = 2;
@@ -193,10 +200,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
     // Write to W & V
     tempW.col(k) = currPivot * residualCol;
     tempV.col(k) = residualRow;
-    
-    // Update Approximation Matrix
-    //approxMatrix += currPivot * residualCol * residualRow.transpose();
-    
+        
     // Update Frobenious Norm
     double sumNorm = 0;
     for(int j = 0; j < k; j++){
