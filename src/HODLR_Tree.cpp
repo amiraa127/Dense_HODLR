@@ -235,7 +235,9 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
   if (currLevel > (numLevels - 1))
     numLevels = currLevel + 1;
   
-  if ((matrixSize <= sizeThreshold) && (currLevel > 0)){
+  //if ((matrixSize <= sizeThreshold) && (currLevel > 0)){
+  if ((matrixSize <= sizeThreshold) && (user_IndexRoot->splitIndex == -1)){
+ 
     HODLR_IndexRoot->isLeaf = true;
     HODLR_IndexRoot->min_i = min_i;
     HODLR_IndexRoot->min_j = min_j;
@@ -254,12 +256,12 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
     leafNodesVec.push_back(HODLR_IndexRoot);
     return;
   }
-
+  
   HODLR_IndexRoot->isLeaf = false;
-  HODLR_IndexRoot->min_i = min_i;
-  HODLR_IndexRoot->min_j = min_j;
-  HODLR_IndexRoot->max_i = max_i;
-  HODLR_IndexRoot->max_j = max_j;
+  HODLR_IndexRoot->min_i  = min_i;
+  HODLR_IndexRoot->min_j  = min_j;
+  HODLR_IndexRoot->max_i  = max_i;
+  HODLR_IndexRoot->max_j  = max_j;
   HODLR_IndexRoot->currLevel = currLevel;
   HODLR_IndexRoot->topOffDiag_minRank  = user_IndexRoot->topOffDiag_minRank;
   HODLR_IndexRoot->bottOffDiag_minRank = user_IndexRoot->bottOffDiag_minRank;

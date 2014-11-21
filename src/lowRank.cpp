@@ -4,7 +4,7 @@ const double pi = 3.14159265359;
 
 // Some needed function prototypes
 // ACA
-int chooseNNZRowIndex(const std::vector<bool> &chosenRows);
+//int chooseNNZRowIndex(const std::vector<bool> &chosenRows);
 int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
 
 // Boundary Identifier
@@ -97,7 +97,6 @@ double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::
 
   W.conservativeResize(Eigen::NoChange,calculatedRank);
   V.conservativeResize(Eigen::NoChange,calculatedRank);
-
   
   return epsilon;
 }
@@ -120,11 +119,11 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
   Eigen::MatrixXd tempV(numCols,numColsV);
 
   Eigen::VectorXd residualRow,residualCol;
-  std::vector<bool> chosenRows(numRows),chosenCols(numCols);
-  for (int i = 0; i < numRows; i++)
-    chosenRows[i] = false;
-  for (int i = 0; i < numCols; i++)
-    chosenCols[i] = false;
+  std::vector<bool> chosenRows(numRows,false),chosenCols(numCols,false);
+  //for (int i = 0; i < numRows; i++)
+  //  chosenRows[i] = false;
+  //for (int i = 0; i < numCols; i++)
+  //  chosenCols[i] = false;
   
   double frobNormSq = 0;
   double frobNorm   = 0;   
@@ -135,6 +134,8 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
   int k = 0;
   
   while (((epsilon > tolerance) || (k < minRank)) && (k < rankUpperBound)){
+    
+    // increase the size of W and V if limit is reached
     if ( k == numColsW - 1){
       numColsW = 2 * numColsW;
       numColsV = 2 * numColsV;
@@ -143,7 +144,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
     }
 
     chosenRows[currRowIndex] = true;
-    int globalCurrRowIdx = currRowIndex + min_i;
+    int globalCurrRowIdx    = currRowIndex + min_i;
     Eigen::VectorXd currRow = matrixData.block(globalCurrRowIdx,min_j,1,numCols).transpose();
 
     // Update row of Residual
@@ -152,19 +153,34 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
       sum += tempW(currRowIndex,l) * tempV.col(l);
     }
     residualRow = (currRow - sum);
+
     // Find Next Column
     int maxInd;
     Eigen::VectorXd absCurrRow = residualRow.cwiseAbs();
     double maxValue = absCurrRow.maxCoeff(&maxInd);
+   
+    /*
     if (maxValue <= minPivot){
       currRowIndex = chooseNNZRowIndex(chosenRows);
       if (currRowIndex == -1)
 	break;
       continue;
-      absCurrRow = residualRow.cwiseAbs();
-      maxValue = absCurrRow.maxCoeff(&maxInd);
-      currColIndex = maxInd;
+      //absCurrRow = residualRow.cwiseAbs();
+      //maxValue = absCurrRow.maxCoeff(&maxInd);
+      //currColIndex = maxInd;
     }
+    */
+
+    if (maxValue <= minPivot){
+      std::vector<bool>::iterator nextRowIter;
+      nextRowIter = std::find(chosenRows.begin(),chosenRows.end(),false);
+      if (nextRowIter == chosenRows.end())
+	break;
+      currRowIndex = nextRowIter - chosenRows.begin();
+      continue;
+
+    }
+
     if (chosenCols[maxInd] == false){
       currColIndex = maxInd;
     }else{
@@ -217,6 +233,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
     if (k == maxRank)
       break;
   }
+
   calculatedRank = k;
   // Return zero for zero matrix
   if ( k == 0){
@@ -248,6 +265,7 @@ double partialPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eige
   return epsilon;
 }
 
+/*
 int chooseNNZRowIndex(const std::vector<bool> &chosenRows){
   int n = chosenRows.size();
   for (int i = 0;i < n; i++){
@@ -256,7 +274,7 @@ int chooseNNZRowIndex(const std::vector<bool> &chosenRows){
   }
   return -1;
 }
-
+*/
 int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow, const int minPivot) {
   int n = currColRow.rows();
   for (int index = 0; index < n; index++){

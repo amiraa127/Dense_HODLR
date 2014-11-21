@@ -1,16 +1,22 @@
 #ifndef LOW_RANK_HPP
 #define LOW_RANK_HPP
 
+
+//Standard C++
+#include <assert.h>
+#include <algorithm>
+#include <iostream>
+#include <set>
+
+//External Libraries
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <set>
-#include <assert.h>
-#include <iostream>
-#include <algorithm>
-#include <matrixIO.hpp>
-#include <HODLR_Tree.hpp>
+
+//Custom Dependancies
 #include "helperFunctions.hpp"
+#include "HODLR_Tree.hpp"
 #include "kernel.hpp"
+#include "matrixIO.hpp"
 
 template <typename T>
 double fullPivACA_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W,Eigen::MatrixXd & V, const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank,const int minRank = -1,const int minPivot = 0);
