@@ -286,7 +286,6 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
   HODLR_IndexRoot->right = rightNode;
   
   if ((user_IndexRoot->left == NULL) && (user_IndexRoot->right == NULL)){
-    std::cout<<"here"<<std::endl;
     //create default left node
     leftNode->currLevel = currLevel + 1;
     leftNode->min_i = min_i;

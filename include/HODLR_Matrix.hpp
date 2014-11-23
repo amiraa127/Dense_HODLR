@@ -170,11 +170,6 @@ public:
   void set_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
   void set_BoundaryDepth(int inputBoundaryDepth);  
-  //void set_TreeRootNode(HODLR_Tree::node* root);
-  //void set_MatrixData(Eigen::MatrixXd & matrixData);
-  //void set_MatrixData_Sp(Eigen::SparseMatrix<double> & matrixData_Sp);
-  //void set_SquareFlag(bool isSquared_input);
-  //void set_LRStorationFlag(bool LRStoredInTree_input);
   void set_recLUFactorizedFlag(bool factorized);
   void set_LeafConst();
 
@@ -190,11 +185,12 @@ public:
   double get_LR_ComputationTime() const;
   double get_totalIter_SolveTime() const;
   double get_MatrixSize() const;
-
+  
   int rows() const;
   int cols() const;
   double norm();
-  //HODLR_Tree::node* get_TreeRootNode();
+  double determinant();
+  double logAbsDeterminant();
 
   /************************************ Acessing HODLR Entries *******************************/
   Eigen::MatrixXd block(int min_i,int min_j,int numRows,int numCols);
@@ -247,7 +243,9 @@ private:
   double extendedSp_SolveTime;
   double extendedSp_TotalTime;
   double totalIter_SolveTime;
-    
+  double determinant_;
+  double logAbsDeterminant_;
+
   std::vector<double> LR_ComputationLevelTimeVec;
   std::vector<double> recLU_FactorLevelTimeVec;
   std::vector<double> recLU_SolveLevelTimeVec;
@@ -271,7 +269,7 @@ private:
   bool isLeafConst;
   bool constLeafSet;
   bool constLeafFactorized;
-
+  bool calculatedDet;
 
   double LR_Tolerance;
   double minPivot;
@@ -323,6 +321,9 @@ private:
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
+  
+  /******************************** Determinant ************************************************/    void calcDeterminant();
+  void calcDeterminant(HODLR_Tree::node* HODLR_Root);
 
   /******************************** Friend Functions *******************************************/
   friend void extendAddUpdate(HODLR_Matrix & parentHODLR, std::vector<Eigen::MatrixXd*> D_Array,std::vector<HODLR_Matrix*> D_HODLR_Array,std::vector<Eigen::MatrixXd*> U_Array,std::vector<Eigen::MatrixXd*> V_Array,std::vector<std::vector<int> > & updateIdxVec_Array_D,std::vector<std::vector<int> > & updateIdxVec_Array_D_HODLR,double tol,std::string mode);

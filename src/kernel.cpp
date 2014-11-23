@@ -18,8 +18,6 @@ kernelMatrix::~kernelMatrix(){
 
 Eigen::MatrixXd kernelMatrix::block(const int min_i,const int min_j,const int blk_NumRows,const int blk_NumCols) const{
   Eigen::MatrixXd result(blk_NumRows,blk_NumCols);
-  //for (int i = 0; i < blk_NumRows; i++)
-  //  for (int j = 0; j < blk_NumCols; j++)
   for (int j = 0; j < blk_NumCols; j++)
     for (int i = 0; i < blk_NumRows; i++)
       result(i,j) = kernel(i + min_i,j + min_j,kernelData);

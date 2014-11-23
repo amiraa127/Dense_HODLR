@@ -20,29 +20,29 @@ class HODLR_Solver_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  /*
-  CPPUNIT_TEST(recLU_Solver_Test);
-  CPPUNIT_TEST(extendedSp_Solver_Test);
-  CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
-  CPPUNIT_TEST(iterative_Solver_Schur_Test_9k);
-  CPPUNIT_TEST(recLU_Solver_Schur_Test_12k);
-  CPPUNIT_TEST(iterative_Solver_Schur_Test_12k);
-  CPPUNIT_TEST(recLU_Solver_Schur_Test_16k);
-  CPPUNIT_TEST(iterative_Solver_Schur_Test_16k);  
-  CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
-  CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
-  CPPUNIT_TEST(iterative_Solve_Test);
-  CPPUNIT_TEST(assignment_Test_Simple);
-  CPPUNIT_TEST(assignment_Test_ExtendedSp);
-  CPPUNIT_TEST(blockExtraction_Test);
   
-  CPPUNIT_TEST(splitAtTop_Test);
+  //CPPUNIT_TEST(recLU_Solver_Test);
+  //CPPUNIT_TEST(extendedSp_Solver_Test);
+  //CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
+  //CPPUNIT_TEST(iterative_Solver_Schur_Test_9k);
+  //CPPUNIT_TEST(recLU_Solver_Schur_Test_12k);
+  //CPPUNIT_TEST(iterative_Solver_Schur_Test_12k);
+  //CPPUNIT_TEST(recLU_Solver_Schur_Test_16k);
+  //CPPUNIT_TEST(iterative_Solver_Schur_Test_16k);  
+  //CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
+  //CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
+  //CPPUNIT_TEST(iterative_Solve_Test);
+  //CPPUNIT_TEST(assignment_Test_Simple);
+  //CPPUNIT_TEST(assignment_Test_ExtendedSp);
+  //CPPUNIT_TEST(blockExtraction_Test);
+  
+  //CPPUNIT_TEST(splitAtTop_Test);
 
-  CPPUNIT_TEST(boundaryFinder_Test);
-  CPPUNIT_TEST(boundaryFinder_lowRank_Test);
-  */
-  CPPUNIT_TEST(kernelSolver_Test);
- 
+  //CPPUNIT_TEST(boundaryFinder_Test);
+  //CPPUNIT_TEST(boundaryFinder_lowRank_Test);
+  
+  //CPPUNIT_TEST(kernelSolver_Test);
+  CPPUNIT_TEST(determinant_Test);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -105,13 +105,13 @@ public:
     refrenceFile.close();
   }
 
-
-
- /* Function : recLU_Solver_Schur_Test_9k
+  /*
+  
+  /* Function : recLU_Solver_Schur_Test_9k
    * ------------------------------
    * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 9kx9k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void recLU_Solver_Schur_Test_9k(){
     std::cout<<"Testing recursive implicit LU solver on a 9k Schur complement matrix...."<<std::endl;
  
@@ -185,7 +185,7 @@ public:
    * ------------------------------
    * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 9kx9k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void iterative_Solver_Schur_Test_9k(){
     std::cout<<"Testing iterative solver on a 9k Schur complement matrix...."<<std::endl;
  
@@ -242,7 +242,7 @@ public:
    * ------------------------------
    * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 12kx12k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void recLU_Solver_Schur_Test_12k(){
     std::cout<<"Testing recursive implicit LU solver on a 12k Schur complement matrix...."<<std::endl;
  
@@ -312,7 +312,7 @@ public:
    * ------------------------------
    * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 12kx12k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void iterative_Solver_Schur_Test_12k(){
     std::cout<<"Testing iterative solver on a 12k Schur complement matrix...."<<std::endl;
  
@@ -369,7 +369,7 @@ public:
    * ------------------------------
    * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 16kx16k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void recLU_Solver_Schur_Test_16k(){
     std::cout<<"Testing recursive implicit LU solver on a 16k Schur complement matrix...."<<std::endl;
  
@@ -440,7 +440,7 @@ public:
    * ------------------------------
    * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 16kx16k Schur complement of a turbine blade geometry with two cooling paths. 
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-   */ 
+    
   void iterative_Solver_Schur_Test_16k(){
     std::cout<<"Testing iterative solver on a 16k Schur complement matrix...."<<std::endl;
  
@@ -491,7 +491,7 @@ public:
     //std::cout<< relError<<std::endl;
     CPPUNIT_ASSERT(relError < 1e-5);    
   }
-
+*/
   /* Function : extendedSp_Solver_Simple_Unbalanced
    *------------------------------------------
    * This function tests the extended sparsification LU solver on a simple unbalanced tree. 
@@ -544,7 +544,7 @@ public:
    * This function tests the extended sparsification LU solver on an unbalanced tree. 
    * The HODLR tree is unbalanced on the left and right and has a structure similar to a Schur complement HODLR tree.
    * The function checks if the solver solves the mentioned matrix with the exoected accuracy.
-   */  
+   */   
   void extendedSp_Solver_Schur_Unbalanced_Test(){
     std::cout<<"Testing extended sparsification solver on a Schur complement unbalanced tree...."<<std::endl;
     // Create custom indexing tree
@@ -735,6 +735,7 @@ public:
     */
   }
 
+  /*
   void boundaryFinder_lowRank_Test(){
     //Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/SCHUR_Stiffness/unStructured/300k/300_front_num_2_level_2");
     //Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/SCHUR_Stiffness/unStructured/300k/300_front_num_2_level_2_Graph");
@@ -777,7 +778,7 @@ public:
       std::cout<<"depth = "<<i<<" rank = "<<colIdx.size()<<" abs error = "<<absError<< " rel error = "<<relError<<std::endl;
     
     }
-    */
+    
     
     Eigen::MatrixXd W,V;
     int rank;
@@ -823,6 +824,7 @@ public:
     std::cout<<schurComplement.rows()<<std::endl;
     
   }
+  */
 
   void kernelSolver_Test(){
     int numPoints = 10000;
@@ -835,6 +837,26 @@ public:
     Eigen::VectorXd difference = solverSoln - X;
     double relError = difference.norm()/X.norm();
     std::cout<<relError<<std::endl;
+  }
+
+  void determinant_Test(){
+    int matrixSize = 3000;
+    HODLR_Matrix sample_HODLR;
+    Eigen::MatrixXd sampleMatrix = sample_HODLR.createExactHODLR(10,matrixSize,50);
+    //Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+    //HODLR_Matrix sample_HODLR(sampleMatrix,30);
+    //std::cout<<sampleMatrix.determinant()<<std::endl;
+    Eigen::PartialPivLU<Eigen::MatrixXd> lu(sampleMatrix);
+    double logAbsDet = 0;
+    Eigen::MatrixXd luMatrix = lu.matrixLU();
+    for (int i = 0; i < luMatrix.rows(); i++)
+      logAbsDet += log(std::abs(luMatrix(i,i)));
+    //std::cout<<qr.logAbsDeterminant()<<std::endl;
+    std::cout<<logAbsDet<<std::endl;
+    std::cout<<sample_HODLR.logAbsDeterminant()<<std::endl;
+
+
+
   }
 
 };   
