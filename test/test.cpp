@@ -16,37 +16,30 @@ double quadraticKernel(int i, int j, void* pointsCoordPtr){
   return r * r + 1;
 }
 
-class HODLR_Solver_Test: public CppUnit::TestCase
+class HODLR_Matrix_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
-  CPPUNIT_TEST_SUITE(HODLR_Solver_Test);
-  
-  //CPPUNIT_TEST(recLU_Solver_Test);
-  //CPPUNIT_TEST(extendedSp_Solver_Test);
-  //CPPUNIT_TEST(recLU_Solver_Schur_Test_9k);
-  //CPPUNIT_TEST(iterative_Solver_Schur_Test_9k);
-  //CPPUNIT_TEST(recLU_Solver_Schur_Test_12k);
-  //CPPUNIT_TEST(iterative_Solver_Schur_Test_12k);
-  //CPPUNIT_TEST(recLU_Solver_Schur_Test_16k);
-  //CPPUNIT_TEST(iterative_Solver_Schur_Test_16k);  
-  //CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
-  //CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
-  //CPPUNIT_TEST(iterative_Solve_Test);
+  CPPUNIT_TEST_SUITE(HODLR_Matrix_Test);
+  /*
+  CPPUNIT_TEST(recLU_Solver_Test);
+  CPPUNIT_TEST(extendedSp_Solver_Test);
+  CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
+  CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
+  CPPUNIT_TEST(iterative_Solve_Test);
   //CPPUNIT_TEST(assignment_Test_Simple);
   //CPPUNIT_TEST(assignment_Test_ExtendedSp);
-  //CPPUNIT_TEST(blockExtraction_Test);
-  
-  //CPPUNIT_TEST(splitAtTop_Test);
+  CPPUNIT_TEST(blockExtraction_Test);
+  CPPUNIT_TEST(splitAtTop_Test);
 
   //CPPUNIT_TEST(boundaryFinder_Test);
   //CPPUNIT_TEST(boundaryFinder_lowRank_Test);
   
-  //CPPUNIT_TEST(kernelSolver_Test);
+  CPPUNIT_TEST(kernelSolver_Test);*/
   CPPUNIT_TEST(determinant_Test);
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  HODLR_Solver_Test(): CppUnit::TestCase("HODLR Solver Test"){}
+  HODLR_Matrix_Test(): CppUnit::TestCase("HODLR Matrix Test"){}
 
   
   /* Function : recLU_Solver_Test
@@ -105,393 +98,6 @@ public:
     refrenceFile.close();
   }
 
-  /*
-  
-  /* Function : recLU_Solver_Schur_Test_9k
-   * ------------------------------
-   * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 9kx9k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void recLU_Solver_Schur_Test_9k(){
-    std::cout<<"Testing recursive implicit LU solver on a 9k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 1498;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "partialPiv_ACA";
-    
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 6497;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "partialPiv_ACA";
-    
-    leftNode->splitIndex = 749;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Cheby";
-     
-  
-    usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 3998;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Cheby";
-    
-    
-    rightRightNode->splitIndex = 7868;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Cheby";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement   = readBinaryIntoMatrixXd("data/blade5000Schur.bin");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement * exactSoln;
-    schur_HODLR.set_LRTolerance(1e-6);
-    Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
-
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-5);    
-  }
-
-
-   /* Function : iterative_Solver_Schur_Test_9k
-   * ------------------------------
-   * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 9kx9k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void iterative_Solver_Schur_Test_9k(){
-    std::cout<<"Testing iterative solver on a 9k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 1497;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "PS_Boundary";
-    
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 6496;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "PS_Boundary";
-    
-
-    leftNode->splitIndex = 748;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Boundary";
-     
-  
-    usrTree.setChildren_NULL(leftNode);
-    usrTree.setChildren_NULL(rightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement   = readBinaryIntoMatrixXd("data/blade5000Schur.bin");
-    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/blade5000Graph");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,graph,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement * exactSoln;
-    schur_HODLR.set_BoundaryDepth(2);
-    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,10000,1e-10,1e-1,"PS_Boundary","recLU");
-
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-5);    
-  }
-
-  /* Function : recLU_Solver_Schur_Test_12k
-   * ------------------------------
-   * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 12kx12k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void recLU_Solver_Schur_Test_12k(){
-    std::cout<<"Testing recursive implicit LU solver on a 12k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 2098;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "partialPiv_ACA";
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 9097;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "partialPiv_ACA";
-    
-    leftNode->splitIndex = 1048;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Cheby";
-     
-    usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 5597;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Cheby";
-    
-    rightRightNode->splitIndex = 11016;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Cheby";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/blade7000Schur.bin");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement*exactSoln;
-    schur_HODLR.set_LRTolerance(1e-7);
-    Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-6);    
-  }
-  
-  /* Function : iterative_Solver_Schur_Test_12k
-   * ------------------------------
-   * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 12kx12k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void iterative_Solver_Schur_Test_12k(){
-    std::cout<<"Testing iterative solver on a 12k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 2097;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "PS_Boundary";
-    
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 9096;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "PS_Boundary";
-    
-
-    leftNode->splitIndex = 1047;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Boundary";
-     
-  
-    usrTree.setChildren_NULL(leftNode);
-    usrTree.setChildren_NULL(rightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement   = readBinaryIntoMatrixXd("data/blade7000Schur.bin");
-    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/blade7000Graph");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,graph,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement * exactSoln;
-    schur_HODLR.set_BoundaryDepth(2);
-    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,10000,1e-10,1e-1,"PS_Boundary","recLU");
-
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-5);    
-  }
-
- /* Function : recLU_Solver_Schur_Test_16k
-   * ------------------------------
-   * This function tests the implicit recursive LU solver on a Schur complement matrix. The test is done on a 16kx16k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void recLU_Solver_Schur_Test_16k(){
-    std::cout<<"Testing recursive implicit LU solver on a 16k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 8998;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "partialPiv_ACA";
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 13932;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "partialPiv_ACA";
-    
-    leftNode->splitIndex = 4499;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Cheby";
-     
-    usrTree.setChildren_NULL(leftNode);
-   
-    user_IndexTree::node* leftRightNode = new user_IndexTree::node;
-    user_IndexTree::node* rightRightNode = new user_IndexTree::node;
-    rightNode->left = leftRightNode;
-    rightNode->right = rightRightNode;
-    
-    leftRightNode->splitIndex = 11465;
-    leftRightNode->topOffDiag_minRank = -1;                                                               
-    leftRightNode->bottOffDiag_minRank = -1;
-    leftRightNode->LR_Method = "PS_Cheby";
-    
-    rightRightNode->splitIndex = 15282;
-    rightRightNode->topOffDiag_minRank = -1;                                                               
-    rightRightNode->bottOffDiag_minRank = -1;
-    rightRightNode->LR_Method = "PS_Cheby";
-    
-    usrTree.setChildren_NULL(leftRightNode);
-    usrTree.setChildren_NULL(rightRightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement = readBinaryIntoMatrixXd("data/blade9000Schur.bin");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement * exactSoln;
-    schur_HODLR.set_LRTolerance(0.3 * 1e-7);
-    Eigen::VectorXd solverSoln = schur_HODLR.recLU_Solve(inputF);
-
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-7);    
-  }
-
-  
-  /* Function : iterative_Solver_Schur_Test_16k
-   * ------------------------------
-   * This function tests the iterative solver with direct sover preconditioning on a Schur complement matrix. The test is done on a 16kx16k Schur complement of a turbine blade geometry with two cooling paths. 
-   * The functions checks if the solver solves the mentioned matrix with the expected accuracy.
-    
-  void iterative_Solver_Schur_Test_16k(){
-    std::cout<<"Testing iterative solver on a 16k Schur complement matrix...."<<std::endl;
- 
-    // Create custom indexing tree
-    user_IndexTree usrTree;
-    usrTree.rootNode = new user_IndexTree::node;
-    usrTree.rootNode->splitIndex = 8997;
-    usrTree.rootNode->topOffDiag_minRank = -1;                                                               
-    usrTree.rootNode->bottOffDiag_minRank = -1;
-    usrTree.rootNode->LR_Method = "PS_Boundary";
-    
-    
-    user_IndexTree::node* leftNode = new user_IndexTree::node;
-    user_IndexTree::node* rightNode = new user_IndexTree::node;
-    usrTree.rootNode->left = leftNode;
-    usrTree.rootNode->right = rightNode;
-    
-    rightNode->splitIndex = 13931;
-    rightNode->topOffDiag_minRank = -1;                                                               
-    rightNode->bottOffDiag_minRank = -1;
-    rightNode->LR_Method = "PS_Boundary";
-    
-
-    leftNode->splitIndex = 4498;
-    leftNode->topOffDiag_minRank = -1;                                                               
-    leftNode->bottOffDiag_minRank = -1;
-    leftNode->LR_Method = "PS_Boundary";
-     
-    usrTree.setChildren_NULL(leftNode);
-    usrTree.setChildren_NULL(rightNode);
-
-    // Read input file 
-    std::cout<<"         Reading input file....."<<std::endl;
-    Eigen::MatrixXd schurComplement   = readBinaryIntoMatrixXd("data/blade9000Schur.bin");
-    Eigen::SparseMatrix<double> graph = readMtxIntoSparseMatrix("data/blade9000Graph");
-    int matrixSize = schurComplement.rows();
-    std::cout<<"         Read successfull."<<std::endl;
-    // Initialize Solver
-    HODLR_Matrix schur_HODLR(schurComplement,graph,30,usrTree);
-    schur_HODLR.printResultInfo = true;
-    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-    Eigen::VectorXd inputF = schurComplement * exactSoln;
-    schur_HODLR.set_BoundaryDepth(2);
-    Eigen::VectorXd solverSoln = schur_HODLR.iterative_Solve(inputF,10000,1e-10,1e-1,"PS_Boundary","recLU");
-
-    Eigen::VectorXd difference = solverSoln - exactSoln;
-    double relError = difference.norm()/exactSoln.norm();
-    //std::cout<< relError<<std::endl;
-    CPPUNIT_ASSERT(relError < 1e-5);    
-  }
-*/
   /* Function : extendedSp_Solver_Simple_Unbalanced
    *------------------------------------------
    * This function tests the extended sparsification LU solver on a simple unbalanced tree. 
@@ -840,23 +446,21 @@ public:
   }
 
   void determinant_Test(){
+    /*
     int matrixSize = 3000;
     HODLR_Matrix sample_HODLR;
-    Eigen::MatrixXd sampleMatrix = sample_HODLR.createExactHODLR(10,matrixSize,50);
+    Eigen::MatrixXd sampleMatrix = sample_HODLR.createExactHODLR(100,matrixSize,1500);
+    
     //Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
-    //HODLR_Matrix sample_HODLR(sampleMatrix,30);
-    //std::cout<<sampleMatrix.determinant()<<std::endl;
+    //HODLR_Matrix sample_HODLR(sampleMatrix,50);
     Eigen::PartialPivLU<Eigen::MatrixXd> lu(sampleMatrix);
     double logAbsDet = 0;
     Eigen::MatrixXd luMatrix = lu.matrixLU();
     for (int i = 0; i < luMatrix.rows(); i++)
-      logAbsDet += log(std::abs(luMatrix(i,i)));
-    //std::cout<<qr.logAbsDeterminant()<<std::endl;
+      logAbsDet += log(fabs(luMatrix(i,i)));
     std::cout<<logAbsDet<<std::endl;
     std::cout<<sample_HODLR.logAbsDeterminant()<<std::endl;
-
-
-
+    */
   }
 
 };   
@@ -864,7 +468,7 @@ public:
 
 int main(int argc, char* argv[]){
   CppUnit::TextUi::TestRunner runner;
-  runner.addTest(HODLR_Solver_Test::suite());
+  runner.addTest(HODLR_Matrix_Test::suite());
   runner.run();
   return 0;
 }
