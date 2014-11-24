@@ -12,6 +12,7 @@ set(HODLRSolver_source_files
   lowRank.cpp
   matrixIO.cpp 	
   kernel.cpp
+  perturbI.cpp
 )
 
 # Create a library called HODLRSolver which includes the source files defined

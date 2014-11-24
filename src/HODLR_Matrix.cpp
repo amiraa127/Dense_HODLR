@@ -520,7 +520,6 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
 
 Eigen::MatrixXd HODLR_Matrix::createExactHODLR(const int rank,int input_MatrixSize,const int input_SizeThreshold){
   assert(indexTree.rootNode == NULL);
-  //assert(rank > 0);
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(input_MatrixSize,input_MatrixSize);
   isSquareMatrix = true;  // Currently unable to build trees for non squared matrices
   matrixSize    = input_MatrixSize;
@@ -603,11 +602,14 @@ void HODLR_Matrix::recSM_Factorize(){
    
   int tree_numLevels = indexTree.get_numLevels();
   for (int i = tree_numLevels - 1; i > 0; i--){
-    std::cout<<"Elimiating the effect of level "<<i<<std::endl;
+    //std::cout<<"Elimiating the effect of level "<<i<<std::endl;
     std::vector<HODLR_Tree::node*> left,right; 
     recSM_Factorize(indexTree.rootNode,left,right,i);
   }
-  std::cout<<"Factorized"<<std::endl;
+  HODLR_Tree::node* HODLR_Root = indexTree.rootNode;
+  HODLR_Root->nodePerturbI = perturbI(&(HODLR_Root->topOffDiagU_SM),&(HODLR_Root->topOffDiagV),&(HODLR_Root->bottOffDiagU_SM),&(HODLR_Root->bottOffDiagV));
+ 
+ // std::cout<<"Factorized"<<std::endl;
 }
 
 
@@ -649,8 +651,10 @@ void HODLR_Matrix::recSM_Factorize(HODLR_Tree::node* HODLR_Root,std::vector<HODL
     if (currChild->isLeaf){
       HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currChild->leafLU.solve(RHS);
     }else{
-      perturbI currPerturb(currChild->topOffDiagU_SM,currChild->topOffDiagV,currChild->bottOffDiagU_SM,currChild->bottOffDiagV);
-      HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+      //perturbI currPerturb(&(currChild->topOffDiagU_SM),&(currChild->topOffDiagV),&(currChild->bottOffDiagU_SM),&(currChild->bottOffDiagV));
+      currChild->nodePerturbI = perturbI(&(currChild->topOffDiagU_SM),&(currChild->topOffDiagV),&(currChild->bottOffDiagU_SM),&(currChild->bottOffDiagV));
+      //HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+      HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currChild->nodePerturbI.solve(RHS);
     }
   }
   
@@ -662,11 +666,12 @@ void HODLR_Matrix::recSM_Factorize(HODLR_Tree::node* HODLR_Root,std::vector<HODL
     if (currChild->isLeaf){
       HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currChild->leafLU.solve(RHS);
     }else{
-      perturbI currPerturb(currChild->topOffDiagU_SM,currChild->topOffDiagV,currChild->bottOffDiagU_SM,currChild->bottOffDiagV);
-      HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+      //perturbI currPerturb(&(currChild->topOffDiagU_SM),&(currChild->topOffDiagV),&(currChild->bottOffDiagU_SM),&(currChild->bottOffDiagV));
+      //HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+      currChild->nodePerturbI = perturbI(&(currChild->topOffDiagU_SM),&(currChild->topOffDiagV),&(currChild->bottOffDiagU_SM),&(currChild->bottOffDiagV));
+      HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currChild->nodePerturbI.solve(RHS);
     }
   }
- 
 }
 
 void HODLR_Matrix::recSM_Solve(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &RHS){
@@ -683,10 +688,10 @@ void HODLR_Matrix::recSM_Solve(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &RHS
   recSM_Solve(HODLR_Root->right,RHS);
   
   Eigen::MatrixXd currRHS = RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols());
-  perturbI currPerturb(HODLR_Root->topOffDiagU_SM,HODLR_Root->topOffDiagV,HODLR_Root->bottOffDiagU_SM,HODLR_Root->bottOffDiagV);
-  RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols()) = currPerturb.solve(currRHS);
-  
-  
+  //perturbI currPerturb(&(HODLR_Root->topOffDiagU_SM),&(HODLR_Root->topOffDiagV),&(HODLR_Root->bottOffDiagU_SM),&(HODLR_Root->bottOffDiagV));
+  //RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols()) = currPerturb.solve(currRHS);
+  RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols()) = HODLR_Root->nodePerturbI.solve(currRHS);
+ 
 
 }
 

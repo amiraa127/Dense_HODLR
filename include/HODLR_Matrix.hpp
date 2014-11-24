@@ -15,14 +15,14 @@
 #include <Eigen/Sparse>
 
 //Custom Dependencies
-#include "HODLR_Tree.hpp"
 #include "helperFunctions.hpp"
-#include "user_IndexTree.hpp"
-#include "recLU_FactorTree.hpp"
+#include "HODLR_Tree.hpp"
+#include "kernel.hpp"
 #include "lowRank.hpp"
 #include "matrixIO.hpp"
-#include "kernel.hpp"
-
+#include "perturbI.hpp"
+#include "user_IndexTree.hpp"
+#include "recLU_FactorTree.hpp"
 
 /**
  * \author Amirhossein Aminfar
@@ -31,42 +31,7 @@
 class HODLR_Matrix{
 
 public:
-
-
-  struct perturbI{
-    Eigen::MatrixXd& topU;
-    Eigen::MatrixXd& topV;
-    Eigen::MatrixXd& bottU;
-    Eigen::MatrixXd& bottV;
-    Eigen::MatrixXd eqMatrix;
-    Eigen::MatrixXd U;
-    Eigen::MatrixXd VT;
-    perturbI(Eigen::MatrixXd & topU_,Eigen::MatrixXd & topV_, Eigen::MatrixXd & bottU_, Eigen::MatrixXd & bottV_): topU(topU_),topV(topV_),bottU(bottU_),bottV(bottV_){
-      assert(topU.rows() + bottU.rows() == topV.rows() + bottV.rows());
-      assert(topU.cols()  == topV.cols());
-      assert(bottU.cols() == bottV.cols());
-    
-      int rankTotal = topU.cols() + bottU.cols();
-      int blockSize = topU.rows() + bottU.rows();
-      
-      U  = Eigen::MatrixXd::Zero(blockSize,rankTotal);
-      VT = Eigen::MatrixXd::Zero(rankTotal,blockSize);
-      
-      U.topLeftCorner(topU.rows(),topU.cols()) = topU;
-      U.bottomRightCorner(bottU.rows(),bottU.cols()) = bottU;
-      VT.topRightCorner(topV.cols(),topV.rows()) = topV.transpose();
-      VT.bottomLeftCorner(bottV.cols(),bottV.rows()) = bottV.transpose();
-    
-      eqMatrix = Eigen::MatrixXd::Identity(rankTotal,rankTotal) + VT * U;      
-      
-    };
-    
-    Eigen::MatrixXd solve(Eigen::MatrixXd &RHS){
-      Eigen::PartialPivLU<Eigen::MatrixXd> lu(eqMatrix);
-      return (RHS - U * (lu.solve(VT * RHS)));  
-    }
-  };
-  
+ 
   bool printLevelRankInfo;
   bool printLevelAccuracy;
   bool printLevelInfo;

@@ -43,16 +43,20 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
 public:
   HODLR_Matrix_Test(): CppUnit::TestCase("HODLR Matrix Test"){}
 
+  /* Function : recSM_Solver_Test_Radom
+   * --------------------------------------
+   * This function tests the recursive Sherman Morrison Solver ona 10kx10k random HODLR matrix and checks the accuracy.
+   */
   void recSM_Solver_Test_Random(){
-
+    std::cout<<"Testing recursive Sherman Morrison solver on a random matrix...."<<std::endl;
     int matrixSize = 10000;
     HODLR_Matrix sampleHODLR;
     Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
     Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
     Eigen::MatrixXd solverSoln = sampleHODLR.recSM_Solve(sampleRHS);
-    std::cout<<(exactSoln - solverSoln).norm()/exactSoln.norm()<<std::endl;
-
+    double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
+    CPPUNIT_ASSERT(error < 1e-8);
   }
 
   /* Function : recLU_Solver_Test
@@ -77,7 +81,7 @@ public:
       sscanf(testLine.c_str(),"%lf %lf",&testTol,&testErr);
       sscanf(refLine.c_str(),"%lf %lf",&refTol,&refErr);
       CPPUNIT_ASSERT_DOUBLES_EQUAL(refTol,testTol,1e-10);
-      CPPUNIT_ASSERT(abs((testErr - refErr)/refErr) < 10);
+      CPPUNIT_ASSERT(fabs((testErr - refErr)/refErr) < 10);
     }
     testFile.close();
     refrenceFile.close();
@@ -105,7 +109,7 @@ public:
       sscanf(testLine.c_str(),"%lf %lf",&testTol,&testErr);
       sscanf(refLine.c_str(),"%lf %lf",&refTol,&refErr);
       CPPUNIT_ASSERT_DOUBLES_EQUAL(refTol,testTol,1e-10);
-      CPPUNIT_ASSERT(abs((testErr - refErr)/refErr) < 10);
+      CPPUNIT_ASSERT(fabs((testErr - refErr)/refErr) < 10);
     }
     testFile.close();
     refrenceFile.close();
