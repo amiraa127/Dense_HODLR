@@ -239,6 +239,10 @@ private:
   double recLU_FactorizationTime;
   double recLU_SolveTime;
   double recLU_TotalTime;
+  double recSM_FactorizationTime;
+  double recSM_SolveTime;
+  double recSM_TotalTime;
+
   double LR_ComputationTime;
   double extendedSp_AssemblyTime;
   double extendedSp_FactorizationTime;
@@ -258,6 +262,7 @@ private:
   
   bool LRStoredInTree;
   bool recLU_Factorized;
+  bool recSM_Factorized;
   bool assembled_ExtendedSp;
   bool saveExtendedSp_Matrix;
   bool freeMatrixMemory;
