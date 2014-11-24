@@ -1823,25 +1823,20 @@ void HODLR_Matrix::calcDeterminant(){
   if (calculatedDet == false){
     determinant_ = 1;
     logAbsDeterminant_ = 0;
+    recSM_Factorize();
     calcDeterminant(indexTree.rootNode);
   }
 }
 
 void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
-  /*
+  
   if (HODLR_Root->isLeaf == true){
     Eigen::PartialPivLU<Eigen::MatrixXd> luFact(HODLR_Root->leafMatrix);
-   
     Eigen::MatrixXd luMatrix = luFact.matrixLU();
-    //
-    double x = 0.0;
-    //
     for (int i = 0; i < luMatrix.rows(); i++){
       determinant_ *= luMatrix(i,i);
       logAbsDeterminant_ += log(fabs(luMatrix(i,i)));
-      x += log(fabs(luMatrix(i,i)));
     }
-    std::cout<<x<<std::endl;
     return;
   }
   
@@ -1852,22 +1847,13 @@ void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   
   int rankTotal = HODLR_Root->topOffDiagRank + HODLR_Root->bottOffDiagRank;
   int blockSize = numRows_TopOffDiag + numRows_BottOffDiag;
- 
-  //std::cout<<blockSize<<std::endl;
-  std::cout<<HODLR_Root->splitIndex_i<< " "<<HODLR_Root->splitIndex_j<<std::endl;
+  
   Eigen::MatrixXd U  = Eigen::MatrixXd::Zero(blockSize,rankTotal);
   Eigen::MatrixXd VT = Eigen::MatrixXd::Zero(rankTotal,blockSize);
   
-  Eigen::MatrixXd actualMatrix = Eigen::MatrixXd::Identity(blockSize,blockSize);
-  Eigen::MatrixXd actualMatrixD = Eigen::MatrixXd::Zero(blockSize,blockSize);
-  actualMatrix.topRightCorner(numRows_TopOffDiag,numCols_TopOffDiag) = HODLR_Root->topOffDiagU*HODLR_Root->topOffDiagV.transpose();
-  actualMatrix.bottomLeftCorner(numRows_BottOffDiag,numCols_BottOffDiag) = HODLR_Root->bottOffDiagU*HODLR_Root->bottOffDiagV.transpose();
 
-  actualMatrixD.topLeftCorner(1500,1500) = matrixData.topLeftCorner(1500,1500);
-  actualMatrixD.bottomRightCorner(1500,1500) = matrixData.bottomRightCorner(1500,1500);
-
-  U.topLeftCorner(numRows_TopOffDiag,HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagU;
-  U.bottomRightCorner(numRows_BottOffDiag,HODLR_Root->bottOffDiagRank) = HODLR_Root->bottOffDiagU;
+  U.topLeftCorner(numRows_TopOffDiag,HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagU_SM;
+  U.bottomRightCorner(numRows_BottOffDiag,HODLR_Root->bottOffDiagRank) = HODLR_Root->bottOffDiagU_SM;
   VT.topRightCorner(HODLR_Root->topOffDiagRank,numCols_TopOffDiag) = HODLR_Root->topOffDiagV.transpose();
   VT.bottomLeftCorner(HODLR_Root->bottOffDiagRank,numCols_BottOffDiag) = HODLR_Root->bottOffDiagV.transpose();
   
@@ -1875,17 +1861,13 @@ void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   Eigen::PartialPivLU<Eigen::MatrixXd> luFact(detMatrix);
   Eigen::MatrixXd luMatrix = luFact.matrixLU();
   
-  Eigen::HouseholderQR<Eigen::MatrixXd> qr(actualMatrixD);
-  double x = 0;
   for (int i = 0; i < rankTotal; i++){
     determinant_ *= luMatrix(i,i);
     logAbsDeterminant_ += log(fabs(luMatrix(i,i)));
-    x += log(std::abs(luMatrix(i,i)));
   }
-  std::cout<<x<<" "<<qr.logAbsDeterminant()<<std::endl;
  
   calcDeterminant(HODLR_Root->left);
   calcDeterminant(HODLR_Root->right);
-  */
+  
 }
 

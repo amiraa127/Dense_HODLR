@@ -24,9 +24,9 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   CPPUNIT_TEST(recSM_Solver_Test_Random);
 
   CPPUNIT_TEST(recLU_Solver_Test);
-  CPPUNIT_TEST(extendedSp_Solver_Test);
-  CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
-  CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
+  //CPPUNIT_TEST(extendedSp_Solver_Test);
+  //CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
+  //CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
   CPPUNIT_TEST(iterative_Solve_Test);
   //CPPUNIT_TEST(assignment_Test_Simple);
   //CPPUNIT_TEST(assignment_Test_ExtendedSp);
@@ -37,7 +37,7 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   //CPPUNIT_TEST(boundaryFinder_lowRank_Test);
   
   CPPUNIT_TEST(kernelSolver_Test);
-  //CPPUNIT_TEST(determinant_Test);
+  CPPUNIT_TEST(determinant_Test);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -463,21 +463,19 @@ public:
   }
 
   void determinant_Test(){
-    /*
+    
     int matrixSize = 3000;
     HODLR_Matrix sample_HODLR;
-    Eigen::MatrixXd sampleMatrix = sample_HODLR.createExactHODLR(100,matrixSize,1500);
-    
-    //Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
-    //HODLR_Matrix sample_HODLR(sampleMatrix,50);
+    Eigen::MatrixXd sampleMatrix = sample_HODLR.createExactHODLR(100,matrixSize,50);
     Eigen::PartialPivLU<Eigen::MatrixXd> lu(sampleMatrix);
     double logAbsDet = 0;
     Eigen::MatrixXd luMatrix = lu.matrixLU();
     for (int i = 0; i < luMatrix.rows(); i++)
       logAbsDet += log(fabs(luMatrix(i,i)));
-    std::cout<<logAbsDet<<std::endl;
-    std::cout<<sample_HODLR.logAbsDeterminant()<<std::endl;
-    */
+    double error = fabs(logAbsDet - sample_HODLR.logAbsDeterminant())/fabs(logAbsDet);
+    
+    std::cout<<error<<std::endl;
+    
   }
 
 };   
