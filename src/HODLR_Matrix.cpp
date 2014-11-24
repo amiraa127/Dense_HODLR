@@ -1382,8 +1382,9 @@ void HODLR_Matrix::saveSolverInfo(const std::string outputFileName){
 void HODLR_Matrix::reset_attributes(){
   LRStoredInTree       = false;
   recLU_Factorized     = false;
+  recSM_Factorized     = false;
   assembled_ExtendedSp = false;
-
+  
   recLU_FactorizationTime = 0;
   recLU_SolveTime = 0;
   LR_ComputationTime = 0;
