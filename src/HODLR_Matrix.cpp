@@ -599,6 +599,101 @@ void HODLR_Matrix::recLU_Factorize(){
   Eigen::MatrixXd dummyX = recLU_Factorize(dummyF, indexTree.rootNode, recLUfactorTree.rootNode);
 }
 
+void HODLR_Matrix::recSM_Factorize(){
+   
+  int tree_numLevels = indexTree.get_numLevels();
+  for (int i = tree_numLevels - 1; i > 0; i--){
+    std::cout<<"Elimiating the effect of level "<<i<<std::endl;
+    std::vector<HODLR_Tree::node*> left,right; 
+    recSM_Factorize(indexTree.rootNode,left,right,i);
+  }
+  std::cout<<"Factorized"<<std::endl;
+}
+
+
+void HODLR_Matrix::recSM_Factorize(HODLR_Tree::node* HODLR_Root,std::vector<HODLR_Tree::node*> &leftChildren, std::vector<HODLR_Tree::node*> &rightChildren,int desLevel){
+  if (HODLR_Root->left->currLevel == desLevel){
+    if (HODLR_Root->left->isLeaf)
+      HODLR_Root->left->leafLU = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->left->leafMatrix);
+    leftChildren.push_back(HODLR_Root->left);
+  }else if (!HODLR_Root->left->isLeaf){
+    std::vector<HODLR_Tree::node*> left,right;
+    recSM_Factorize(HODLR_Root->left,left,right,desLevel);
+    left.insert(left.end(),right.begin(),right.end());
+    leftChildren = left;
+  }
+  
+  if (HODLR_Root->right->currLevel == desLevel){
+    if (HODLR_Root->right->isLeaf)
+      HODLR_Root->right->leafLU = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->right->leafMatrix);
+    rightChildren.push_back(HODLR_Root->right);
+  }else if (!HODLR_Root->right->isLeaf){
+    std::vector<HODLR_Tree::node*> left,right; 
+    recSM_Factorize(HODLR_Root->right,left,right,desLevel);
+    right.insert(right.end(),left.begin(),left.end());
+    rightChildren = right;
+  }
+  
+  if (HODLR_Root->topOffDiagU_SM.rows() == 0)
+    HODLR_Root->topOffDiagU_SM = HODLR_Root->topOffDiagU;
+  
+  if (HODLR_Root->bottOffDiagU_SM.rows() == 0)
+    HODLR_Root->bottOffDiagU_SM = HODLR_Root->bottOffDiagU;
+  
+  
+  for (unsigned int i = 0; i < leftChildren.size(); i++){
+    HODLR_Tree::node* currChild = leftChildren[i];
+    int currChildSize   = currChild->max_i - currChild->min_i + 1;
+    int minIdx = currChild->min_i - HODLR_Root->min_i;
+    Eigen::MatrixXd RHS = HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols());
+    if (currChild->isLeaf){
+      HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currChild->leafLU.solve(RHS);
+    }else{
+      perturbI currPerturb(currChild->topOffDiagU_SM,currChild->topOffDiagV,currChild->bottOffDiagU_SM,currChild->bottOffDiagV);
+      HODLR_Root->topOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->topOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+    }
+  }
+  
+  for (unsigned int i = 0; i < rightChildren.size(); i++){
+    HODLR_Tree::node* currChild = rightChildren[i];
+    int currChildSize   = currChild->max_i - currChild->min_i + 1;
+    int minIdx = currChild->min_i - HODLR_Root->splitIndex_i - 1;
+    Eigen::MatrixXd RHS = HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols());
+    if (currChild->isLeaf){
+      HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currChild->leafLU.solve(RHS);
+    }else{
+      perturbI currPerturb(currChild->topOffDiagU_SM,currChild->topOffDiagV,currChild->bottOffDiagU_SM,currChild->bottOffDiagV);
+      HODLR_Root->bottOffDiagU_SM.block(minIdx,0,currChildSize,HODLR_Root->bottOffDiagU_SM.cols()) = currPerturb.solve(RHS);
+    }
+  }
+ 
+}
+
+void HODLR_Matrix::recSM_Solve(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &RHS){
+ 
+  int currBlockSize =  HODLR_Root->max_i - HODLR_Root->min_i + 1;
+  
+  if (HODLR_Root->isLeaf == true){
+    Eigen::MatrixXd currRHS = RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols());
+    RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols()) = HODLR_Root->leafLU.solve(currRHS);
+    return;
+  }
+  
+  recSM_Solve(HODLR_Root->left,RHS);
+  recSM_Solve(HODLR_Root->right,RHS);
+  
+  Eigen::MatrixXd currRHS = RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols());
+  perturbI currPerturb(HODLR_Root->topOffDiagU_SM,HODLR_Root->topOffDiagV,HODLR_Root->bottOffDiagU_SM,HODLR_Root->bottOffDiagV);
+  RHS.block(HODLR_Root->min_i,0,currBlockSize,RHS.cols()) = currPerturb.solve(currRHS);
+  
+  
+
+}
+
+
+
+
+
 Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot){
 
   // Base case
@@ -841,9 +936,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
     else if (kernelDataAvail == true)
       std::cout<<"Residual l2 Relative Error       = "<<((kernelMatrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;
     
-  }
-  
-
+  } 
   return solution;
 
 }
@@ -864,6 +957,14 @@ void HODLR_Matrix::recLU_Compute(){
   }
 }
 
+Eigen::MatrixXd HODLR_Matrix::recSM_Solve(const Eigen::MatrixXd & RHS){
+  storeLRinTree();
+  recSM_Factorize();
+  Eigen::MatrixXd cpyRHS = RHS;
+  recSM_Solve(indexTree.rootNode,cpyRHS);
+  return cpyRHS;
+
+}
 
 void HODLR_Matrix::findNodesAtLevel(HODLR_Tree::node* HODLR_Root, const int level,std::vector<HODLR_Tree::node*> & outputVector){
 

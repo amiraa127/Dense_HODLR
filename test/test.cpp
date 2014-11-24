@@ -20,7 +20,9 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
 {
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Matrix_Test);
-  /*
+  
+  CPPUNIT_TEST(recSM_Solver_Test_Random);
+
   CPPUNIT_TEST(recLU_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Test);
   CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
@@ -34,14 +36,25 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   //CPPUNIT_TEST(boundaryFinder_Test);
   //CPPUNIT_TEST(boundaryFinder_lowRank_Test);
   
-  CPPUNIT_TEST(kernelSolver_Test);*/
-  CPPUNIT_TEST(determinant_Test);
+  CPPUNIT_TEST(kernelSolver_Test);
+  //CPPUNIT_TEST(determinant_Test);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   HODLR_Matrix_Test(): CppUnit::TestCase("HODLR Matrix Test"){}
 
-  
+  void recSM_Solver_Test_Random(){
+
+    int matrixSize = 10000;
+    HODLR_Matrix sampleHODLR;
+    Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
+    Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
+    Eigen::MatrixXd solverSoln = sampleHODLR.recSM_Solve(sampleRHS);
+    std::cout<<(exactSoln - solverSoln).norm()/exactSoln.norm()<<std::endl;
+
+  }
+
   /* Function : recLU_Solver_Test
    * ------------------------------
    * This function tests the recursive LU solver on a 10kx10k dense interaction matrix with an inverse multiquadratic kernel.
