@@ -596,22 +596,33 @@ void HODLR_Matrix::createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,
 
 
 void HODLR_Matrix::recLU_Factorize(){
-  recLUfactorTree.rootNode = new recLU_FactorTree::node;
-  (recLUfactorTree.rootNode)->isLeaf = false; 
-  Eigen::VectorXd dummyF = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2); 
-  Eigen::MatrixXd dummyX = recLU_Factorize(dummyF, indexTree.rootNode, recLUfactorTree.rootNode);
+   if (recLU_Factorized == false){
+    double startTime = clock();
+    recLUfactorTree.rootNode = new recLU_FactorTree::node;
+    (recLUfactorTree.rootNode)->isLeaf = false; 
+    Eigen::VectorXd dummyF = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2); 
+    Eigen::MatrixXd dummyX = recLU_Factorize(dummyF, indexTree.rootNode, recLUfactorTree.rootNode);
+    double endTime = clock();
+    recLU_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    recLU_Factorized = true;
+  }
+
 }
 
 void HODLR_Matrix::recSM_Factorize(){
-   
-  int tree_numLevels = indexTree.get_numLevels();
-  for (int i = tree_numLevels - 1; i > 0; i--){
-    std::vector<HODLR_Tree::node*> left,right; 
-    recSM_Factorize(indexTree.rootNode,left,right,i);
+  if (recSM_Factorized == false){
+    double startTime = clock();
+    int tree_numLevels = indexTree.get_numLevels();
+    for (int i = tree_numLevels - 1; i > 0; i--){
+      std::vector<HODLR_Tree::node*> left,right; 
+      recSM_Factorize(indexTree.rootNode,left,right,i);
+    }
+    HODLR_Tree::node* HODLR_Root = indexTree.rootNode;
+    HODLR_Root->nodePerturbI = perturbI(&(HODLR_Root->topOffDiagU_SM),&(HODLR_Root->topOffDiagV),&(HODLR_Root->bottOffDiagU_SM),&(HODLR_Root->bottOffDiagV));
+    double endTime = clock();
+    recSM_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
+    recSM_Factorized = true;
   }
-  HODLR_Tree::node* HODLR_Root = indexTree.rootNode;
-  HODLR_Root->nodePerturbI = perturbI(&(HODLR_Root->topOffDiagU_SM),&(HODLR_Root->topOffDiagV),&(HODLR_Root->bottOffDiagU_SM),&(HODLR_Root->bottOffDiagV));
-
 }
 
 
@@ -909,14 +920,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
   }
 
   storeLRinTree();
-
-  if (recLU_Factorized == false){
-    double startTime = clock();
-    recLU_Factorize();
-    double endTime = clock();
-    recLU_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    recLU_Factorized = true;
-  }
+  recLU_Factorize();
   
   double startTime = clock();
   Eigen::MatrixXd solution = recLU_Solve(input_RHS,indexTree.rootNode,recLUfactorTree.rootNode);
@@ -948,13 +952,8 @@ void HODLR_Matrix::recLU_Compute(){
     initializeInfoVecotrs(indexTree.get_numLevels());
   }
   storeLRinTree();
-  if (recLU_Factorized == false){
-    double startTime = clock();
-    recLU_Factorize();
-    double endTime = clock();
-    recLU_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    recLU_Factorized = true;
-  }
+  recLU_Factorize();
+ 
 }
 
 Eigen::MatrixXd HODLR_Matrix::recSM_Solve(const Eigen::MatrixXd & input_RHS){
@@ -968,15 +967,8 @@ Eigen::MatrixXd HODLR_Matrix::recSM_Solve(const Eigen::MatrixXd & input_RHS){
   }
 
   storeLRinTree();
- 
-  if (recSM_Factorized == false){
-    double startTime = clock();
-    recSM_Factorize();
-    double endTime = clock();
-    recSM_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    recSM_Factorized = true;
-  }
-
+  recSM_Factorize();
+  
   Eigen::MatrixXd solution = input_RHS;
   double startTime = clock();
   recSM_Solve(indexTree.rootNode,solution);

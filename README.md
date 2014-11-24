@@ -12,18 +12,39 @@ Amirhossein Aminfar: amir_aa127@yahoo.co.uk
 
 If you use the implementation or any part of the implementation in your work, kindly cite as follows:
 
-####Article:
+####Articles:
 
 @article{aminfar2014fast,
-
 author={{A}minfar, {A}mirhossein and {A}mbikasaran, {S}ivaram and {D}arve, {E}ric},
-
 title={A Fast Block Low-Rank Dense Solver with Applications to Finite-Element Matrices},
-
 journal={arXiv:1403.5337},
-
 year={2014}
+}
 
+
+@article{ambikasaran2014fastdet,
+title={Fast Direct Methods for {G}aussian Processes and the Analysis of {NASA} {K}epler Mission Data},
+author={Ambikasaran, Sivaram and Foreman-Mackey, Daniel and Greengard, Leslie F. and Hogg, David W. and O'Neil, Michael},
+journal={arXiv preprint arXiv:1403.6015},
+year={2014}
+}
+
+@article{ambikasaran2013fast,
+title={An $\mathcal{O}({N} \log {N})$ Fast Direct Solver for Partial Hierarchically Semi-Separable Matrices},
+author={Ambikasaran, Sivaram and Darve, Eric F.},
+journal={Journal of Scientific Computing},
+volume={57},
+number={3},
+pages={477--501},
+year={2013},
+publisher={Springer}
+}
+
+@article{ambikasaran2014fastsym,
+title={Fast symmetric factorization of hierarchical matrices with applications},
+author={Ambikasaran, Sivaram and O'Neil, Michael},
+journal={arXiv preprint arXiv:1405.0223},
+year={2014}
 }
 
 ####Code
@@ -56,6 +77,7 @@ This program is free software; you can redistribute it and/or modify it under th
 ####Build
 
 The easiest way to build the library is to use [CMake](http://www.cmake.org). Go to the project directory and run:
+
 ```
 mkdir build
 cd build
@@ -63,6 +85,6 @@ cmake ../
 make
 ```
 
-####Documrntation
+####Documentation
 
 The documentation for this package is currently located at http://amiraa127.github.io/Dense_HODLR/. It's currently incomplete but I will add material to it gradually.
