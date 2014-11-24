@@ -17,7 +17,7 @@ perturbI::perturbI(Eigen::MatrixXd* topU_,Eigen::MatrixXd* topV_, Eigen::MatrixX
   topV = topV_;
   bottU = bottU_;
   bottV = bottV_;
-
+ 
   assert(topU->rows() + bottU->rows() == topV->rows() + bottV->rows());
   assert(topU->cols()  == topV->cols());
   assert(bottU->cols() == bottV->cols());
@@ -35,14 +35,21 @@ perturbI::perturbI(Eigen::MatrixXd* topU_,Eigen::MatrixXd* topV_, Eigen::MatrixX
   
   eqMatrix = Eigen::MatrixXd::Identity(rankTotal,rankTotal) + VT * U;
   eqMatrixStored = true;
+  eqMatrixFactorized = false;
+ 
 };
 
-Eigen::MatrixXd eqMatrixFactorize(){
-
-
+void perturbI::eqMatrixFactorize(){
+  assert(eqMatrixStored == true);
+  if (eqMatrixFactorized == false){
+    eqLU = Eigen::PartialPivLU<Eigen::MatrixXd>(eqMatrix);
+    eqMatrixFactorized = true;
+  }
 }
 
 Eigen::MatrixXd perturbI::solve(const Eigen::MatrixXd &RHS){
-  Eigen::PartialPivLU<Eigen::MatrixXd> lu(eqMatrix);
-  return (RHS - U * (lu.solve(VT * RHS)));
+  //Eigen::PartialPivLU<Eigen::MatrixXd> lu(eqMatrix);
+  //return (RHS - U * (lu.solve(VT * RHS)));
+  eqMatrixFactorize();
+  return (RHS - U * (eqLU.solve(VT * RHS)));  
 }
