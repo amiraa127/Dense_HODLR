@@ -8,6 +8,7 @@ class perturbI{
 
   bool eqMatrixStored;
   bool eqMatrixFactorized;
+  bool calculatedDet;  
 
   Eigen::MatrixXd* topU;
   Eigen::MatrixXd* topV;
@@ -23,7 +24,7 @@ class perturbI{
 
 
   void eqMatrixFactorize();
-
+  void calcDeterminant();
 public:
  
   perturbI();
@@ -31,6 +32,8 @@ public:
   Eigen::MatrixXd solve(const Eigen::MatrixXd &RHS);
   double determinant();
   double logAbsDeterminant();
+
+
 };
 
 #endif

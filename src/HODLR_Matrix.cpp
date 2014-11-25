@@ -1824,15 +1824,16 @@ void HODLR_Matrix::calcDeterminant(){
 void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   
   if (HODLR_Root->isLeaf == true){
-    Eigen::PartialPivLU<Eigen::MatrixXd> luFact(HODLR_Root->leafMatrix);
-    Eigen::MatrixXd luMatrix = luFact.matrixLU();
+    //Eigen::PartialPivLU<Eigen::MatrixXd> luFact(HODLR_Root->leafMatrix);
+    //Eigen::MatrixXd luMatrix = luFact.matrixLU();
+    Eigen::MatrixXd luMatrix = HODLR_Root->leafLU.matrixLU();
     for (int i = 0; i < luMatrix.rows(); i++){
       determinant_ *= luMatrix(i,i);
       logAbsDeterminant_ += log(fabs(luMatrix(i,i)));
     }
     return;
   }
-  
+  /*
   int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
   int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
   int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
@@ -1858,6 +1859,9 @@ void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
     determinant_ *= luMatrix(i,i);
     logAbsDeterminant_ += log(fabs(luMatrix(i,i)));
   }
+  */
+  determinant_ *= HODLR_Root->nodePerturbI.determinant();
+  logAbsDeterminant_ += HODLR_Root->nodePerturbI.logAbsDeterminant();
  
   calcDeterminant(HODLR_Root->left);
   calcDeterminant(HODLR_Root->right);
