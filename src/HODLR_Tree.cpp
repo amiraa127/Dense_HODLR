@@ -186,6 +186,7 @@ HODLR_Tree::node* HODLR_Tree::copyTree(std::vector<std::vector<node*> > &rhs_nod
 }
 
 void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec)const{
+  /*
   newNode->currLevel                = oldNode->currLevel;
   newNode->min_i                    = oldNode->min_i;
   newNode->min_j                    = oldNode->min_j;
@@ -210,7 +211,8 @@ void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::v
   newNode->topOffDiagColIdx         = oldNode->topOffDiagColIdx;
   newNode->bottOffDiagRowIdx        = oldNode->bottOffDiagRowIdx;
   newNode->bottOffDiagColIdx        = oldNode->bottOffDiagColIdx;
-
+  */
+  *(newNode) = *(oldNode);
   if (oldNode->isLeaf == true){
     newNode->left = NULL;
     newNode->right = NULL; 

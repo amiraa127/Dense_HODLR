@@ -28,7 +28,7 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   //CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
   //CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
   CPPUNIT_TEST(iterative_Solve_Test);
-  //CPPUNIT_TEST(assignment_Test_Simple);
+  CPPUNIT_TEST(assignment_Test_Simple);
   //CPPUNIT_TEST(assignment_Test_ExtendedSp);
   CPPUNIT_TEST(blockExtraction_Test);
   CPPUNIT_TEST(splitAtTop_Test);

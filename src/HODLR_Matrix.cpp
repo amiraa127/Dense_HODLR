@@ -275,7 +275,8 @@ HODLR_Matrix::~HODLR_Matrix(){
 }
 
 HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
-    
+
+  /*
   //public attributes
   printLevelRankInfo = rhs.printLevelRankInfo;
   printLevelAccuracy = rhs.printLevelAccuracy;
@@ -326,7 +327,8 @@ HODLR_Matrix:: HODLR_Matrix(const HODLR_Matrix & rhs){
   extendedSp_SavePath    = rhs.extendedSp_SavePath;
   indexTree              = rhs.indexTree;
   //recLUfactorTree needs to be copied :)) TODO
-
+  */ 
+  *(this) = rhs;
 }
 
 void HODLR_Matrix::initInfoVectors(){
@@ -1821,11 +1823,10 @@ void HODLR_Matrix::calcDeterminant(){
   }
 }
 
+
 void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   
   if (HODLR_Root->isLeaf == true){
-    //Eigen::PartialPivLU<Eigen::MatrixXd> luFact(HODLR_Root->leafMatrix);
-    //Eigen::MatrixXd luMatrix = luFact.matrixLU();
     Eigen::MatrixXd luMatrix = HODLR_Root->leafLU.matrixLU();
     for (int i = 0; i < luMatrix.rows(); i++){
       determinant_ *= luMatrix(i,i);
@@ -1833,36 +1834,10 @@ void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
     }
     return;
   }
-  /*
-  int numRows_TopOffDiag  = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1; 
-  int numRows_BottOffDiag = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
-  int numCols_TopOffDiag  = HODLR_Root->max_j - HODLR_Root->splitIndex_j;
-  int numCols_BottOffDiag = HODLR_Root->splitIndex_j - HODLR_Root->min_j + 1;
   
-  int rankTotal = HODLR_Root->topOffDiagRank + HODLR_Root->bottOffDiagRank;
-  int blockSize = numRows_TopOffDiag + numRows_BottOffDiag;
-  
-  Eigen::MatrixXd U  = Eigen::MatrixXd::Zero(blockSize,rankTotal);
-  Eigen::MatrixXd VT = Eigen::MatrixXd::Zero(rankTotal,blockSize);
-  
-
-  U.topLeftCorner(numRows_TopOffDiag,HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagU_SM;
-  U.bottomRightCorner(numRows_BottOffDiag,HODLR_Root->bottOffDiagRank) = HODLR_Root->bottOffDiagU_SM;
-  VT.topRightCorner(HODLR_Root->topOffDiagRank,numCols_TopOffDiag) = HODLR_Root->topOffDiagV.transpose();
-  VT.bottomLeftCorner(HODLR_Root->bottOffDiagRank,numCols_BottOffDiag) = HODLR_Root->bottOffDiagV.transpose();
-  
-  Eigen::MatrixXd detMatrix = Eigen::MatrixXd::Identity(rankTotal,rankTotal) + VT * U; 
-  Eigen::PartialPivLU<Eigen::MatrixXd> luFact(detMatrix);
-  Eigen::MatrixXd luMatrix = luFact.matrixLU();
-  
-  for (int i = 0; i < rankTotal; i++){
-    determinant_ *= luMatrix(i,i);
-    logAbsDeterminant_ += log(fabs(luMatrix(i,i)));
-  }
-  */
   determinant_ *= HODLR_Root->nodePerturbI.determinant();
   logAbsDeterminant_ += HODLR_Root->nodePerturbI.logAbsDeterminant();
- 
+  
   calcDeterminant(HODLR_Root->left);
   calcDeterminant(HODLR_Root->right);
   
