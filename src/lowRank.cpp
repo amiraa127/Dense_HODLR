@@ -389,83 +389,85 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
 
 template <typename T>
 void extractRowsCols(const T & matrixData, int min_i,int min_j,int numRows,int numCols,Eigen::MatrixXd & W,Eigen::MatrixXd & V,const std::vector<int> & rowIndex,const std::vector<int> & colIndex,const double tolerance,int & calculatedRank,const std::string mode){
+  
+  
+  int numRowsSelect = rowIndex.size();
+  int numColsSelect = colIndex.size();
 
-    int numRowsSelect = rowIndex.size();
-    int numColsSelect = colIndex.size();
-    if (mode == "fullPivLU") {
-        int numPoints = std::max(numRowsSelect,numColsSelect);
-        Eigen::MatrixXd tempW = Eigen::MatrixXd::Zero(numRows,numPoints);
-        Eigen::MatrixXd tempV = Eigen::MatrixXd::Zero(numCols,numPoints);
-        Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
-        
-        //fill W
-        for (int i = 0; i < numPoints; i++){
-            if (i < numColsSelect)
-                tempW.col(i) = matrixData.block(min_i,min_j + colIndex[i],numRows,1);
-            if (i < numRowsSelect)
-                tempV.col(i) = matrixData.block(min_i + rowIndex[i],min_j,1,numCols).transpose();
-            
-        }
-        
-        //fill K
-        for (int i = 0; i < numPoints; i++)
-            for (int j = 0; j < numPoints; j++)
-                if (i < numRowsSelect && j < numColsSelect)
-                    tempK(i,j) = matrixData(min_i + rowIndex[i],min_j + colIndex[j]);
-        
-        Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
-        lu.setThreshold(tolerance);
-        int rank = lu.rank();
-       
-        if (rank > 0){
-            V = ((lu.permutationP() * tempV.transpose()).transpose()).leftCols(rank);
-            Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
-            V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
-            W = (tempW * lu.permutationQ()).leftCols(rank);
-            calculatedRank = rank;
-        }else{
-            W = Eigen::MatrixXd::Zero(numRows,1);
-            V = Eigen::MatrixXd::Zero(numCols,1);
-            calculatedRank = 1;
-        }
-    }else if(mode == "SVD"){
-        Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(numRows,numColsSelect);
-        Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(numCols,numRowsSelect);
-        Eigen::MatrixXd KTemp = Eigen::MatrixXd::Zero(numRowsSelect,numColsSelect);
-        
-        //fill W
-        for (int i = 0; i < numColsSelect; i++)
-            WTemp.col(i) = matrixData.block(min_i,min_j + colIndex[i],numRows,1);
-        
-        //fill V
-        for (int i = 0; i < numRowsSelect; i++)
-            VTemp.col(i) = matrixData.block(min_i + rowIndex[i],min_j,1,numCols).transpose();
-        
-        
-        //fill K
-        for (int i = 0; i < numRowsSelect; i++)
-            for (int j = 0; j < numColsSelect; j++)
-                KTemp(i,j) = matrixData(min_i + rowIndex[i],min_j + colIndex[j]);
-        
-        
-        Eigen::MatrixXd svdW,svdV,svdK;
-        calculatedRank = SVD_LowRankApprox(KTemp,tolerance, &svdW, &svdV, &svdK);
-        
-        
-        //calculate K
-	Eigen::MatrixXd K = Eigen::MatrixXd::Zero(calculatedRank,calculatedRank);
-        for (int i = 0; i < calculatedRank; i++)
-            K(i,i) = 1./svdK(i,i);
-	  
-        //calculate W and V
-        W = WTemp * svdV * K;
-        V = VTemp * svdW;
+  if (mode == "fullPivLU") {
+    int numPoints = std::max(numRowsSelect,numColsSelect);
+    Eigen::MatrixXd tempW = Eigen::MatrixXd::Zero(numRows,numPoints);
+    Eigen::MatrixXd tempV = Eigen::MatrixXd::Zero(numCols,numPoints);
+    Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numPoints,numPoints);
+    
+    //fill W
+    for (int i = 0; i < numPoints; i++){
+      if (i < numColsSelect)
+	tempW.col(i) = matrixData.block(min_i,min_j + colIndex[i],numRows,1);
+      if (i < numRowsSelect)
+	tempV.col(i) = matrixData.block(min_i + rowIndex[i],min_j,1,numCols).transpose();
       
-    }else{
-        std::cout<<"Error! Unknown operation mode."<<std::endl;
-        exit(EXIT_FAILURE);
     }
+    
+    //fill K
+    for (int i = 0; i < numPoints; i++)
+      for (int j = 0; j < numPoints; j++)
+	if (i < numRowsSelect && j < numColsSelect)
+	  tempK(i,j) = matrixData(min_i + rowIndex[i],min_j + colIndex[j]);
+    
+    Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
+    lu.setThreshold(tolerance);
+    int rank = lu.rank();
+    
+    if (rank > 0){
+      V = ((lu.permutationP() * tempV.transpose()).transpose()).leftCols(rank);
+      Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());
+      V = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::Upper>().solve(L_Soln).transpose();
+      W = (tempW * lu.permutationQ()).leftCols(rank);
+      calculatedRank = rank;
+    }else{
+      W = Eigen::MatrixXd::Zero(numRows,1);
+      V = Eigen::MatrixXd::Zero(numCols,1);
+      calculatedRank = 1;
+    }
+  }else if(mode == "SVD"){
+    Eigen::MatrixXd WTemp = Eigen::MatrixXd::Zero(numRows,numColsSelect);
+    Eigen::MatrixXd VTemp = Eigen::MatrixXd::Zero(numCols,numRowsSelect);
+    Eigen::MatrixXd KTemp = Eigen::MatrixXd::Zero(numRowsSelect,numColsSelect);
+    
+    //fill W
+    for (int i = 0; i < numColsSelect; i++)
+      WTemp.col(i) = matrixData.block(min_i,min_j + colIndex[i],numRows,1);
+    
+    //fill V
+    for (int i = 0; i < numRowsSelect; i++)
+      VTemp.col(i) = matrixData.block(min_i + rowIndex[i],min_j,1,numCols).transpose();
+    
+    
+    //fill K
+    for (int i = 0; i < numRowsSelect; i++)
+      for (int j = 0; j < numColsSelect; j++)
+	KTemp(i,j) = matrixData(min_i + rowIndex[i],min_j + colIndex[j]);
+    
+    
+    Eigen::MatrixXd svdW,svdV,svdK;
+    calculatedRank = SVD_LowRankApprox(KTemp,tolerance, &svdW, &svdV, &svdK);
+    
+    
+    //calculate K
+    Eigen::MatrixXd K = Eigen::MatrixXd::Zero(calculatedRank,calculatedRank);
+    for (int i = 0; i < calculatedRank; i++)
+      K(i,i) = 1./svdK(i,i);
+    
+    //calculate W and V
+    W = WTemp * svdV * K;
+    V = VTemp * svdW;
+    
+  }else{
+    std::cout<<"Error! Unknown operation mode."<<std::endl;
+    exit(EXIT_FAILURE);
   }
+}
 
 
 int SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, const double accuracy, Eigen::MatrixXd* Wptr, Eigen::MatrixXd* Vptr, Eigen::MatrixXd* Kptr, int minRank){
@@ -894,7 +896,7 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
     lu.setThreshold(tol);
     rank = lu.rank();
     double largestPivot = std::abs((lu.matrixLU())(0,0));
-    
+
     if ((rank > 0) && (largestPivot >= 1e-6)){
       V = ((lu.permutationP() * rowMatrix.transpose()).transpose()).leftCols(rank);
       Eigen::MatrixXd L_Soln = lu.matrixLU().topLeftCorner(rank,rank).triangularView<Eigen::UnitLower>().solve(V.transpose());

@@ -30,15 +30,14 @@ int main(int arc, char**argv)
 {
   
   if (arc<6) print_help();
-
+  
   double center[3];
   //change this in case you need different centering
-  for (int idir=0;idir<3;++idir)  center[idir]=0.0;
-
+  for (int idir = 0 ;idir < 3; ++idir)  center[idir]=0.0;
+  
   char* filename= argv[1];
   std::ifstream myfile (filename);
-  if (!myfile.is_open()) 
-  {
+  if (!myfile.is_open()){
     std::cout<<"Wrong input file name"<<std::endl;
     exit(1);
   }
@@ -50,10 +49,10 @@ int main(int arc, char**argv)
   std::istringstream n_line(line);
   n_line >> pointsPerSphere;
   n_line >> DX;
-
+  
   //allocate space for positions of all blobs
   double *X = new double[3 * pointsPerSphere];
-
+  
   for (int row=0;row < pointsPerSphere;row++){
     if (!std::getline(myfile,line)) {
       std::cout <<"Error in input  file particle.vertex"<<std::endl;
@@ -61,8 +60,8 @@ int main(int arc, char**argv)
     } 
     std::istringstream iss(line);
     for (int rdir=0;rdir<3;rdir++){
-	iss>>X[row*3+rdir];
-      }
+      iss>>X[row*3+rdir];
+    }
   }
   myfile.close();
   
@@ -71,15 +70,17 @@ int main(int arc, char**argv)
   size[0] = strtol(argv[3],NULL,10); // Number of markers x
   size[1] = strtol(argv[4],NULL,10); // Number of markers y
   size[2] = strtol(argv[5],NULL,10); // Number of markers z
-
-
+  
+  
   std::cout<<"Total number of vertices is "<<pointsPerSphere * size[0] * size[1] * size[2]<<std::endl;
+  
   int matrixSize  = pointsPerSphere * size[0] * size[1] * size[2] * 3;
   double* globalX = new double[matrixSize];
   int numSpheres  = size[0] * size[1] * size[2];
   int diagBlkSize = pointsPerSphere * 3;
   int sphereIdx   = 0;
   Eigen::MatrixXd sphereCenters(numSpheres,NDIM + 1);
+
   for(int ipart=0;ipart<size[0];ipart++) 
     for(int jpart=0;jpart<size[1];jpart++) 
       for(int kpart=0;kpart<size[2];kpart++) 
@@ -94,17 +95,17 @@ int main(int arc, char**argv)
 	  sphereCenters(sphereIdx,NDIM) = sphereIdx;
 	  sphereIdx ++;
 	}
- 
- 
+  
+  
   kernelDataInput RPY_Matrix_Input;
   RPY_Matrix_Input.X =  globalX;
   RPY_Matrix_Input.DX = DX;
   
   int numPoints = matrixSize/3;
-
+  
   //Sorting according to HODLR.
-
-  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,500);
+  
+  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,500,"PS_Boundary");
   
   int globalX_Idx = 0;
   
@@ -115,14 +116,48 @@ int main(int arc, char**argv)
 	globalX_Idx++;
       } 
   }
+  
+  double threshold = 100 * DX;
+  std::vector<Eigen::Triplet<double,int> > tripletVec;
+
+  for (int i = 0; i < numSpheres; i++)
+    for (int j = 0; j < numSpheres; j++){
+
+      double xdist = pow((sphereCenters(i,0) - sphereCenters(j,0)),2);
+      double ydist = pow((sphereCenters(i,1) - sphereCenters(j,1)),2);
+      double zdist = pow((sphereCenters(i,2) - sphereCenters(j,2)),2);
+      double dist  = sqrt(xdist + ydist + zdist);
+      
+      if (dist <= threshold){
+	int iOffset = pointsPerSphere * 3 * i;
+	int jOffset = pointsPerSphere * 3 * j;
+	for (int k = 0; k < pointsPerSphere * 3; k++){
+	  Eigen::Triplet<double,int> currEntry(iOffset + k,jOffset + k,1);
+	  assert((iOffset + k) < matrixSize);
+	  assert((jOffset + k) < matrixSize);
+	  assert((iOffset + k) >= 0);
+	  assert((jOffset + k) >= 0);
+	  
+	  tripletVec.push_back(currEntry);
+	  
+	}
+      }
+    }
+  
+  Eigen::SparseMatrix<double> graph(matrixSize,matrixSize);
+  std::cout<<matrixSize<<" "<<tripletVec.size()<<std::endl;
+  graph.setFromTriplets(tripletVec.begin(),tripletVec.end());
 
   
   Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
-  HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree); 
+  //HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree);
+  HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,graph,diagBlkSize + 1,usrTree);
+ 
   kernelMatrix exactMatrixKernel(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input);
   Eigen::VectorXd inputF = exactMatrixKernel * exactSoln; // Computing the RHS 
   kernelHODLR.printResultInfo = true; // Comment this line out if you don't want the l2 error
   std::cout<<"Solving"<<std::endl;
+  kernelHODLR.set_BoundaryDepth(2);
   kernelHODLR.set_LRTolerance(1e-4); // Low-rank approximation tolerance
   kernelHODLR.set_LeafConst();
   Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);

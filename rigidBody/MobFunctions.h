@@ -368,7 +368,7 @@ get_KDTree_Sorted(
     }
 }
 
-void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStartIdx,user_IndexTree::node* usrTreeNode,int pointsPerSphere,int rankUpperBound){
+void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStartIdx,user_IndexTree::node* usrTreeNode,int pointsPerSphere,int rankUpperBound,std::string LR_Method){
  
   ///	Get the total number of points.  
   usrTreeNode->topOffDiag_minRank  = -1;
@@ -376,7 +376,7 @@ void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStart
   usrTreeNode->topOffDiag_maxRank  = rankUpperBound;
   usrTreeNode->bottOffDiag_maxRank = rankUpperBound;
 
-  usrTreeNode->LR_Method = "partialPiv_ACA";
+  usrTreeNode->LR_Method = LR_Method;
   
   unsigned N = locations.rows();
   if (N == 1) {
@@ -412,8 +412,8 @@ void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStart
   Eigen::MatrixXd rightLocations = locations.block(Nleft,0,Nright,nDimensions);
     
   ///	Sort the left and right locations based on a KDTree.
-  get_KDTree_Sorted(leftLocations, index+1,globalStartIdx,usrTreeNode->left,pointsPerSphere,rankUpperBound);
-  get_KDTree_Sorted(rightLocations, index+1,globalStartIdx + Nleft,usrTreeNode->right,pointsPerSphere,rankUpperBound);
+  get_KDTree_Sorted(leftLocations, index+1,globalStartIdx,usrTreeNode->left,pointsPerSphere,rankUpperBound,LR_Method);
+  get_KDTree_Sorted(rightLocations, index+1,globalStartIdx + Nleft,usrTreeNode->right,pointsPerSphere,rankUpperBound,LR_Method);
   
   ///	Output the locations.
   locations.block(0,0,Nleft,nDimensions) = leftLocations;
@@ -421,11 +421,11 @@ void get_KDTree_Sorted(Eigen::MatrixXd& locations,unsigned index,int globalStart
 
 }
 
-user_IndexTree get_KDTree_Sorted(Eigen::MatrixXd& locations,int pointsPerSphere,int rankUpperBound){
+user_IndexTree get_KDTree_Sorted(Eigen::MatrixXd& locations,int pointsPerSphere,int rankUpperBound,std::string LR_Method = "partialPiv_ACA"){
   user_IndexTree result;
   result.rootNode = new user_IndexTree::node;
   int numPoints = locations.rows();
-  get_KDTree_Sorted(locations,0,0,result.rootNode,pointsPerSphere,rankUpperBound);
+  get_KDTree_Sorted(locations,0,0,result.rootNode,pointsPerSphere,rankUpperBound,LR_Method);
   return result;
 }
 

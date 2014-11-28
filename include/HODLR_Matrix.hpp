@@ -145,13 +145,19 @@ public:
    */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold,user_IndexTree &input_IndexTree);
   
-   
+  
+  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData, Eigen::SparseMatrix<double> &inputGraph, int inputSizeThreshold, user_IndexTree &input_IndexTree);
+
+ 
   /**
    * \param[in] inputMatrix
    * This constructor initializes the class with a dense matrix. 
    */
   HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
   /** @} */
+
+  
+
 
 
   ~HODLR_Matrix();

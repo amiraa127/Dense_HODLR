@@ -11,7 +11,7 @@ link_directories(${DenseHODLR_BINARY_DIR}/src)
 add_executable(HODLRTest test.cpp)
 
 # test should link to solver libraries
-target_link_libraries(HODLRTest HODLRSolver ${CPPUNIT_LIBRARIES} ${PASTIX_LIBRARIES}) # ${PASTIX_LIBRARIES} 
+target_link_libraries(HODLRTest HODLRSolver ${CPPUNIT_LIBRARIES} ${PASTIX_LIBRARIES})
 
 # Tests to run
 add_test(BasicTests HODLRTest)
