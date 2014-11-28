@@ -6,18 +6,24 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 enable_testing()
 
 set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++11 -O3 -Wall")
+
 add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
 # Find the dependencies.
 find_package (Eigen REQUIRED)
 find_package (CppUnit REQUIRED)
+find_package (Pastix  REQUIRED)
+
+if (PASTIX_FOUND)
+   message ("-- Found Pastix version ${PASTIX_VERSION}: ${PASTIX_INCLUDE_DIRS}")
+endif (PASTIX_FOUND)
 
 if (EIGEN_FOUND)
-    message ("-- Found Eigen version ${EIGEN_VERSION}: ${EIGEN_INCLUDE_DIRS}")
+    message ("-- Found Eigen version ${EIGEN_VERSION} : ${EIGEN_INCLUDE_DIRS}")
 endif (EIGEN_FOUND)
 
 if (CPPUNIT_FOUND)
-    message ("-- Found Eigen version ${EIGEN_VERSION}: ${EIGEN_INCLUDE_DIRS}")
+    message ("-- Found CPPUNIT : ${CPPUNIT_INCLUDE_DIRS}")
 endif (CPPUNIT_FOUND)
 
 add_subdirectory(src)

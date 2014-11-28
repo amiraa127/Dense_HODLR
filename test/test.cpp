@@ -1,3 +1,4 @@
+
 #include "HODLR_Matrix.hpp"
 #include "user_IndexTree.hpp"
 #include "helperFunctions.hpp"
@@ -21,7 +22,10 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   /*----------------Creating a Test Suite----------------------*/
   CPPUNIT_TEST_SUITE(HODLR_Matrix_Test);
   
+  CPPUNIT_TEST(recLU_Solver_Test_Random);
   CPPUNIT_TEST(recSM_Solver_Test_Random);
+  CPPUNIT_TEST(extendedSp_Solver_Test_Random);
+ 
 
   CPPUNIT_TEST(recLU_Solver_Test);
   //CPPUNIT_TEST(extendedSp_Solver_Test);
@@ -45,6 +49,25 @@ public:
 
   /* Function : recSM_Solver_Test_Radom
    * --------------------------------------
+   * This function tests the recursive LU solver ona 10kx10k random HODLR matrix and checks the accuracy.
+   */
+  void recLU_Solver_Test_Random(){
+    std::cout<<"Testing recursive LU solver on a random matrix...."<<std::endl;
+    int matrixSize = 10000;
+    HODLR_Matrix sampleHODLR;
+    Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
+    sampleHODLR.printResultInfo = true;
+    Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
+    Eigen::MatrixXd solverSoln = sampleHODLR.recLU_Solve(sampleRHS);
+    double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
+    CPPUNIT_ASSERT(error < 1e-8);
+    std::cout<<"#################################################################"<<std::endl;	
+  }
+
+  
+  /* Function : recSM_Solver_Test_Radom
+   * --------------------------------------
    * This function tests the recursive Sherman Morrison Solver ona 10kx10k random HODLR matrix and checks the accuracy.
    */
   void recSM_Solver_Test_Random(){
@@ -52,12 +75,36 @@ public:
     int matrixSize = 10000;
     HODLR_Matrix sampleHODLR;
     Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
+    sampleHODLR.printResultInfo = true;
     Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
     Eigen::MatrixXd solverSoln = sampleHODLR.recSM_Solve(sampleRHS);
     double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
     CPPUNIT_ASSERT(error < 1e-8);
+    std::cout<<"#################################################################"<<std::endl;
+	
   }
+  
+
+  /* Function : recSM_Solver_Test_Radom
+   * --------------------------------------
+   * This function tests the Extended Sparsification Solver ona 10kx10k random HODLR matrix and checks the accuracy.
+   */
+  void extendedSp_Solver_Test_Random(){
+    std::cout<<"Testing Extended Sparsification solver on a random matrix...."<<std::endl;
+    int matrixSize = 10000;
+    HODLR_Matrix sampleHODLR;
+    Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
+    sampleHODLR.printResultInfo = true;
+    Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
+    Eigen::MatrixXd solverSoln = sampleHODLR.extendedSp_Solve(sampleRHS);
+    double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
+    std::cout<<error<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-8);
+    std::cout<<"#################################################################"<<std::endl;
+  }
+
 
   /* Function : recLU_Solver_Test
    * ------------------------------
@@ -241,7 +288,7 @@ public:
     Eigen::VectorXd inputF = sampleMatrix * exactSoln;
     //sample_HODLR.set_LRTolerance(1e-7);  
     sample_HODLR.printResultInfo = true;
-    Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","extendedSp");
+    Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","recLU");
     Eigen::VectorXd difference = solverSoln-exactSoln;
     double relError = difference.norm()/exactSoln.norm();
     //std::cout<<relError<<std::endl;

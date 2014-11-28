@@ -1,4 +1,5 @@
 #include "HODLR_Matrix.hpp"
+#include "EigenPaStiXSupport.hpp"
 
 void HODLR_Matrix::setDefaultValues(){
   
@@ -1202,7 +1203,9 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
   }
   
   storeLRinTree();
-    
+   
+  Eigen::PastixLU<Eigen::SparseMatrix<double> > extendedSp_PastixSolver;
+   
   if (assembled_ExtendedSp == false){
     double startTime = clock();
     Eigen::SparseMatrix<double> extendedSp_Matrix = assembleExtendedSPMatrix();
@@ -1217,14 +1220,21 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     extendedSp_AssemblyTime = (endTime-startTime)/CLOCKS_PER_SEC;
     extendedSp_Size = extendedSp_Matrix.rows();
     startTime = clock();
-    extendedSp_Solver.compute(extendedSp_Matrix);
+    extendedSp_PastixSolver.iparm(IPARM_FACTORIZATION) = API_FACT_LU;
+    extendedSp_PastixSolver.iparm(IPARM_VERBOSE)       = API_VERBOSE_NOT;
+    extendedSp_PastixSolver.iparm(IPARM_ORDERING)      = API_ORDER_SCOTCH;
+    extendedSp_PastixSolver.iparm(IPARM_SYM) = API_SYM_NO;
+    extendedSp_PastixSolver.dparm(DPARM_EPSILON_MAGN_CTRL) = 1e-16;
+
+    extendedSp_PastixSolver.compute(extendedSp_Matrix);
+    //extendedSp_Solver.compute(extendedSp_Matrix);
     endTime = clock();
-    if (extendedSp_Solver.info() != Eigen::Success){
-      std::cout<<"Extended sparse matrix factorization failed."<<std::endl;
-      exit(EXIT_FAILURE);
-    }
+    //if (extendedSp_Solver.info() != Eigen::Success){
+    //  std::cout<<"Extended sparse matrix factorization failed."<<std::endl;
+    //  exit(EXIT_FAILURE);
+    //}
     extendedSp_FactorizationTime = (endTime-startTime)/CLOCKS_PER_SEC;
-    assembled_ExtendedSp = true;
+    //assembled_ExtendedSp = true;
   }
   
 
@@ -1233,13 +1243,15 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
   Eigen::MatrixXd extendedSp_RHS = Eigen::MatrixXd::Zero(extendedSp_Size,input_RHS.cols());
   extendedSp_RHS.topLeftCorner(input_RHS.rows(),input_RHS.cols()) = input_RHS;
   double startTime = clock();
-  sp_Solution = extendedSp_Solver.solve(extendedSp_RHS);
+  //sp_Solution = extendedSp_Solver.solve(extendedSp_RHS);
+  sp_Solution = extendedSp_PastixSolver.solve(extendedSp_RHS);
+ 
   double endTime = clock();
   extendedSp_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
-  if (extendedSp_Solver.info() != Eigen::Success){
-    std::cout<<"Extended sparse matrix solve failed."<<std::endl;
-    exit(EXIT_FAILURE);
-  }
+  //if (extendedSp_Solver.info() != Eigen::Success){
+  //  std::cout<<"Extended sparse matrix solve failed."<<std::endl;
+  //  exit(EXIT_FAILURE);
+  //}
 
   // Extract Dense Solution
   Eigen::MatrixXd solution = sp_Solution.topLeftCorner(input_RHS.rows(),input_RHS.cols());

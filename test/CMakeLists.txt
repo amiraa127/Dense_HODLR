@@ -2,6 +2,7 @@
 include_directories(${DenseHODLR_SOURCE_DIR}/include)
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${CPPUNIT_INCLUDE_DIRS})
+include_directories(${PASTIX_INCLUDE_DIRS})
 
 # Directories to look for libraries
 link_directories(${DenseHODLR_BINARY_DIR}/src)
@@ -10,7 +11,7 @@ link_directories(${DenseHODLR_BINARY_DIR}/src)
 add_executable(HODLRTest test.cpp)
 
 # test should link to solver libraries
-target_link_libraries(HODLRTest HODLRSolver CppUnit)
+target_link_libraries(HODLRTest HODLRSolver ${CPPUNIT_LIBRARIES} ${PASTIX_LIBRARIES}) # ${PASTIX_LIBRARIES} 
 
 # Tests to run
 add_test(BasicTests HODLRTest)

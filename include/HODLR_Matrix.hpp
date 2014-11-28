@@ -3,6 +3,7 @@
 
 //Standard C++
 #include <cmath>
+#include <complex>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <vector>
 
 //External Dependencies
+
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
