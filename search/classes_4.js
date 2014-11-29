@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['user_5findextree',['user_IndexTree',['../classuser___index_tree.html',1,'']]]
+  ['reclu_5ffactortree',['recLU_FactorTree',['../classrec_l_u___factor_tree.html',1,'']]]
 ];
