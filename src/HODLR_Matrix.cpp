@@ -56,7 +56,7 @@ HODLR_Matrix::HODLR_Matrix(){
   setDefaultValues();
 }
 
-void HODLR_Matrix::setParameters(Eigen::MatrixXd &inputMatrix){
+void HODLR_Matrix::initialize(Eigen::MatrixXd &inputMatrix){
   matrixData     = inputMatrix;
   matrixSize     = inputMatrix.rows();
   matrixNumRows  = inputMatrix.rows();
@@ -67,17 +67,13 @@ void HODLR_Matrix::setParameters(Eigen::MatrixXd &inputMatrix){
 
 // Dense Constructors
 
-HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
+HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,std::string LR_Method){
   setDefaultValues();
-  setParameters(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  //matrixData    = inputMatrix;
-  //matrixSize    = inputMatrix.rows();
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
   matrixDataAvail = true;  
@@ -85,13 +81,8 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold){
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
   setDefaultValues();
-  setParameters(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  //matrixData    = inputMatrix;
-  //matrixSize    = inputMatrix.rows();
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
@@ -101,16 +92,11 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
   setDefaultValues();
-  setParameters(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
   assert(inputMatrix.cols() == inputGraph.cols());
   assert(inputMatrix.rows() == inputGraph.rows());
   graphData     = inputGraph;
-  //matrixData    = inputMatrix;
-  //matrixSize    = inputMatrix.rows();
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod("PS_Boundary");
@@ -123,16 +109,11 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<double> &inputGraph, int inputSizeThreshold, user_IndexTree &input_IndexTree){
   setDefaultValues();
-  setParameters(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
   assert(inputMatrix.cols() == inputGraph.cols());
   assert(inputMatrix.rows() == inputGraph.rows());
   graphData     = inputGraph;
-  //matrixData    = inputMatrix;
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
-  //matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod("PS_Boundary");
@@ -145,34 +126,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
 // End Dense Constructores
 
 
-HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,std::string LR_Method){
-  setDefaultValues();
-  matrixData_Sp = inputMatrix;
-  sizeThreshold = 30;
-  matrixDataAvail_Sp = true;
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  indexTree.set_LRMethod(LR_Method);
-  matrixSize    = inputMatrix.rows();
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
-}
-
-
-
-HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* kernelData),void* inputKernelData,int inputSizeThreshold){
-  setDefaultValues();
-  isSquareMatrix = (numRows == numCols);
-  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  kernelMatrixData = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);
-  matrixSize    = numRows;
-  matrixNumRows = numRows;
-  matrixNumCols = numCols;
-  sizeThreshold = inputSizeThreshold;
-  indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.createDefaultTree(matrixSize);
-  initializeInfoVecotrs(indexTree.get_numLevels());
-  kernelDataAvail = true;  
-}
+// Sparse Constructors
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method){
   setDefaultValues();
@@ -190,8 +144,57 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSiz
   matrixDataAvail_Sp = true;
 }
 
+HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::SparseMatrix<double> & inputGraph,int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
+  setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
+  matrixData_Sp = inputMatrix;
+  graphData     = inputGraph;
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
+  matrixSize    = inputMatrix.rows();
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.set_LRMethod(LR_Method);
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
+  initializeInfoVecotrs(indexTree.get_numLevels());
+  matrixDataAvail_Sp = true;
+  graphDataAvail     = true;
+}
 
+HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
+  setDefaultValues();
+  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
+  matrixData_Sp = inputMatrix;
+  matrixNumRows = inputMatrix.rows();
+  matrixNumCols = inputMatrix.cols();
+  matrixSize    = inputMatrix.rows();
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.set_LRMethod(LR_Method);
+  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
+  initializeInfoVecotrs(indexTree.get_numLevels());
+  matrixDataAvail_Sp = true;
+}
 
+// End Sparse Constructors
+
+// Kernel Constructors
+HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* kernelData),void* inputKernelData,int inputSizeThreshold){
+  setDefaultValues();
+  isSquareMatrix = (numRows == numCols);
+  assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
+  kernelMatrixData = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);
+  matrixSize    = numRows;
+  matrixNumRows = numRows;
+  matrixNumCols = numCols;
+  sizeThreshold = inputSizeThreshold;
+  indexTree.set_sizeThreshold(sizeThreshold);
+  indexTree.createDefaultTree(matrixSize);
+  initializeInfoVecotrs(indexTree.get_numLevels());
+  kernelDataAvail = true;  
+}
 
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
   setDefaultValues();
@@ -213,23 +216,6 @@ HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,
   graphDataAvail      = true;
 }
  
-
-HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
-  setDefaultValues();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  matrixData_Sp = inputMatrix;
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
-  matrixSize    = inputMatrix.rows();
-  sizeThreshold = inputSizeThreshold;
-  indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_LRMethod(LR_Method);
-  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
-  initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail_Sp = true;
-}
-
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold,user_IndexTree &input_IndexTree){
   setDefaultValues();
   isSquareMatrix = (numRows == numCols);
@@ -244,25 +230,6 @@ HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,
   initializeInfoVecotrs(indexTree.get_numLevels());
   kernelDataAvail = true;
 }
-
-HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::SparseMatrix<double> & inputGraph,int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
-  setDefaultValues();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
-  assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  matrixData_Sp = inputMatrix;
-  graphData     = inputGraph;
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
-  matrixSize    = inputMatrix.rows();
-  sizeThreshold = inputSizeThreshold;
-  indexTree.set_sizeThreshold(sizeThreshold);
-  indexTree.set_LRMethod(LR_Method);
-  indexTree.createFromUsrTree(matrixSize,input_IndexTree);
-  initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail_Sp = true;
-  graphDataAvail     = true;
-}
-
 
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData, Eigen::SparseMatrix<double> &inputGraph, int inputSizeThreshold, user_IndexTree &input_IndexTree){
   setDefaultValues();
@@ -283,6 +250,8 @@ HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,
   kernelDataAvail = true;
   graphDataAvail  = true;
 }
+
+// End kernel constructors
 
 HODLR_Matrix::~HODLR_Matrix(){
 
