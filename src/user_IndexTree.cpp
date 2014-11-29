@@ -3,8 +3,6 @@
 user_IndexTree::user_IndexTree(){
   rootNode = NULL;
 
-
-
 }
 
 user_IndexTree::~user_IndexTree(){
