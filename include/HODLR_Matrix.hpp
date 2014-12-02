@@ -196,6 +196,7 @@ public:
   /************************************* Attribute Modification **********************************/
   void set_LRTolerance(double tolerance);  
   void set_minPivot(double minPivot);
+  void set_pastix_MinPivot(double minPivot);
   void set_LRMethod(std::string input_LRMethod);
   void set_FreeMatrixMemory(bool inputVal);
   void set_BoundaryDepth(int inputBoundaryDepth);  
@@ -307,6 +308,7 @@ private:
 
   double LR_Tolerance;
   double minPivot;
+  double pastix_MinPivot;
   int boundaryDepth;
 
   HODLR_Tree indexTree;
@@ -323,6 +325,7 @@ private:
 
   void setDefaultValues();
   void initialize(Eigen::MatrixXd& inputMatrix);
+  void initialize(Eigen::SparseMatrix<double>& inputMatrix);
   void reset_attributes();
   void initializeInfoVecotrs(int numLevels);
 

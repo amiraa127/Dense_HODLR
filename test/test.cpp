@@ -25,9 +25,12 @@ class HODLR_Matrix_Test: public CppUnit::TestCase
   CPPUNIT_TEST(recLU_Solver_Test_Random);
   CPPUNIT_TEST(recSM_Solver_Test_Random);
   CPPUNIT_TEST(extendedSp_Solver_Test_Random);
+  CPPUNIT_TEST(recLU_Solver_Test_Radial);
+  CPPUNIT_TEST(recSM_Solver_Test_Radial);
+  CPPUNIT_TEST(extendedSp_Solver_Test_Radial);
  
 
-  CPPUNIT_TEST(recLU_Solver_Test);
+  //CPPUNIT_TEST(recLU_Solver_Test);
   //CPPUNIT_TEST(extendedSp_Solver_Test);
   //CPPUNIT_TEST(extendedSp_Solver_Simple_Unbalanced_Test);
   //CPPUNIT_TEST(extendedSp_Solver_Schur_Unbalanced_Test);
@@ -61,8 +64,8 @@ public:
     Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
     Eigen::MatrixXd solverSoln = sampleHODLR.recLU_Solve(sampleRHS);
     double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
-    CPPUNIT_ASSERT(error < 1e-8);
     std::cout<<"#################################################################"<<std::endl;	
+    CPPUNIT_ASSERT(error < 1e-8);   
   }
 
   
@@ -80,9 +83,8 @@ public:
     Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
     Eigen::MatrixXd solverSoln = sampleHODLR.recSM_Solve(sampleRHS);
     double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
-    CPPUNIT_ASSERT(error < 1e-8);
     std::cout<<"#################################################################"<<std::endl;
-	
+    CPPUNIT_ASSERT(error < 1e-8);	
   }
   
 
@@ -96,21 +98,81 @@ public:
     HODLR_Matrix sampleHODLR;
     Eigen::MatrixXd sampleMatrix = sampleHODLR.createExactHODLR(10,matrixSize,50);
     sampleHODLR.printResultInfo = true;
+    sampleHODLR.set_pastix_MinPivot(1e-20);
     Eigen::VectorXd exactSoln  = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
     Eigen::VectorXd sampleRHS  = sampleMatrix * exactSoln;
     Eigen::MatrixXd solverSoln = sampleHODLR.extendedSp_Solve(sampleRHS);
     double error = (solverSoln - exactSoln).norm()/exactSoln.norm();
-    std::cout<<error<<std::endl;
-    CPPUNIT_ASSERT(error < 1e-8);
+    //std::cout<<error<<std::endl;
     std::cout<<"#################################################################"<<std::endl;
+    CPPUNIT_ASSERT(error < 1e-8);
   }
 
+  
+  void recLU_Solver_Test_Radial(){
+    int matrixSize = 10000;
+    std::cout<<"Testing recursive LU solver on a radial basis function matrix...."<<std::endl;
+    Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+    HODLR_Matrix sample_HODLR(sampleMatrix,30);
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd inputF = sampleMatrix * exactSoln;
+    sample_HODLR.set_LRTolerance(1e-8);  
+    sample_HODLR.printResultInfo = true;
+    //Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","recLU");
+    Eigen::VectorXd solverSoln = sample_HODLR.recLU_Solve(inputF);
 
+    Eigen::VectorXd difference = solverSoln-exactSoln;
+    double relError = difference.norm()/exactSoln.norm();
+    //std::cout<<relError<<std::endl;
+    std::cout<<"#################################################################"<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-6);
+  }
+
+  
+  void recSM_Solver_Test_Radial(){
+    int matrixSize = 10000;
+    std::cout<<"Testing recursive Sherman Morrison solver on a radial basis function matrix...."<<std::endl;
+    Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+    HODLR_Matrix sample_HODLR(sampleMatrix,30);
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd inputF = sampleMatrix * exactSoln;
+    sample_HODLR.set_LRTolerance(1e-8);  
+    sample_HODLR.printResultInfo = true;
+    //Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","recLU");
+    Eigen::VectorXd solverSoln = sample_HODLR.recSM_Solve(inputF);
+    Eigen::VectorXd difference = solverSoln-exactSoln;
+    double relError = difference.norm()/exactSoln.norm();
+    //std::cout<<relError<<std::endl;
+    std::cout<<"#################################################################"<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-6);
+  }
+
+  
+  void extendedSp_Solver_Test_Radial(){
+    int matrixSize = 10000;
+    std::cout<<"Testing Extended Sparsification solver on a radial basis function matrix...."<<std::endl;
+    Eigen::MatrixXd sampleMatrix = makeMatrix1DUniformPts(-1,1,-1,1,matrixSize,matrixSize,0,inverseMultiQuadraticKernel);
+    HODLR_Matrix sample_HODLR(sampleMatrix,30);
+    Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
+    Eigen::VectorXd inputF = sampleMatrix * exactSoln;
+    sample_HODLR.set_LRTolerance(1e-8);
+    sample_HODLR.printResultInfo = true;
+    //Eigen::VectorXd solverSoln = sample_HODLR.iterative_Solve(inputF,10000,1e-10,1e-2,"partialPiv_ACA","recLU");
+    Eigen::VectorXd solverSoln = sample_HODLR.extendedSp_Solve(inputF);
+    Eigen::VectorXd difference = solverSoln-exactSoln;
+    double relError = difference.norm()/exactSoln.norm();
+    //std::cout<<relError<<std::endl;
+    std::cout<<"#################################################################"<<std::endl;
+    CPPUNIT_ASSERT(relError < 1e-6);
+
+  }
+
+  
   /* Function : recLU_Solver_Test
    * ------------------------------
    * This function tests the recursive LU solver on a 10kx10k dense interaction matrix with an inverse multiquadratic kernel.
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy for a given ACA tolerance.
-   */
+   
   void recLU_Solver_Test(){
     int intervalSize = 10000;
     Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,intervalSize,-2,2);
@@ -133,12 +195,14 @@ public:
     testFile.close();
     refrenceFile.close();
   }
-  
+
+
+  */
   /* Function : extendedSp_Solver_Test
    * ------------------------------
    * This function tests the extended sparsification solver on a 10kx10k dense interaction matrix with an inverse multiquadratic kernel.
    * The functions checks if the solver solves the mentioned matrix with the expected accuracy for a given ACA tolerance.
-   */
+   *
   void extendedSp_Solver_Test(){
     int intervalSize = 10000;
     Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,intervalSize,-2,2);
@@ -162,6 +226,7 @@ public:
     refrenceFile.close();
   }
 
+  */
   /* Function : extendedSp_Solver_Simple_Unbalanced
    *------------------------------------------
    * This function tests the extended sparsification LU solver on a simple unbalanced tree. 
@@ -294,6 +359,7 @@ public:
     //std::cout<<relError<<std::endl;
     CPPUNIT_ASSERT(relError < 1e-6);
   }
+
 
   void assignment_Test_Simple(){
     std::cout<<"Testing assignment operator with recLU solver....."<<std::endl;

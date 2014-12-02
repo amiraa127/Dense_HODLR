@@ -4,7 +4,8 @@
 void HODLR_Matrix::setDefaultValues(){
   
   LR_Tolerance = 1e-6;
-  minPivot  = 0;
+  minPivot     = 0;
+  pastix_MinPivot = 1e-31;
   
   recLU_FactorizationTime      = 0;
   recLU_SolveTime              = 0;
@@ -57,11 +58,22 @@ HODLR_Matrix::HODLR_Matrix(){
 }
 
 void HODLR_Matrix::initialize(Eigen::MatrixXd &inputMatrix){
-  matrixData     = inputMatrix;
-  matrixSize     = inputMatrix.rows();
-  matrixNumRows  = inputMatrix.rows();
-  matrixNumCols  = inputMatrix.cols();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  matrixData      = inputMatrix;
+  matrixSize      = inputMatrix.rows();
+  matrixNumRows   = inputMatrix.rows();
+  matrixNumCols   = inputMatrix.cols();
+  isSquareMatrix  = (inputMatrix.rows() == inputMatrix.cols());
+  matrixDataAvail = true;
+}
+
+void HODLR_Matrix::initialize(Eigen::SparseMatrix<double> &inputMatrix){
+  matrixData_Sp      = inputMatrix;
+  matrixSize         = inputMatrix.rows();
+  matrixNumRows      = inputMatrix.rows();
+  matrixNumCols      = inputMatrix.cols();
+  isSquareMatrix     = (inputMatrix.rows() == inputMatrix.cols());
+  matrixDataAvail_Sp = true; 
+
 
 }
 
@@ -76,7 +88,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,s
   indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail = true;  
+  //matrixDataAvail = true;  
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
@@ -87,7 +99,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail = true;
+  //matrixDataAvail = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
@@ -102,7 +114,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail     = true;
+  //matrixDataAvail     = true;
   graphDataAvail      = true;
 }
 
@@ -119,7 +131,7 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail = true;
+  //matrixDataAvail = true;
   graphDataAvail  = true;
 }
 
@@ -130,52 +142,55 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method){
   setDefaultValues();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
+  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  matrixData_Sp = inputMatrix;
-  matrixSize    = inputMatrix.rows();
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
+  //matrixData_Sp = inputMatrix;
+  //matrixSize    = inputMatrix.rows();
+  //matrixNumRows = inputMatrix.rows();
+  //matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail_Sp = true;
+  //matrixDataAvail_Sp = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::SparseMatrix<double> & inputGraph,int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
   setDefaultValues();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
+  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  matrixData_Sp = inputMatrix;
+  //matrixData_Sp = inputMatrix;
   graphData     = inputGraph;
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
-  matrixSize    = inputMatrix.rows();
+  //matrixNumRows = inputMatrix.rows();
+  //matrixNumCols = inputMatrix.cols();
+  //matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail_Sp = true;
+  //matrixDataAvail_Sp = true;
   graphDataAvail     = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
   setDefaultValues();
-  isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
+  initialize(inputMatrix);
+  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  matrixData_Sp = inputMatrix;
-  matrixNumRows = inputMatrix.rows();
-  matrixNumCols = inputMatrix.cols();
-  matrixSize    = inputMatrix.rows();
+  //matrixData_Sp = inputMatrix;
+  //matrixNumRows = inputMatrix.rows();
+  //matrixNumCols = inputMatrix.cols();
+  //matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  matrixDataAvail_Sp = true;
+  //matrixDataAvail_Sp = true;
 }
 
 // End Sparse Constructors
@@ -1133,10 +1148,13 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
   storeLRinTree();
    
   Eigen::PastixLU<Eigen::SparseMatrix<double> > extendedSp_PastixSolver;
-   
+  //Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+    
   if (assembled_ExtendedSp == false){
     double startTime = clock();
     Eigen::SparseMatrix<double> extendedSp_Matrix = assembleExtendedSPMatrix();
+
+
     extendedSp_Matrix.makeCompressed();
     double endTime = clock();
     if (saveExtendedSp_Matrix == true){
@@ -1152,10 +1170,11 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     extendedSp_PastixSolver.iparm(IPARM_VERBOSE)       = API_VERBOSE_NOT;
     extendedSp_PastixSolver.iparm(IPARM_ORDERING)      = API_ORDER_SCOTCH;
     extendedSp_PastixSolver.iparm(IPARM_SYM) = API_SYM_NO;
-    extendedSp_PastixSolver.dparm(DPARM_EPSILON_MAGN_CTRL) = 1e-16;
+    extendedSp_PastixSolver.dparm(DPARM_EPSILON_MAGN_CTRL) = pastix_MinPivot;
 
     extendedSp_PastixSolver.compute(extendedSp_Matrix);
     //extendedSp_Solver.compute(extendedSp_Matrix);
+
     endTime = clock();
     //if (extendedSp_Solver.info() != Eigen::Success){
     //  std::cout<<"Extended sparse matrix factorization failed."<<std::endl;
@@ -1359,6 +1378,9 @@ void HODLR_Matrix::set_minPivot(double input_minPivot){
   }
 }
 
+void HODLR_Matrix::set_pastix_MinPivot(double input_minPivot){
+  pastix_MinPivot = input_minPivot;
+}
 void HODLR_Matrix::set_LRMethod(std::string input_LRMethod){
   if ((matrixDataAvail == false) && (matrixDataAvail_Sp == false) && (kernelDataAvail == false)){
     std::cout<<"Error! Matrix data has been deleted from memory!"<<std::endl;

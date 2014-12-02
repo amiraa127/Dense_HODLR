@@ -117,7 +117,7 @@ int main(int arc, char**argv)
       } 
   }
   
-  double threshold = 100 * DX;
+  double threshold = 2 * DX;
   std::vector<Eigen::Triplet<double,int> > tripletVec;
 
   for (int i = 0; i < numSpheres; i++)

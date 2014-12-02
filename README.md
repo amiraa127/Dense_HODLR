@@ -101,8 +101,9 @@ This program is free software; you can redistribute it and/or modify it under th
 ####Build
 The new version of the HODLR package requires PaStiX and SCOTCH for the sparse embedding functionality. It is important to compile PaStiX with the -DFORCE_NOMPI flag and link PaStiX to SCOTCH not ptSCOTCH. 
 
+The easiest way to build the library is to use [CMake](http://www.cmake.org). Before running cmake, open the file `CMakeLists.txt` on the project directory and comment out the `file(COPY ..`lines.
 
-The easiest way to build the library is to use [CMake](http://www.cmake.org). Go to the project directory and run:
+Go to the project directory and run:
 
 ```
 mkdir build
