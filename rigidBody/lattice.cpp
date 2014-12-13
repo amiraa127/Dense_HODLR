@@ -117,7 +117,10 @@ int main(int arc, char**argv)
       } 
   }
   
-  double threshold = 2 * DX;
+  double threshold = length;
+  double solverTol = 1e-4;
+  int BDLR_Points  = 12;
+  int BDLR_Depth   = 0;
   std::vector<Eigen::Triplet<double,int> > tripletVec;
 
   for (int i = 0; i < numSpheres; i++)
@@ -131,23 +134,22 @@ int main(int arc, char**argv)
       if (dist <= threshold){
 	int iOffset = pointsPerSphere * 3 * i;
 	int jOffset = pointsPerSphere * 3 * j;
-	for (int k = 0; k < pointsPerSphere * 3; k++){
-	  Eigen::Triplet<double,int> currEntry(iOffset + k,jOffset + k,1);
-	  assert((iOffset + k) < matrixSize);
-	  assert((jOffset + k) < matrixSize);
-	  assert((iOffset + k) >= 0);
-	  assert((jOffset + k) >= 0);
-	  
-	  tripletVec.push_back(currEntry);
-	  
+	for (int k = 0; k < BDLR_Points * 3; k++){
+	  for (int l = 0; l < BDLR_Points * 3; l++){
+	    Eigen::Triplet<double,int> currEntry(iOffset + k,jOffset + l,1);
+	    assert((iOffset + k) < matrixSize);
+	    assert((jOffset + k) < matrixSize);
+	    assert((iOffset + k) >= 0);
+	    assert((jOffset + k) >= 0);
+	    tripletVec.push_back(currEntry);
+	  }
 	}
       }
     }
   
   Eigen::SparseMatrix<double> graph(matrixSize,matrixSize);
-  std::cout<<matrixSize<<" "<<tripletVec.size()<<std::endl;
   graph.setFromTriplets(tripletVec.begin(),tripletVec.end());
-
+  std::cout<<"NNZ = "<<graph.nonZeros()<<std::endl;
   
   Eigen::VectorXd exactSoln = Eigen::VectorXd::LinSpaced(Eigen::Sequential,matrixSize,-2,2);
   //HODLR_Matrix kernelHODLR(matrixSize,matrixSize,RPY_Kernel,&RPY_Matrix_Input,diagBlkSize + 1,usrTree);
@@ -157,8 +159,8 @@ int main(int arc, char**argv)
   Eigen::VectorXd inputF = exactMatrixKernel * exactSoln; // Computing the RHS 
   kernelHODLR.printResultInfo = true; // Comment this line out if you don't want the l2 error
   std::cout<<"Solving"<<std::endl;
-  kernelHODLR.set_BoundaryDepth(2);
-  kernelHODLR.set_LRTolerance(1e-4); // Low-rank approximation tolerance
+  kernelHODLR.set_BoundaryDepth(BDLR_Depth);
+  kernelHODLR.set_LRTolerance(solverTol); // Low-rank approximation tolerance
   kernelHODLR.set_LeafConst();
   Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);
   Eigen::VectorXd difference = solverSoln - exactSoln;
