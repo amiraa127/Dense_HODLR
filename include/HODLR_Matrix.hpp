@@ -326,6 +326,7 @@ private:
   void setDefaultValues();
   void initialize(Eigen::MatrixXd& inputMatrix);
   void initialize(Eigen::SparseMatrix<double>& inputMatrix);
+  void initialize(int numRows, int numCols,double (*inputKernel)(int i,int j,void* kernelData),void* inputKernelData);
   void reset_attributes();
   void initializeInfoVecotrs(int numLevels);
 

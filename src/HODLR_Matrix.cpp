@@ -73,8 +73,16 @@ void HODLR_Matrix::initialize(Eigen::SparseMatrix<double> &inputMatrix){
   matrixNumCols      = inputMatrix.cols();
   isSquareMatrix     = (inputMatrix.rows() == inputMatrix.cols());
   matrixDataAvail_Sp = true; 
+}
 
-
+void HODLR_Matrix::initialize(int numRows, int numCols,double (*inputKernel)(int i,int j,void* kernelData),void* inputKernelData){
+  kernelMatrixData = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);
+  matrixSize    = numRows;
+  matrixNumRows = numRows;
+  matrixNumCols = numCols;
+  isSquareMatrix = (numRows == numCols);
+  kernelDataAvail = true;  
+  
 }
 
 // Dense Constructors
@@ -88,7 +96,6 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,int inputSizeThreshold,s
   indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail = true;  
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree){
@@ -99,7 +106,6 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix, int inputSizeThreshold,
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
@@ -114,7 +120,6 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<doub
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail     = true;
   graphDataAvail      = true;
 }
 
@@ -131,7 +136,6 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail = true;
   graphDataAvail  = true;
 }
 
@@ -143,54 +147,36 @@ HODLR_Matrix::HODLR_Matrix(Eigen::MatrixXd & inputMatrix,Eigen::SparseMatrix<dou
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,std::string LR_Method){
   setDefaultValues();
   initialize(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  //matrixData_Sp = inputMatrix;
-  //matrixSize    = inputMatrix.rows();
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail_Sp = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, Eigen::SparseMatrix<double> & inputGraph,int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
   setDefaultValues();
   initialize(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  //matrixData_Sp = inputMatrix;
   graphData     = inputGraph;
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
-  //matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail_Sp = true;
   graphDataAvail     = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSizeThreshold, user_IndexTree &input_IndexTree,std::string LR_Method){
   setDefaultValues();
   initialize(inputMatrix);
-  //isSquareMatrix = (inputMatrix.rows() == inputMatrix.cols());
   assert(isSquareMatrix == true);  // Currently unable to build trees for non squared matrices
-  //matrixData_Sp = inputMatrix;
-  //matrixNumRows = inputMatrix.rows();
-  //matrixNumCols = inputMatrix.cols();
-  //matrixSize    = inputMatrix.rows();
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod(LR_Method);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  //matrixDataAvail_Sp = true;
 }
 
 // End Sparse Constructors
@@ -198,62 +184,67 @@ HODLR_Matrix::HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix, int inputSi
 // Kernel Constructors
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* kernelData),void* inputKernelData,int inputSizeThreshold){
   setDefaultValues();
-  isSquareMatrix = (numRows == numCols);
+  //isSquareMatrix = (numRows == numCols);
+  initialize(numRows,numCols,inputKernel,inputKernelData);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  kernelMatrixData = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);
-  matrixSize    = numRows;
-  matrixNumRows = numRows;
-  matrixNumCols = numCols;
+  // kernelMatrixData = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);
+  //matrixSize    = numRows;
+  //matrixNumRows = numRows;
+  //matrixNumCols = numCols;
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  kernelDataAvail = true;  
+  //kernelDataAvail = true;  
 }
 
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold){
   setDefaultValues();
-  isSquareMatrix = (numRows == numCols);
+  initialize(numRows,numCols,inputKernel,inputKernelData);
+  
+  //isSquareMatrix = (numRows == numCols);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
   assert(numCols == inputGraph.cols());
   assert(numRows == inputGraph.rows());
   graphData           = inputGraph;
-  kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
-  matrixSize          = numRows;
-  matrixNumRows       = numRows;
-  matrixNumCols       = numCols;
+  //kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
+  //matrixSize          = numRows;
+  //matrixNumRows       = numRows;
+  //matrixNumCols       = numCols;
   sizeThreshold       = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createDefaultTree(matrixSize);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  kernelDataAvail     = true;
+  //kernelDataAvail     = true;
   graphDataAvail      = true;
 }
  
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold,user_IndexTree &input_IndexTree){
   setDefaultValues();
-  isSquareMatrix = (numRows == numCols);
+  initialize(numRows,numCols,inputKernel,inputKernelData);
+  //isSquareMatrix = (numRows == numCols);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
-  matrixSize          = numRows;
-  matrixNumRows       = numRows;
-  matrixNumCols       = numCols;
+  //kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
+  //matrixSize          = numRows;
+  //matrixNumRows       = numRows;
+  //matrixNumCols       = numCols;
   sizeThreshold = inputSizeThreshold;
   indexTree.set_sizeThreshold(sizeThreshold);
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  kernelDataAvail = true;
+  //kernelDataAvail = true;
 }
 
 HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData, Eigen::SparseMatrix<double> &inputGraph, int inputSizeThreshold, user_IndexTree &input_IndexTree){
   setDefaultValues();
-  isSquareMatrix = (numRows == numCols);
+  initialize(numRows,numCols,inputKernel,inputKernelData);
+  //isSquareMatrix = (numRows == numCols);
   assert(isSquareMatrix == true); // Currently unable to build trees for non squared matrices
-  kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
-  matrixSize          = numRows;
-  matrixNumRows       = numRows;
-  matrixNumCols       = numCols;
+  //kernelMatrixData    = kernelMatrix(numRows,numCols,inputKernel,inputKernelData);;
+  //matrixSize          = numRows;
+  //matrixNumRows       = numRows;
+  //matrixNumCols       = numCols;
   assert(numCols == inputGraph.cols());
   assert(numRows == inputGraph.rows());
   graphData     = inputGraph;
@@ -262,7 +253,7 @@ HODLR_Matrix::HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,
   indexTree.set_LRMethod("PS_Boundary");
   indexTree.createFromUsrTree(matrixSize,input_IndexTree);
   initializeInfoVecotrs(indexTree.get_numLevels());
-  kernelDataAvail = true;
+  //kernelDataAvail = true;
   graphDataAvail  = true;
 }
 
@@ -440,9 +431,6 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
       exit(EXIT_FAILURE);
     }
   }else if (HODLR_Root->LR_Method == "PS_Boundary"){
-      //assert(matrixDataAvail == true);  
-    //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
-    //PS_Boundary_LowRankApprox(matrixData,matrixData_Sp,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,boundaryDepth);
     assert(graphDataAvail == true);  
     if (matrixDataAvail == true){
       PS_Boundary_LowRankApprox(matrixData,graphData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,boundaryDepth);
