@@ -64,7 +64,7 @@ public:
   
   /**
    * \param[in] inputMatrix : Preallocated dense matrix as Eigen::MatrixXd matrix class.
-   * \param[in] inputSizeThreshold : Leaf size threhold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \param[in] inputSizeThreshold : Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
    * \param[in] LR_Method : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations. If no value is provided, it will set the LR_Method parameter to "partialPiv_ACA".
    * \brief This constructor initializes the class with a dense matrix and an optional leaf size threshold. 
    */
@@ -72,7 +72,7 @@ public:
 
   /**
    * \param[in] inputMatrix : Preallocated dense matrix as Eigen::MatrixXd matrix class.
-   * \param[in] inputSizeThreshold : Leaf size threhold.
+   * \param[in] inputSizeThreshold : Leaf size threshold.
    * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
    * \brief This constructor initializes the class with a dense matrix and a user specified indexing scheme which will be used to create the HODLR index tree.
    * This constructor initializes the class with a dense matrix. 
@@ -82,7 +82,7 @@ public:
   /**
    * \param[in] inputMatrix : Preallocated dense matrix as Eigen::MatrixXd matrix class.
    * \param[in] inputGraph  : Preallocated sparse matrix. This sparse matrix will be used as the interaction graph in the BDLR low-rank approximation scheme.
-   * \param[in] inputSizeThreshold : Leaf size threhold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \param[in] inputSizeThreshold : Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
    * \brief This constructor initializes the class with a dense matrix and an interaction graph (sparse matrix). The grpah is going to be used primarily as the interaction graph in the BDLR scheme.
    */
   HODLR_Matrix(Eigen::MatrixXd &inputMatrix,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold = 30);
@@ -90,7 +90,7 @@ public:
   /**
    * \param[in] inputMatrix : Preallocated dense matrix as Eigen::MatrixXd matrix class.
    * \param[in] inputGraph  : Preallocated sparse matrix. This sparse matrix will be used as the interaction graph in the BDLR low-rank approximation scheme. 
-   * \param[in] inputSizeThreshold : Leaf size threhold.
+   * \param[in] inputSizeThreshold : Leaf size threshold.
    * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
    * \brief This constructor initializes the class with a dense matrix and an interaction graph (sparse matrix) and a user defined indexing schemes. The grpah is going to be used primarily as the interaction graph in the BDLR scheme. The user defined indexing scheme will be used to create the HODLR index tree.
    */
@@ -110,7 +110,7 @@ public:
   
   /**
    * \param[in] inputMatrix : Preallocated Sparse Matrix.
-   * \param[in] inputSizeThreshold : Leaf size threhold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \param[in] inputSizeThreshold : Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
    * \param[in] LR_Method   : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations. If no value is provided, it will set the LR_Method parameter to "PS_Sparse".
    * \brief This constructor initializes the class with a sparse matrix and optional leaf size and low-rank approximation method parameters.
    */
@@ -118,10 +118,10 @@ public:
 
   /**
    * \param[in] inputMatrix : Preallocated Sparse Matrix.
-   * \param[in] inputSizeThreshold : Leaf size threhold. If no value is provided, it will set the leaf size to the default value of 30.
-   * \param[in] input_IndexTree : Leaf size threshold.
+   * \param[in] inputSizeThreshold : Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
    * \param[in] LR_Method   : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations. If no value is provided, it will set the LR_Method parameter to "PS_Sparse".
-   * \brief This constructor initializes the class with a sparse matrix and a user defined indexing scheme used to create the the HODLR indexing tree.
+   * \brief This constructor initializes the class with a sparse matrix and a user defined indexing scheme used to create the HODLR indexing tree.
    */
   HODLR_Matrix(Eigen::SparseMatrix<double> &inputMatrix,int inputSizeThreshold,user_IndexTree &input_IndexTree,std::string LR_Method = "PS_Sparse");
  
@@ -129,8 +129,8 @@ public:
   /**
    * \param[in] inputMatrix : Preallocated Sparse Matrix.
    * \param[in] inputGraph  : Preallocated sparse matrix. This sparse matrix will be used as the interaction graph in the BDLR low-rank approximation scheme.
-   * \param[in] inputSizeThreshold : Leaf size threhold. If no value is provided, it will set the leaf size to the default value of 30.
-   * \param[in] input_IndexTree : Leaf size threshold.   
+   * \param[in] inputSizeThreshold : Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
    * \param[in] LR_Method   : Low-rank approximation scheme to be used in calculating the off-diagonal low-rank approximations. If no value is provided, it will set the LR_Method parameter to "PS_Sparse".
    * \brief This constructor initializes the class with a sparse matrix and an interaction graph (sparse matrix) and a user defined indexing schemes. The grpah is going to be used primarily as the interaction graph in the BDLR scheme. The user defined indexing scheme will be used to create the HODLR index tree.  
    */
@@ -141,32 +141,53 @@ public:
 
   /**
    * \defgroup kernelConstruct Kernel Matrix Constructors
-   * Thse constructors build an HODLR matrix from a preallcated dense matrix. Currently, the dense matrix is being passed by a non const reference variable. So if you want your original matrix, copy it elsewhere befor passing it to the constructor.
+   * \brief These constructors build an HODLR matrix from a kernel function. 
    * @{
    */
   
-  
-   
+
   /**
-   * \param[in] inputMatrix
-   * This constructor initializes the class with a dense matrix. 
+   * \param[in] numRows : Number of rows of the dense matrix.
+   * \param[in] numCols : Number of columns of the dense matrix.
+   * \param[in] inputKernel: Kernel function defining the matrix.
+   * \param[in] inputKernelData: Additional information needed by the kernel function in excess of the row and column index of the entry.
+   * \param[in] inputSizeThreshold: Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \brief This constructor initializes the class with a kernel function and a size threshold. 
    */
-  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold);
+  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold = 30);
   
-  /**
-   * \param[in] inputMatrix
-   * This constructor initializes the class with a dense matrix. 
+    /**
+   * \param[in] numRows : Number of rows of the dense matrix.
+   * \param[in] numCols : Number of columns of the dense matrix.
+   * \param[in] inputKernel: Kernel function defining the matrix.
+   * \param[in] inputKernelData: Additional information needed by the kernel function in excess of the row and column index of the entry.
+   * \param[in] inputGraph  : Preallocated sparse matrix. This sparse matrix will be used as the interaction graph in the BDLR low-rank approximation scheme.
+   * \param[in] inputSizeThreshold: Leaf size threshold. If no value is provided, it will set the leaf size to the default value of 30.
+   * \brief This constructor initializes the class with a kernel function, a size threshold and an interaction graph.  The grpah is going to be used primarily as the interaction graph in the BDLR scheme. 
    */
-  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold);
+  HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,Eigen::SparseMatrix<double> &inputGraph,int inputSizeThreshold = 30);
   
-    
   /**
-   * \param[in] inputMatrix
-   * This constructor initializes the class with a dense matrix. 
+   * \param[in] numRows : Number of rows of the dense matrix.
+   * \param[in] numCols : Number of columns of the dense matrix.
+   * \param[in] inputKernel: Kernel function defining the matrix.
+   * \param[in] inputKernelData: Additional information needed by the kernel function in excess of the row and column index of the entry.
+   * \param[in] inputSizeThreshold: Leaf size threshold.
+   * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
+   * \brief This constructor initializes the class with a kernel function a user defined indexing scheme used to create the HODLR indexing tree. 
    */
   HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData,int inputSizeThreshold,user_IndexTree &input_IndexTree);
 
-  
+  /**
+   * \param[in] numRows : Number of rows of the dense matrix.
+   * \param[in] numCols : Number of columns of the dense matrix.
+   * \param[in] inputKernel: Kernel function defining the matrix.
+   * \param[in] inputKernelData: Additional information needed by the kernel function in excess of the row and column index of the entry.
+   * \param[in] inputGraph  : Preallocated sparse matrix. This sparse matrix will be used as the interaction graph in the BDLR low-rank approximation scheme.
+   * \param[in] inputSizeThreshold: Leaf size threshold.
+   * \param[in] input_IndexTree : User defined splitting scheme stored as a user_IndexTree class. 
+   * \brief This constructor initializes the class with a kernel function and an interaction graph (sparse matrix) and a user defined indexing schemes. The grpah is going to be used primarily as the interaction graph in the BDLR scheme. The user defined indexing scheme will be used to create the HODLR index tree.  
+   */  
   HODLR_Matrix(int numRows, int numCols,double (*inputKernel)(int i,int j,void* inputKernelData),void* inputKernelData, Eigen::SparseMatrix<double> &inputGraph, int inputSizeThreshold, user_IndexTree &input_IndexTree);
   /** @} */
 
@@ -201,8 +222,9 @@ public:
   void set_FreeMatrixMemory(bool inputVal);
   void set_BoundaryDepth(int inputBoundaryDepth);  
   void set_recLUFactorizedFlag(bool factorized);
+  void set_numSel(int numSel_);
   void set_LeafConst();
-
+  
   void saveExtendedSp(std::string savePath);
   /************************************ Accessing Attributes ************************************/
   double get_recLU_FactorizationTime() const;
@@ -310,7 +332,8 @@ private:
   double minPivot;
   double pastix_MinPivot;
   int boundaryDepth;
-
+  int numSel;
+  
   HODLR_Tree indexTree;
   recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;

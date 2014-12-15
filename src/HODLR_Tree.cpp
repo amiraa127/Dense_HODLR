@@ -186,32 +186,6 @@ HODLR_Tree::node* HODLR_Tree::copyTree(std::vector<std::vector<node*> > &rhs_nod
 }
 
 void HODLR_Tree::copyNode(const node* oldNode, node* newNode, std::vector<std::vector<node*> > &rhs_nodeLevelVec,std::vector<node*> &rhs_leafNodesVec)const{
-  /*
-  newNode->currLevel                = oldNode->currLevel;
-  newNode->min_i                    = oldNode->min_i;
-  newNode->min_j                    = oldNode->min_j;
-  newNode->max_i                    = oldNode->max_i;
-  newNode->max_j                    = oldNode->max_j;
-  newNode->splitIndex_i             = oldNode->splitIndex_i;
-  newNode->splitIndex_j             = oldNode->splitIndex_j; 
-  newNode->topOffDiag_minRank       = oldNode->topOffDiag_minRank;
-  newNode->bottOffDiag_minRank      = oldNode->bottOffDiag_minRank;      
-  newNode->topOffDiag_maxRank       = oldNode->topOffDiag_maxRank;
-  newNode->bottOffDiag_maxRank      = oldNode->bottOffDiag_maxRank;      
-  newNode->isLeaf                   = oldNode->isLeaf;
-  newNode->LR_Method                = oldNode->LR_Method;
-  newNode->topOffDiagU              = oldNode->topOffDiagU;
-  newNode->topOffDiagV              = oldNode->topOffDiagV;
-  newNode->bottOffDiagU             = oldNode->bottOffDiagU;
-  newNode->bottOffDiagV             = oldNode->bottOffDiagV;
-  newNode->leafMatrix               = oldNode->leafMatrix;
-  newNode->topOffDiagRank           = oldNode->topOffDiagRank;
-  newNode->bottOffDiagRank          = oldNode->bottOffDiagRank;
-  newNode->topOffDiagRowIdx         = oldNode->topOffDiagRowIdx;
-  newNode->topOffDiagColIdx         = oldNode->topOffDiagColIdx;
-  newNode->bottOffDiagRowIdx        = oldNode->bottOffDiagRowIdx;
-  newNode->bottOffDiagColIdx        = oldNode->bottOffDiagColIdx;
-  */
   *(newNode) = *(oldNode);
   if (oldNode->isLeaf == true){
     newNode->left = NULL;
@@ -237,7 +211,6 @@ void HODLR_Tree::userTree_To_HODLRTree(const int currLevel,const int min_i,const
   if (currLevel > (numLevels - 1))
     numLevels = currLevel + 1;
   
-  //if ((matrixSize <= sizeThreshold) && (currLevel > 0)){
   if ((matrixSize <= sizeThreshold) && (user_IndexRoot->splitIndex == -1)){
  
     HODLR_IndexRoot->isLeaf = true;

@@ -106,6 +106,8 @@ int main(int arc, char**argv)
   //Sorting according to HODLR.
   
   user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,500,"PS_Boundary");
+  //user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,0,"partialPiv_ACA");
+
   
   int globalX_Idx = 0;
   
@@ -162,6 +164,7 @@ int main(int arc, char**argv)
   kernelHODLR.set_BoundaryDepth(BDLR_Depth);
   kernelHODLR.set_LRTolerance(solverTol); // Low-rank approximation tolerance
   kernelHODLR.set_LeafConst();
+  kernelHODLR.set_numSel(0);
   Eigen::VectorXd solverSoln = kernelHODLR.recLU_Solve(inputF);
   Eigen::VectorXd difference = solverSoln - exactSoln;
   double relError = difference.norm()/exactSoln.norm();
