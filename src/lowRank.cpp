@@ -556,7 +556,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	int currRow = it.row() - min_i;
 	int currCol = it.col() - min_j;
 	if (rowSet.count(currRow) == 1 && colSet.count(currCol) == 1){
-	  /*
+	  
 	  if (classifiedRows[currRow] == false && classifiedCols[currCol] == false){
 	    rowPos[0].push_back(currRow);
 	    colPos[0].push_back(currCol);
@@ -566,7 +566,9 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	    colCurrClassVec.push_back(currCol);
 	    numClassifiedRows ++;
 	    numClassifiedCols ++;
-	    }*/
+	    }
+	  
+	  /*
 	  if (classifiedRows[currRow] == false){
 	    rowPos[0].push_back(currRow); 
 	    classifiedRows[currRow] = true;
@@ -578,11 +580,12 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	    classifiedCols[currCol] = true;
 	    colCurrClassVec.push_back(currCol);
 	    numClassifiedCols ++;   
-	  }
+	  }*/
 	}
       }else if (it.row() > max_i)
 	break;
     }
+
   if (numClassifiedRows == 0){
     if ((numRowPts >= numSel ) && (numColPts >= numSel) && (numSel >= 0)){
       std::vector<int> rowVec(rowSet.begin(),rowSet.end());

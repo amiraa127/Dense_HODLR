@@ -9,6 +9,11 @@ set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++11 -O3 -Wall")
 
 add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
+if (NOT PASTIX)
+   add_definitions(-DNOPASTIX)
+   #message("No PaStiX")
+endif(NOT PASTIX)
+
 # Find the dependencies.
 find_package (Eigen REQUIRED)
 find_package (CppUnit REQUIRED)

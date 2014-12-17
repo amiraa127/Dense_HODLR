@@ -1,6 +1,7 @@
 #include "HODLR_Matrix.hpp"
+#ifndef NOPASTIX
 #include "EigenPaStiXSupport.hpp"
-
+#endif
 void HODLR_Matrix::setDefaultValues(){
   
   LR_Tolerance = 1e-6;
@@ -1110,10 +1111,13 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
   }
   
   storeLRinTree();
-   
+
+  #if !defined NOPASTIX
   Eigen::PastixLU<Eigen::SparseMatrix<double> > extendedSp_PastixSolver;
-  //Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
-    
+  #else
+  Eigen::SparseLU<Eigen::SparseMatrix<double> > extendedSp_Solver;
+  #endif
+  
   if (assembled_ExtendedSp == false){
     double startTime = clock();
     Eigen::SparseMatrix<double> extendedSp_Matrix = assembleExtendedSPMatrix();
@@ -1130,15 +1134,17 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
     extendedSp_AssemblyTime = (endTime-startTime)/CLOCKS_PER_SEC;
     extendedSp_Size = extendedSp_Matrix.rows();
     startTime = clock();
+
+    #if !defined NOPASTIX
     extendedSp_PastixSolver.iparm(IPARM_FACTORIZATION) = API_FACT_LU;
     extendedSp_PastixSolver.iparm(IPARM_VERBOSE)       = API_VERBOSE_NOT;
     extendedSp_PastixSolver.iparm(IPARM_ORDERING)      = API_ORDER_SCOTCH;
     extendedSp_PastixSolver.iparm(IPARM_SYM) = API_SYM_NO;
     extendedSp_PastixSolver.dparm(DPARM_EPSILON_MAGN_CTRL) = pastix_MinPivot;
-
     extendedSp_PastixSolver.compute(extendedSp_Matrix);
-    //extendedSp_Solver.compute(extendedSp_Matrix);
-
+    #else
+    extendedSp_Solver.compute(extendedSp_Matrix);
+    #endif
     endTime = clock();
     //if (extendedSp_Solver.info() != Eigen::Success){
     //  std::cout<<"Extended sparse matrix factorization failed."<<std::endl;
@@ -1154,9 +1160,13 @@ Eigen::MatrixXd HODLR_Matrix::extendedSp_Solve(const Eigen::MatrixXd & input_RHS
   Eigen::MatrixXd extendedSp_RHS = Eigen::MatrixXd::Zero(extendedSp_Size,input_RHS.cols());
   extendedSp_RHS.topLeftCorner(input_RHS.rows(),input_RHS.cols()) = input_RHS;
   double startTime = clock();
-  //sp_Solution = extendedSp_Solver.solve(extendedSp_RHS);
+  
+  #if !defined NOPASTIX
   sp_Solution = extendedSp_PastixSolver.solve(extendedSp_RHS);
- 
+  #else
+  sp_Solution = extendedSp_Solver.solve(extendedSp_RHS);
+  #endif
+  
   double endTime = clock();
   extendedSp_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
   //if (extendedSp_Solver.info() != Eigen::Success){
@@ -1344,7 +1354,6 @@ void HODLR_Matrix::set_minPivot(double input_minPivot){
 
 void HODLR_Matrix::set_numSel(int numSel_){
   numSel = numSel_;
-
 }
 
 void HODLR_Matrix::set_pastix_MinPivot(double input_minPivot){
