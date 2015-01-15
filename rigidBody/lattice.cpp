@@ -120,7 +120,7 @@ int main(int arc, char**argv)
   }
   
   double threshold = 1.25*length;
-  double solverTol = 1e-3;
+  double solverTol = 1e-4;
   int BDLR_Points  = 12;
   int BDLR_Depth   = 0;
   std::vector<Eigen::Triplet<double,int> > tripletVec;
