@@ -376,7 +376,7 @@ currDir =  os.getcwd()
 dst = currDir+'/boundaryLR';
 idx = currDir.find('benchmarks')
 src = currDir[:idx]+'build/'+currDir[idx:]+'/boundaryLR';
-distutils.dir_util.copy_tree(src,dst)
+#distutils.dir_util.copy_tree(src,dst)
 nameList = []
 
 # loop through all the files
@@ -401,7 +401,7 @@ for root,dirs,fileNames in os.walk(currDir):
 # copy output from source dir
 src = currDir[:idx]+'build/'+currDir[idx:]+'/results'
 dst = currDir+'/results'
-shutil.copyfile(src,dst);
+#shutil.copyfile(src,dst);
 size,directAccuracy,directTime,finalAccuracy,totalTime,LUTime,numIter = parseResultFile(dst,nameList);
 # Open summary table file
 sumFile = open(currDir+'/summary.tex','w')
@@ -455,4 +455,4 @@ proc.communicate()
 os.unlink('summary.aux')
 os.unlink('summary.log')
 
-uploadToDropBox(currDir)
+#uploadToDropBox(currDir)

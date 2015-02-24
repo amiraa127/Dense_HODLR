@@ -38,6 +38,6 @@ add_subdirectory(rigidBody)
 
 file(COPY test/data DESTINATION ${DenseHODLR_BINARY_DIR}/test)
 file(COPY benchmarks/ACA DESTINATION ${DenseHODLR_BINARY_DIR}/benchmarks)
-file(COPY benchmarks/ACA_Blade DESTINATION ${DenseHODLR_BINARY_DIR}/benchmarks)
-file(COPY benchmarks/boundaryLR DESTINATION ${DenseHODLR_BINARY_DIR}/benchmarks)
+#file(COPY benchmarks/ACA_Blade DESTINATION ${DenseHODLR_BINARY_DIR}/benchmarks)
+#file(COPY benchmarks/boundaryLR DESTINATION ${DenseHODLR_BINARY_DIR}/benchmarks)
 file(COPY rigidBody/input DESTINATION ${DenseHODLR_BINARY_DIR}/rigidBody/)

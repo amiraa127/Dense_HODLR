@@ -329,7 +329,6 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
 
   // Calculate the LR factorizations
   if (HODLR_Root->LR_Method == "partialPiv_ACA"){
-    
     if (matrixDataAvail == true){
       partialPivACA_LowRankApprox(matrixData,HODLR_Root->topOffDiagU,HODLR_Root->topOffDiagV,HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1,numRows_TopOffDiag,numCols_TopOffDiag,LR_Tolerance,HODLR_Root->topOffDiagRank,HODLR_Root->topOffDiag_minRank,HODLR_Root->topOffDiag_maxRank,minPivot);
       partialPivACA_LowRankApprox(matrixData,HODLR_Root->bottOffDiagU,HODLR_Root->bottOffDiagV,HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,numRows_BottOffDiag,numCols_BottOffDiag,LR_Tolerance,HODLR_Root->bottOffDiagRank,HODLR_Root->bottOffDiag_minRank,HODLR_Root->bottOffDiag_maxRank,minPivot);
@@ -423,7 +422,7 @@ void HODLR_Matrix::storeLRinTree(HODLR_Tree::node* HODLR_Root){
     std::cout<<"Error!. Invalid low-rank approximation scheme ( "<<HODLR_Root->LR_Method<<")."<<std::endl;
     exit(EXIT_FAILURE);
   }
-  
+  //std::cout<<"TopOffDiagRank = "<<HODLR_Root->topOffDiagRank<<" BottOffDiagRank = "<<HODLR_Root->bottOffDiagRank<<std::endl;
   double endTime = clock();
   levelRankAverageVec[HODLR_Root->currLevel] = levelRankAverageVec[HODLR_Root->currLevel] * levelRankAverageVecCnt[HODLR_Root->currLevel] + HODLR_Root->topOffDiagRank + HODLR_Root->bottOffDiagRank;
   levelRankAverageVecCnt[HODLR_Root->currLevel] += 2;
@@ -1220,6 +1219,12 @@ Eigen::MatrixXd HODLR_Matrix::oneStep_Iterate(const Eigen::MatrixXd & prevStep_r
   
 }
 
+Eigen_IML_Vector HODLR_Matrix::solve(const Eigen_IML_Vector & other){
+  assert(LRStoredInTree == true);
+  assert(recLU_Factorized);
+  return recLU_Solve(other);
+}
+
 Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS, const int maxIterations, const double stop_tolerance,const double init_LRTolerance,const std::string input_LRMethod, const std::string directSolve_Method = "recLU"){
     
   assert(input_RHS.rows() == matrixSize);
@@ -1239,7 +1244,18 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
   }
   
   storeLRinTree();
-
+  /*
+  double startTimed = clock();
+  diag_IML_Precond diagPre(matrixData);
+  Eigen_IML_Vector x0d(Eigen::MatrixXd::Zero(matrixData.rows(),1));
+  Eigen_IML_Vector RHSd(input_RHS);
+  double told = 1e-10;
+  int resultd = 0, maxitd = 1000,restartd = 32;
+  Eigen::MatrixXd Hd =Eigen::MatrixXd::Zero(restartd+1,restartd);
+  resultd = GMRES(matrixData,x0d,RHSd,diagPre,Hd,restartd,maxitd,told);   
+  double endTimed = clock();
+  */
+  
   double startTime = clock();
   Eigen::MatrixXd init_Guess;
   if (directSolve_Method == "recLU")
@@ -1251,6 +1267,16 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
     exit(EXIT_FAILURE);
   }
   Eigen::MatrixXd currStep_Soln = init_Guess;
+  Eigen_IML_Vector x0(init_Guess);
+  Eigen_IML_Vector RHS(input_RHS);
+  double tol = 1e-10;
+  int result = 0, maxit = 1000,restart = 32;
+  Eigen::MatrixXd H =Eigen::MatrixXd::Zero(restart+1,restart);
+  result = GMRES(matrixData,x0,RHS,*this,H,restart,maxit,tol);   
+
+  Eigen::MatrixXd solution = *(&x0);
+  int num_Iter = maxit;
+  /*
   Eigen::MatrixXd nextStep_Soln;
   Eigen::MatrixXd currStep_Product;
   int num_Iter = 1;
@@ -1272,6 +1298,7 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
       break;
   }
   Eigen::MatrixXd solution = currStep_Soln;
+  */
   double endTime = clock();
   totalIter_SolveTime = (endTime-startTime)/CLOCKS_PER_SEC;
   printResultInfo = save_printResultInfo;
@@ -1284,13 +1311,14 @@ Eigen::MatrixXd HODLR_Matrix::iterative_Solve(const Eigen::MatrixXd & input_RHS,
     std::cout<<"Total Iteration Time               = "<<totalIter_SolveTime<<" seconds"<<std::endl;
     std::cout<<"Total Solve Time                   = "<<totalIter_SolveTime + LR_ComputationTime<<" seconds"<<std::endl;
     std::cout<<"LR Tolerance                       = "<<LR_Tolerance<<std::endl;
+    std::cout<<"BDLR Depth                         = "<<boundaryDepth<<std::endl;
     std::cout<<"Number of Iterations               = "<<num_Iter<<std::endl;
     if (matrixDataAvail == true)
       std::cout<<"Residual l2 Relative Error         = "<<((matrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;
     else if (kernelDataAvail == true)
       std::cout<<"Residual l2 Relative Error         = "<<((kernelMatrixData * solution) - input_RHS).norm()/input_RHS.norm()<<std::endl;  
   }
-  
+  //std::cout<<"Diag Solve Time    = "<<(endTimed-startTimed)/CLOCKS_PER_SEC<< std::endl;
   // restore previous state;
   //set_LRTolerance(prev_LRTolerance);
   //set_LRMethod(prev_LRMethod);

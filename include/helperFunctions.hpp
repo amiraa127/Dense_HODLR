@@ -139,6 +139,10 @@ void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::strin
 
 void testBoundaryLRSolver(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,const int depth,user_IndexTree &usrTree);
 
-void analyzeRank(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const int input_Min_i,const int input_Min_j,const int input_NumRows, const int input_NumCols,std::string mode = "default");
+void analyzeRank(const std::string inputMatrixFileName,const std::string inputGraphFileName,const std::string outputFileName,const int input_Min_i,const int input_Min_j,const int input_NumRows, const int input_NumCols,std::string mode = "default",int maxDepth = 7);
+
+void testACASolver(const std::string inputMatrixFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold);
+
+void testACASolver(const std::string inputMatrixFileName,const std::string outputFileName,const double iterInitTol,const int sizeThreshold,user_IndexTree &usrTree);
 
 #endif

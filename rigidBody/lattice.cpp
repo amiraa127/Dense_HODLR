@@ -105,7 +105,7 @@ int main(int arc, char**argv)
   
   //Sorting according to HODLR.
   
-  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,500,"PS_Boundary");
+  user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,0,"PS_Boundary");
   //user_IndexTree usrTree = get_KDTree_Sorted(sphereCenters,pointsPerSphere,0,"partialPiv_ACA");
 
   

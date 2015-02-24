@@ -11,10 +11,15 @@
 #include <string>
 #include <vector>
 
-//External Dependencies
 
+//External Dependencies:
+//Eigen
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+//IML
+#include "diag_IML_Precond.hpp"
+#include "Eigen_IML_Vector.hpp"
+#include "gmres.h"
 
 //Custom Dependencies
 #include "helperFunctions.hpp"
@@ -209,7 +214,7 @@ public:
   /************************************* Solve Methods **********************************/
   Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS);
   Eigen::MatrixXd recSM_Solve(const Eigen::MatrixXd & input_RHS);
-
+  
   void recLU_Compute();
   Eigen::MatrixXd extendedSp_Solve(const Eigen::MatrixXd & input_RHS);
   Eigen::MatrixXd iterative_Solve(const Eigen::MatrixXd & input_RHS, const int maxIterations, const double stop_tolerance,const double init_LRTolerance,const std::string input_LR_Method, const std::string directSolve_Method);
@@ -375,6 +380,8 @@ private:
   /***************************Iterative Solver Functions****************************/
   Eigen::MatrixXd oneStep_Iterate(const Eigen::MatrixXd &  prevStep_result,const Eigen::MatrixXd & RHS,const Eigen::MatrixXd & initSolveGuess,Eigen::MatrixXd & prevStep_Product,const std::string directSolve_Method);
 
+  Eigen_IML_Vector solve(const Eigen_IML_Vector & other);
+
 
   /**********************************Accessing Matrix Entries***************************/
   void fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j);
@@ -392,11 +399,15 @@ private:
   void calcDeterminant(HODLR_Tree::node* HODLR_Root);
 
   /******************************** Friend Functions *******************************************/
-  friend void extendAddUpdate(HODLR_Matrix & parentHODLR, std::vector<Eigen::MatrixXd*> D_Array,std::vector<HODLR_Matrix*> D_HODLR_Array,std::vector<Eigen::MatrixXd*> U_Array,std::vector<Eigen::MatrixXd*> V_Array,std::vector<std::vector<int> > & updateIdxVec_Array_D,std::vector<std::vector<int> > & updateIdxVec_Array_D_HODLR,double tol,std::string mode);
+  friend void extendAddUpdate(HODLR_Matrix & parentHODLR, std::vector<Eigen::MatrixXd*> D_Array,std::vector<HODLR_Matrix*> D_HODLR_Array,std::vector<Eigen::MatrixXd*> U_Array,std::vector<Eigen::MatrixXd*> V_Array,std::vector<std::vector<int> > & updateIdxVec_Array_D,std::vector<std::vector<int> > & updateIdxVec_Array_D_HODLR,double tol,std::string mode,int maxRank);
   friend void extendAddUpdate(HODLR_Matrix & parentHODLR,HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode);
   friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & U,Eigen::MatrixXd & V,std::vector<int>& updateIdxVec,double tol,std::string mode);
   friend HODLR_Matrix extend(std::vector<int> & extendIdxVec, int parentSize, HODLR_Matrix & childHODLR);
   friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,double tol,std::string mode);
+  template < class Operator, class Vector, class Preconditioner,
+	     class Matrix, class Real >
+  friend int GMRES(const Operator &A, Vector &x, const Vector &b,Preconditioner &M, Matrix &H, int &m, int &max_iter,Real &tol);
+    
 };
 
 /** \class HODLR_Matrix HODLR_Matrix.hpp 
