@@ -340,7 +340,7 @@ private:
   int numSel;
   
   HODLR_Tree indexTree;
-  recLU_FactorTree recLUfactorTree;
+  //recLU_FactorTree recLUfactorTree;
   Eigen::MatrixXd matrixData;
   Eigen::SparseMatrix<double> matrixData_Sp;
   Eigen::SparseMatrix<double> graphData;
@@ -363,10 +363,13 @@ private:
   void storeLRinTree(HODLR_Tree::node* HODLR_Root);
   void recLU_Factorize();
   void recSM_Factorize();
-  Eigen::MatrixXd recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot);
+  //Eigen::MatrixXd recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot);
+  Eigen::MatrixXd recLU_Factorize(const Eigen::MatrixXd & input_RHS,HODLR_Tree::node* HODLR_Root);
+
   void recSM_Factorize(HODLR_Tree::node* HODLR_Root,std::vector<HODLR_Tree::node*> &leftChildren, std::vector<HODLR_Tree::node*> &rightChildren,int desLevel);
 
-  Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, const recLU_FactorTree::node* factorRoot);
+  //Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, const recLU_FactorTree::node* factorRoot);
+  Eigen::MatrixXd recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root);
 
   void recSM_Solve(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &RHS);
   /**************************extendedSp Solver Functions***************************/
@@ -378,7 +381,6 @@ private:
   Eigen::SparseMatrix<double> assembleExtendedSPMatrix();
   
   /***************************Iterative Solver Functions****************************/
-  Eigen::MatrixXd oneStep_Iterate(const Eigen::MatrixXd &  prevStep_result,const Eigen::MatrixXd & RHS,const Eigen::MatrixXd & initSolveGuess,Eigen::MatrixXd & prevStep_Product,const std::string directSolve_Method);
 
   Eigen_IML_Vector solve(const Eigen_IML_Vector & other);
 

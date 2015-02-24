@@ -682,7 +682,7 @@ int main(int argc,char* argv[]){
     
     testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_",1e-1,30,1);
     testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-3_",1e-3,30,3);
-    testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-5_",1e-5,30,80);
+    testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-5_",1e-5,30,70);
 
     // Create usrTrees fro turbine blade results
     std::cout<<"*******************************************************"<<std::endl;

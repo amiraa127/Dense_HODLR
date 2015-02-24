@@ -45,13 +45,17 @@ public:
     Eigen::MatrixXd leafMatrix;
     Eigen::MatrixXd topOffDiagU_SM;
     Eigen::MatrixXd bottOffDiagU_SM;
-   
+    Eigen::MatrixXd topDiagSoln_LR;
+    Eigen::MatrixXd bottDiagSoln_LR;
+
+    
     std::vector<int> topOffDiagRowIdx;
     std::vector<int> topOffDiagColIdx;
     std::vector<int> bottOffDiagRowIdx;
     std::vector<int> bottOffDiagColIdx;
 
     Eigen::PartialPivLU<Eigen::MatrixXd> leafLU;
+    Eigen::PartialPivLU<Eigen::MatrixXd> SchurLU;
     perturbI nodePerturbI;
   };
   
