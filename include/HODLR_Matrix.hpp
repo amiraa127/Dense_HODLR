@@ -39,9 +39,9 @@ class HODLR_Matrix{
 
 public:
  
-  bool printLevelRankInfo;
-  bool printLevelAccuracy;
-  bool printLevelInfo;
+  //bool printLevelRankInfo;
+  //bool printLevelAccuracy;
+  //bool printLevelInfo;
   bool printResultInfo;
   
   
@@ -204,7 +204,6 @@ public:
   HODLR_Matrix(const HODLR_Matrix & rhs); //Copy Constructor
   /** @} */
 
-  
   ~HODLR_Matrix();
   
   /************************************* Create HODLR Structure ***************************************/
@@ -270,6 +269,7 @@ public:
   Eigen::MatrixXd& returnBottOffDiagK();
 
   /******************************** Check ******************************************************/
+  void printHODLRLevelInfo();
   void check_Structure();
   double calcAbsDiff();
   Eigen::MatrixXd createExactHODLR(const int rank,int input_MatrixSize,const int inpt_SizeThreshold);
@@ -396,7 +396,7 @@ private:
   /******************************** Check ******************************************************/
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
-  
+  void printHODLRLevelInfo(HODLR_Tree::node* HODLR_Root);
   /******************************** Determinant ************************************************/    void calcDeterminant();
   void calcDeterminant(HODLR_Tree::node* HODLR_Root);
 

@@ -47,9 +47,9 @@ void HODLR_Matrix::setDefaultValues(){
   constLeafSet           = false;
   constLeafFactorized    = false;
 
-  printLevelRankInfo     = false;
-  printLevelAccuracy     = false;
-  printLevelInfo         = false;
+  // printLevelRankInfo     = false;
+  //printLevelAccuracy     = false;
+  //printLevelInfo         = false;
   printResultInfo        = false;  
   extendedSp_SavePath    = "/extendedSp_Data";
 }
@@ -612,20 +612,11 @@ void HODLR_Matrix::recSM_Solve(HODLR_Tree::node* HODLR_Root,Eigen::MatrixXd &RHS
   
 }
 
-
-
-
-/*
-Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root, recLU_FactorTree::node* factorRoot){
-*/
 Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,HODLR_Tree::node* HODLR_Root){
 
   // Base case
   if (HODLR_Root->isLeaf == true){
     double startTime = clock();
-    //factorRoot->isLeaf = true;
-    //factorRoot->left   = NULL;
-    //factorRoot->right  = NULL;  
     Eigen::MatrixXd result;
     if (isLeafConst == true){
       if (constLeafFactorized == false){
@@ -634,9 +625,7 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
       }
       result = constLeafLU.solve(input_RHS);
     }else{
-      //factorRoot->LU = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->leafMatrix);
       HODLR_Root->leafLU = Eigen::PartialPivLU<Eigen::MatrixXd>(HODLR_Root->leafMatrix);
-     //result = factorRoot->LU.solve(input_RHS); 
       result = HODLR_Root->leafLU.solve(input_RHS);
     }
     double endTime = clock();
@@ -655,14 +644,9 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   topDiagRHS.leftCols(parentRHS_Cols) = input_RHS.topRows(topDiagSize);
   topDiagRHS.rightCols(topOffDiag_LR_Cols) = HODLR_Root->topOffDiagU;  
   
-  /*recLU_FactorTree::node* leftFactorRoot = new recLU_FactorTree::node;
-  leftFactorRoot->isLeaf = false;
-  factorRoot->left = leftFactorRoot;*/
-  //Eigen::MatrixXd topDiagSoln = recLU_Factorize(topDiagRHS,HODLR_Root->left,leftFactorRoot);
   Eigen::MatrixXd topDiagSoln = recLU_Factorize(topDiagRHS,HODLR_Root->left);
 
   Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
-  //factorRoot->topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
   HODLR_Root->topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
  
   
@@ -673,14 +657,9 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   bottDiagRHS.leftCols(parentRHS_Cols) = input_RHS.bottomRows(bottDiagSize);
   bottDiagRHS.rightCols(bottOffDiag_LR_Cols) = HODLR_Root->bottOffDiagU;
  
-  /*recLU_FactorTree::node* rightFactorRoot = new recLU_FactorTree::node;
-  rightFactorRoot->isLeaf = false;
-  factorRoot->right = rightFactorRoot;*/
-  //Eigen::MatrixXd bottDiagSoln = recLU_Factorize(bottDiagRHS,HODLR_Root->right,rightFactorRoot);
   Eigen::MatrixXd bottDiagSoln = recLU_Factorize(bottDiagRHS,HODLR_Root->right);
 
   Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
-  //factorRoot->bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols);
   HODLR_Root->bottDiagSoln_LR = bottDiagSoln.rightCols(bottOffDiag_LR_Cols); 
 
   // Update the remaining of the matrix(generate Schur complement (S matrix));
@@ -694,12 +673,9 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   S.topLeftCorner(IC.rows(),IC.cols()) = IC;
   S.bottomRightCorner(IB.rows(),IB.cols()) = IB;
   
-  //S.topRightCorner(HODLR_Root->bottOffDiagRank,HODLR_Root->topOffDiagRank)   = (HODLR_Root->bottOffDiagV.transpose() * factorRoot->topDiagSoln_LR);
-  //S.bottomLeftCorner(HODLR_Root->topOffDiagRank,HODLR_Root->bottOffDiagRank) = (HODLR_Root->topOffDiagV.transpose()  * factorRoot->bottDiagSoln_LR);
   S.topRightCorner(HODLR_Root->bottOffDiagRank,HODLR_Root->topOffDiagRank)   = (HODLR_Root->bottOffDiagV.transpose() * HODLR_Root->topDiagSoln_LR);
   S.bottomLeftCorner(HODLR_Root->topOffDiagRank,HODLR_Root->bottOffDiagRank) = (HODLR_Root->topOffDiagV.transpose()  * HODLR_Root->bottDiagSoln_LR);
 
-  //factorRoot->LU = Eigen::PartialPivLU<Eigen::MatrixXd>(S);
   HODLR_Root->SchurLU = Eigen::PartialPivLU<Eigen::MatrixXd>(S);
  
   Eigen::MatrixXd schurRHS = Eigen::MatrixXd::Zero(Sdim,parentRHS_Cols);
@@ -707,14 +683,10 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   schurRHS.topRows(HODLR_Root->bottOffDiagRank)    = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
   schurRHS.bottomRows(HODLR_Root->topOffDiagRank)  = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
 
-  //Eigen::MatrixXd y = factorRoot->LU.solve(schurRHS);  
   Eigen::MatrixXd y = HODLR_Root->SchurLU.solve(schurRHS);  
 
   Eigen::MatrixXd result(topDiagSize + bottDiagSize,input_RHS.cols());
   
-  //result.topRows(topDiagSize)     = topDiagSoln_pRHS  - factorRoot->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
-  //result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - factorRoot->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
-
   result.topRows(topDiagSize)     = topDiagSoln_pRHS  - HODLR_Root->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
   result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - HODLR_Root->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
 
@@ -723,35 +695,32 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   return result;
 }
 
-//Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root,const recLU_FactorTree::node* factorRoot){
 Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,const HODLR_Tree::node* HODLR_Root){
 
   // Base case
   if (HODLR_Root->isLeaf == true){
-      double startTime = clock();
-      Eigen::MatrixXd result;
-      if (isLeafConst == true)
-	result = constLeafLU.solve(input_RHS);
-      else
-	//result = factorRoot->LU.solve(input_RHS);
-	result = HODLR_Root->leafLU.solve(input_RHS);
-      double endTime = clock();
-      recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
-      return result;
+    double startTime = clock();
+    Eigen::MatrixXd result;
+    if (isLeafConst == true)
+      result = constLeafLU.solve(input_RHS);
+    else
+      result = HODLR_Root->leafLU.solve(input_RHS);
+    double endTime = clock();
+    recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
+    return result;
   }
   // Low Rank Approximation
   int calculatedRankB,calculatedRankC;
-    
+  
   calculatedRankB = HODLR_Root->topOffDiagRank;
   calculatedRankC = HODLR_Root->bottOffDiagRank;
-  		
+  
   // Factorize and Solve for top diagonal matrix
   int topDiagSize = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1;
   int parentRHS_Cols = input_RHS.cols();
   int topDiagRHS_Cols = parentRHS_Cols;
   Eigen::MatrixXd topDiagRHS = Eigen::MatrixXd::Zero(topDiagSize,topDiagRHS_Cols);
   topDiagRHS.leftCols(parentRHS_Cols) = input_RHS.topRows(topDiagSize);
-  //Eigen::MatrixXd topDiagSoln = recLU_Solve(topDiagRHS,HODLR_Root->left,factorRoot->left);
   Eigen::MatrixXd topDiagSoln = recLU_Solve(topDiagRHS,HODLR_Root->left);
   Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
 
@@ -760,67 +729,10 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
   int bottDiagRHS_Cols = parentRHS_Cols;
   Eigen::MatrixXd bottDiagRHS = Eigen::MatrixXd::Zero(bottDiagSize,bottDiagRHS_Cols);
   bottDiagRHS.leftCols(parentRHS_Cols) = input_RHS.bottomRows(bottDiagSize);
-  //Eigen::MatrixXd bottDiagSoln = recLU_Solve(bottDiagRHS,HODLR_Root->right,factorRoot->right);
   Eigen::MatrixXd bottDiagSoln = recLU_Solve(bottDiagRHS,HODLR_Root->right);
 
   Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
 
-  // Print Information
-  if (printLevelAccuracy){
-    Eigen::MatrixXd WB,WC;
-    Eigen::MatrixXd VB,VC;
-    WB = HODLR_Root->topOffDiagU;
-    VB = HODLR_Root->topOffDiagV;
-    VC = HODLR_Root->bottOffDiagV;
-    WC = HODLR_Root->bottOffDiagU;;
-  
-    if (matrixDataAvail){
-      Eigen::MatrixXd topDiag = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,topDiagSize,topDiagSize);
-      Eigen::MatrixXd topOffDiag = matrixData.block(HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1 ,topDiagSize,bottDiagSize);
-      Eigen::MatrixXd bottOffDiag = matrixData.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,bottDiagSize,topDiagSize);
-      Eigen::MatrixXd bottDiag = matrixData.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->splitIndex_j + 1,bottDiagSize,bottDiagSize);
-      std::cout<<"**********************************************************************"<<std::endl;
-      std::cout<<"**********************************************************************"<<std::endl;
-      std::cout<<"Current Recursion Level                     = "<<HODLR_Root->currLevel<<std::endl;
-      std::cout<<"Top Diagonal Matrix min_i                   = "<<HODLR_Root->min_i<<" | "<<"Top Diagonal Matrix max_i = "<<HODLR_Root->splitIndex_i<<std::endl;
-      std::cout<<"Top Diagonal Matrix min_j                   = "<<HODLR_Root->min_j<<" | "<<"Top Diagonal Matrix max_j = "<<HODLR_Root->splitIndex_j<<std::endl;
-      std::cout<<"Top Diagonal Matrix Solve Rel Error         = "<<(topDiag * topDiagSoln-topDiagRHS).norm()/(topDiagRHS.norm())<<std::endl;
-      std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
-      std::cout<<"Top Off-Diagonal Approximation Rel Error    = "<<(topOffDiag - WB * VB.transpose()).norm()/topOffDiag.norm()<<std::endl;
-      std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
-      std::cout<<"Bottom Diagonal Matrix min_i                = "<<HODLR_Root->splitIndex_i + 1<<" | "<<"Bottom Diagonal Matrix max_i = "<<HODLR_Root->max_i<<std::endl;
-      std::cout<<"Bottom Diagonal Matrix min_j                = "<<HODLR_Root->splitIndex_j + 1<<" | "<<"Bottom Diagonal Matrix max_j = "<<HODLR_Root->max_j<<std::endl;
-      std::cout<<"Bottom Diagonal Matrix Solve Rel Error      = "<<(bottDiag*bottDiagSoln-bottDiagRHS).norm()/(bottDiagRHS.norm())<<std::endl;
-      std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
-      std::cout<<"Bottom Off-Diagonal Approximation Rel Error = "<<(bottOffDiag- WC * VC.transpose()).norm()/bottOffDiag.norm()<<std::endl;
-    }else{
-      std::cout<<"Error! Matrix data has been deleted from memory."<<std::endl;
-    }
-  }
-
-  if (printLevelRankInfo){
-    if (matrixDataAvail){
-      Eigen::MatrixXd topOffDiag = matrixData.block(HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1 ,topDiagSize,bottDiagSize);
-      Eigen::MatrixXd bottOffDiag = matrixData.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,bottDiagSize,topDiagSize);
-      int actualRankTop = ::SVD_LowRankApprox(topOffDiag, LR_Tolerance);
-      int actualRankBott =  ::SVD_LowRankApprox(bottOffDiag, LR_Tolerance);
-      std::cout<<"*****************************************************"<<std::endl;
-      std::cout<<"Current Recursion Level                     = "<<HODLR_Root->currLevel<<std::endl;
-      std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
-      std::cout<<"Top Off-Diagonal Matrix min_i               = "<<HODLR_Root->min_i<<" | "<<" Top Off-Diagonal Matrix max_i = "<<HODLR_Root->splitIndex_i<<std::endl;
-      std::cout<<"Top Off-Diagonal Matrix min_j               = "<<HODLR_Root->splitIndex_j + 1 <<" | "<<" Top Off-Diagonal Matrix max_j = "<<HODLR_Root->max_j<<std::endl;
-      std::cout<<"Top off-Diagonal Matrix Calculated Rank     = "<<calculatedRankB<<std::endl;
-      std::cout<<"Top off-Diagonal Matrix Actual Rank         = "<<actualRankTop<<std::endl;
-      std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
-      std::cout<<"Bottom Off-Diagonal Matrix min_i            = "<<HODLR_Root->splitIndex_i + 1 <<" | "<<" Bottom Off-Diagonal Matrix max_i = "<<HODLR_Root->max_i<<std::endl;
-      std::cout<<"Bottom Off-Diagonal Matrix min_j            = "<<HODLR_Root->min_j<<" | "<<" Bottom Off-Diagonal Matrix max_j = "<<HODLR_Root->splitIndex_j<<std::endl;
-      std::cout<<"Bottom Off-Diagonal Matrix Calculated Rank  = "<<calculatedRankC<<std::endl; 
-      std::cout<<"Bottom off-Diagonal Matrix Actual Rank      = "<<actualRankBott<<std::endl;
-    }else{
-       std::cout<<"Error! Matrix data has been deleted from memory."<<std::endl;
-    }
-  }
-  
   double startTime = clock();
   
   int Sdim = calculatedRankB + calculatedRankC;  
@@ -829,14 +741,9 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
   schurRHS.topRows(HODLR_Root->bottOffDiagRank)   = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
   schurRHS.bottomRows(HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
   
-  //Eigen::MatrixXd y = factorRoot->LU.solve(schurRHS);  
   Eigen::MatrixXd y = HODLR_Root->SchurLU.solve(schurRHS);  
-
   Eigen::MatrixXd result(topDiagSize + bottDiagSize,input_RHS.cols());
   
-  //result.topRows(topDiagSize)     = topDiagSoln_pRHS  - factorRoot->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
-  //result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - factorRoot->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
-
   result.topRows(topDiagSize)     = topDiagSoln_pRHS  - HODLR_Root->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
   result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - HODLR_Root->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
 
@@ -859,7 +766,6 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS){
   storeLRinTree();  
   recLU_Factorize();
   double startTime = clock();
-  //Eigen::MatrixXd solution = recLU_Solve(input_RHS,indexTree.rootNode,recLUfactorTree.rootNode);
   Eigen::MatrixXd solution = recLU_Solve(input_RHS,indexTree.rootNode);
 
   double endTime = clock();
@@ -1770,7 +1676,6 @@ void HODLR_Matrix::calcDeterminant(){
   }
 }
 
-
 void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   
   if (HODLR_Root->isLeaf == true){
@@ -1786,7 +1691,53 @@ void HODLR_Matrix::calcDeterminant(HODLR_Tree::node* HODLR_Root){
   logAbsDeterminant_ += HODLR_Root->nodePerturbI.logAbsDeterminant();
   
   calcDeterminant(HODLR_Root->left);
-  calcDeterminant(HODLR_Root->right);
-  
+  calcDeterminant(HODLR_Root->right);  
 }
 
+void HODLR_Matrix::printHODLRLevelInfo(){
+  assert(LRStoredInTree == true);
+  printHODLRLevelInfo(indexTree.rootNode);
+}
+
+void HODLR_Matrix::printHODLRLevelInfo(HODLR_Tree::node* HODLR_Root){
+  assert(LRStoredInTree == true);
+  // Print Information
+  Eigen::MatrixXd WB,WC;
+  Eigen::MatrixXd VB,VC;
+  WB = HODLR_Root->topOffDiagU;
+  VB = HODLR_Root->topOffDiagV;
+  VC = HODLR_Root->bottOffDiagV;
+  WC = HODLR_Root->bottOffDiagU;;
+  
+  if (matrixDataAvail){
+    int topDiagSize = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1;
+    int bottDiagSize = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
+    Eigen::MatrixXd topDiag = matrixData.block(HODLR_Root->min_i,HODLR_Root->min_j,topDiagSize,topDiagSize);
+    Eigen::MatrixXd topOffDiag = matrixData.block(HODLR_Root->min_i,HODLR_Root->splitIndex_j + 1 ,topDiagSize,bottDiagSize);
+    Eigen::MatrixXd bottOffDiag = matrixData.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->min_j,bottDiagSize,topDiagSize);
+    Eigen::MatrixXd bottDiag = matrixData.block(HODLR_Root->splitIndex_i + 1,HODLR_Root->splitIndex_j + 1,bottDiagSize,bottDiagSize);
+    std::cout<<"**********************************************************************"<<std::endl;
+    std::cout<<"**********************************************************************"<<std::endl;
+    std::cout<<"Current Recursion Level                     = "<<HODLR_Root->currLevel<<std::endl;
+    std::cout<<"Top Diagonal Matrix min_i                   = "<<HODLR_Root->min_i<<" | "<<"Top Diagonal Matrix max_i = "<<HODLR_Root->splitIndex_i<<std::endl;
+    std::cout<<"Top Diagonal Matrix min_j                   = "<<HODLR_Root->min_j<<" | "<<"Top Diagonal Matrix max_j = "<<HODLR_Root->splitIndex_j<<std::endl;
+    //std::cout<<"Top Diagonal Matrix Solve Rel Error         = "<<(topDiag * topDiagSoln-topDiagRHS).norm()/(topDiagRHS.norm())<<std::endl;
+    std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
+    std::cout<<"Top off-Diagonal Matrix Calculated Rank     = "<<HODLR_Root->topOffDiagRank<<std::endl;
+    std::cout<<"Top Off-Diagonal Approximation Rel Error    = "<<(topOffDiag - WB * VB.transpose()).norm()/topOffDiag.norm()<<std::endl;
+    std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
+    std::cout<<"Bottom Diagonal Matrix min_i                = "<<HODLR_Root->splitIndex_i + 1<<" | "<<"Bottom Diagonal Matrix max_i = "<<HODLR_Root->max_i<<std::endl;
+    std::cout<<"Bottom Diagonal Matrix min_j                = "<<HODLR_Root->splitIndex_j + 1<<" | "<<"Bottom Diagonal Matrix max_j = "<<HODLR_Root->max_j<<std::endl;
+    //std::cout<<"Bottom Diagonal Matrix Solve Rel Error      = "<<(bottDiag*bottDiagSoln-bottDiagRHS).norm()/(bottDiagRHS.norm())<<std::endl;
+    std::cout<<"++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
+    std::cout<<"Bottom Off-Diagonal Matrix Calculated Rank  = "<<HODLR_Root->bottOffDiagRank<<std::endl; 
+    std::cout<<"Bottom Off-Diagonal Approximation Rel Error = "<<(bottOffDiag- WC * VC.transpose()).norm()/bottOffDiag.norm()<<std::endl;
+  }else{
+    std::cout<<"Error! Matrix data has been deleted from memory."<<std::endl;
+  }
+  if (!HODLR_Root->left->isLeaf)
+    printHODLRLevelInfo(HODLR_Root->left);
+  if (!HODLR_Root->right->isLeaf)
+    printHODLRLevelInfo(HODLR_Root->right);
+
+}
