@@ -47,9 +47,6 @@ void HODLR_Matrix::setDefaultValues(){
   constLeafSet           = false;
   constLeafFactorized    = false;
 
-  // printLevelRankInfo     = false;
-  //printLevelAccuracy     = false;
-  //printLevelInfo         = false;
   printResultInfo        = false;  
   extendedSp_SavePath    = "/extendedSp_Data";
 }
@@ -709,6 +706,8 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
     recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
     return result;
   }
+  int parentRHS_Cols = input_RHS.cols();
+ 
   // Low Rank Approximation
   int calculatedRankB,calculatedRankC;
   
@@ -717,35 +716,39 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Solve(const Eigen::MatrixXd & input_RHS,cons
   
   // Factorize and Solve for top diagonal matrix
   int topDiagSize = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1;
-  int parentRHS_Cols = input_RHS.cols();
-  int topDiagRHS_Cols = parentRHS_Cols;
-  Eigen::MatrixXd topDiagRHS = Eigen::MatrixXd::Zero(topDiagSize,topDiagRHS_Cols);
-  topDiagRHS.leftCols(parentRHS_Cols) = input_RHS.topRows(topDiagSize);
+  //int topDiagRHS_Cols = parentRHS_Cols;
+
+  //Eigen::MatrixXd topDiagRHS = Eigen::MatrixXd::Zero(topDiagSize,topDiagRHS_Cols);
+  //topDiagRHS.leftCols(parentRHS_Cols) = input_RHS.topRows(topDiagSize);
+  Eigen::MatrixXd topDiagRHS  = input_RHS.topRows(topDiagSize);
   Eigen::MatrixXd topDiagSoln = recLU_Solve(topDiagRHS,HODLR_Root->left);
-  Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
+
+  //Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
 
   // Factorize and Solve for bottom diagonal matrix
   int bottDiagSize = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
-  int bottDiagRHS_Cols = parentRHS_Cols;
-  Eigen::MatrixXd bottDiagRHS = Eigen::MatrixXd::Zero(bottDiagSize,bottDiagRHS_Cols);
-  bottDiagRHS.leftCols(parentRHS_Cols) = input_RHS.bottomRows(bottDiagSize);
+  //int bottDiagRHS_Cols = parentRHS_Cols;
+
+  //Eigen::MatrixXd bottDiagRHS = Eigen::MatrixXd::Zero(bottDiagSize,bottDiagRHS_Cols);
+  //bottDiagRHS.leftCols(parentRHS_Cols) = input_RHS.bottomRows(bottDiagSize);
+  Eigen::MatrixXd bottDiagRHS = input_RHS.bottomRows(bottDiagSize);
   Eigen::MatrixXd bottDiagSoln = recLU_Solve(bottDiagRHS,HODLR_Root->right);
 
-  Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
+  //Eigen::MatrixXd bottDiagSoln_pRHS = bottDiagSoln.leftCols(parentRHS_Cols);
 
   double startTime = clock();
   
   int Sdim = calculatedRankB + calculatedRankC;  
 
   Eigen::MatrixXd schurRHS = Eigen::MatrixXd::Zero(Sdim,parentRHS_Cols);
-  schurRHS.topRows(HODLR_Root->bottOffDiagRank)   = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln_pRHS;  
-  schurRHS.bottomRows(HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln_pRHS;  
+  schurRHS.topRows(HODLR_Root->bottOffDiagRank)   = HODLR_Root->bottOffDiagV.transpose() * topDiagSoln;  
+  schurRHS.bottomRows(HODLR_Root->topOffDiagRank) = HODLR_Root->topOffDiagV.transpose()  * bottDiagSoln;  
   
   Eigen::MatrixXd y = HODLR_Root->SchurLU.solve(schurRHS);  
-  Eigen::MatrixXd result(topDiagSize + bottDiagSize,input_RHS.cols());
+  Eigen::MatrixXd result(input_RHS.rows(),input_RHS.cols());
   
-  result.topRows(topDiagSize)     = topDiagSoln_pRHS  - HODLR_Root->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
-  result.bottomRows(bottDiagSize) = bottDiagSoln_pRHS - HODLR_Root->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
+  result.topRows(topDiagSize)     = topDiagSoln  - HODLR_Root->topDiagSoln_LR  * y.bottomRows(HODLR_Root->topOffDiagRank);
+  result.bottomRows(bottDiagSize) = bottDiagSoln - HODLR_Root->bottDiagSoln_LR * y.topRows(HODLR_Root->bottOffDiagRank);
 
   double endTime = clock();
   recLU_SolveLevelTimeVec[HODLR_Root->currLevel] += (endTime - startTime)/CLOCKS_PER_SEC;
