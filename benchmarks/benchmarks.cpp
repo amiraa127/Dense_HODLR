@@ -682,7 +682,7 @@ int main(int argc,char* argv[]){
     
     testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_",1e-1,30,1);
     testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-3_",1e-3,30,3);
-    testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-5_",1e-5,30,70);
+    testBoundaryLRSolver("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_timing/330_front_num_1_level_1_1e-5_",1e-4,30,10);
 
     // Create usrTrees fro turbine blade results
     std::cout<<"*******************************************************"<<std::endl;
@@ -808,7 +808,7 @@ int main(int argc,char* argv[]){
     testACASolver("../../benchmarks/boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0","../../benchmarks/boundaryLR/stiffness/unstructured/2D/results_timing/blade_16k_level_0_",1e-3,30,usrTree);
     testACASolver("../../benchmarks/boundaryLR/stiffness/unstructured/2D/input/blade_16k_level_0","../../benchmarks/boundaryLR/stiffness/unstructured/2D/results_timing/blade_16k_level_0_",1e-5,30,usrTree);
 
-
+    /*
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"Low-rank accuracy tests for a 3D FETI structured mesh ........"<<std::endl;
@@ -851,8 +851,8 @@ int main(int argc,char* argv[]){
     analyzeRank("../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_1_level_8","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_1_level_8_Graph","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/results_LR/400_front_num_1_level_8_",0,0,0,0,"topOffDiag");
     std::cout<<"-----------------------"<<std::endl;
     std::cout<<"400_front_num_2_level_5"<<std::endl;
-    analyzeRank("../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_2_level_5","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_2_level_5_Graph","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/results_LR/400_front_num_2_level_5_",0,0,0,0,"topOffDiag");
-
+    analyzeRank("../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_2_level_5","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/input/400_front_num_2_level_5_Graph","../../benchmarks/boundaryLR/FETI/unstructured/engine/400k/results_LR/400_front_num_2_level_5_",0,0,0,0,"topOffDiag",70);
+*/
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"Low-rank accuracy tests for a 3D unstructured mesh........."<<std::endl;
@@ -882,10 +882,10 @@ int main(int argc,char* argv[]){
     std::cout<<"Low-rank accuracy tests for a 3D unstructured mesh........."<<std::endl;
     std::cout<<"-----------------------"<<std::endl;
     std::cout<<"330_front_num_0_level_3"<<std::endl;
-    analyzeRank("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_0_level_3","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_0_level_3_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_LR/330_front_num_0_level_3_",0,0,0,0,"topOffDiag");
+    analyzeRank("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_0_level_3","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_0_level_3_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_LR/330_front_num_0_level_3_",0,0,0,0,"topOffDiag",70);
     std::cout<<"-----------------------"<<std::endl;
     std::cout<<"300_front_num_1_level_1"<<std::endl;
-    analyzeRank("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_LR/330_front_num_1_level_1_",0,0,0,0,"topOffDiag");
+    analyzeRank("../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/input/330_front_num_1_level_1_Graph","../../benchmarks/boundaryLR/stiffness/unstructured/3D/cylinderHead/330k/results_LR/330_front_num_1_level_1_",0,0,0,0,"topOffDiag",70);
     std::cout<<"-----------------------"<<std::endl;
     std::cout<<"*******************************************************"<<std::endl;
     std::cout<<"*******************************************************"<<std::endl;

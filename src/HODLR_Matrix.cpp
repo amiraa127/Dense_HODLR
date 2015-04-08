@@ -633,19 +633,18 @@ Eigen::MatrixXd HODLR_Matrix::recLU_Factorize(const Eigen::MatrixXd & input_RHS,
   int topDiagSize = HODLR_Root->splitIndex_i - HODLR_Root->min_i + 1;
   int bottDiagSize = HODLR_Root->max_i - HODLR_Root->splitIndex_i;
   int parentRHS_Cols = input_RHS.cols();
-  
   // Factorize and Solve for top diagonal matrix
   int topOffDiag_LR_Cols = HODLR_Root->topOffDiagU.cols();
   int topDiagRHS_Cols = parentRHS_Cols + topOffDiag_LR_Cols;
   Eigen::MatrixXd topDiagRHS = Eigen::MatrixXd::Zero(topDiagSize,topDiagRHS_Cols);
   topDiagRHS.leftCols(parentRHS_Cols) = input_RHS.topRows(topDiagSize);
   topDiagRHS.rightCols(topOffDiag_LR_Cols) = HODLR_Root->topOffDiagU;  
-  
+
   Eigen::MatrixXd topDiagSoln = recLU_Factorize(topDiagRHS,HODLR_Root->left);
 
   Eigen::MatrixXd topDiagSoln_pRHS = topDiagSoln.leftCols(parentRHS_Cols);
   HODLR_Root->topDiagSoln_LR = topDiagSoln.rightCols(topOffDiag_LR_Cols);
- 
+
   
   // Factorize and Solve for bottom diagonal matrix
   int bottOffDiag_LR_Cols = HODLR_Root->bottOffDiagU.cols();

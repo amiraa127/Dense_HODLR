@@ -1,5 +1,6 @@
 # Directories to look for include files
 include_directories(${DenseHODLR_SOURCE_DIR}/include)
+include_directories(${DenseHODLR_SOURCE_DIR}/IML/include)
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${PASTIX_INCLUDE_DIRS})
 

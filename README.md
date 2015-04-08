@@ -6,7 +6,7 @@ A variety of low-rank approximation methods (SVD, partial pivoting ACA, full piv
 
 ####Author :  
 
-Amirhossein Aminfar: amir_aa127@yahoo.co.uk
+Amirhossein Aminfar: amirhossein.aminfar@gmail.com
 
 ####Citation:
 
@@ -99,16 +99,32 @@ Developed by Amirhossein Aminfar
 This program is free software; you can redistribute it and/or modify it under the terms of MPL2 license. The Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ####Build
-The new version of the HODLR package requires PaStiX and SCOTCH for the sparse embedding functionality. It is important to compile PaStiX with the -DFORCE_NOMPI flag and link PaStiX to SCOTCH not ptSCOTCH. 
+This package has the following dependencies:
 
-The easiest way to build the library is to use [CMake](http://www.cmake.org). Before running cmake, open the file `CMakeLists.txt` on the project directory and comment out the `file(COPY ..`lines.
+1. [Eigen] (http://eigen.tuxfamily.org/index.php?title=Main_Page) C++ library for all matrix manipulations.
 
+2. [CPP Unit] (http://sourceforge.net/projects/cppunit/) for unit testing.
+
+3. (Optional) [SOTCH] (http://www.labri.fr/perso/pelegrin/scotch/) for nested dissection and matrix reordering.
+
+4. (Optional) [PaStiX] (http://pastix.gforge.inria.fr/files/README-txt.html) for the extended sparsification method. It is important to compile PaStiX with the -DFORCE_NOMPI flag and link PaStiX to SCOTCH not ptSCOTCH.
+
+The easiest way to build the library is to use [CMake](http://www.cmake.org).
 Go to the project directory and run:
 
 ```
 mkdir build
 cd build
 cmake ../
+make
+```
+
+The new version of the HODLR package can take advantage of PaStiX for factorizing HODLR matrices using the extended sparsification method. This requires the installation of PaStiX and SCOTCH for the sparse embedding functionality. To compile with PaStiX support, use:
+
+```
+mkdir build
+cd build
+cmake -DPASTIX=ON ../
 make
 ```
 
