@@ -8,7 +8,9 @@ const double pi = 3.14159265359;
 int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
 
 // Boundary Identifier
-int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int depth = -1);
+//int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int depth = -1);
+//int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int min_i, const int min_j,const int numRows, const int numCols,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth,int numSel = 2);
+
 void createIdxFromBoundaryMap(std::map<int,std::vector<int> > & rowPos, std::map<int,std::vector<int> > & colPos, int depth,std::vector<int> &rowIdx,std::vector<int> &colIdx);
 
 // Psuedo Skeleton
@@ -319,7 +321,7 @@ void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen
   std::vector<int> colIndex(colIdxSet.begin(),colIdxSet.end());
  
   //choose rows and columns and do the low-rank approximation 
-  extractRowsCols(Eigen::MatrixXd(lowRankMatrix_Sp),0,0,numRows,numCols,W,V,rowIndex,colIndex,1e-10,calculatedRank);
+  extractRowsCols(Eigen::MatrixXd(lowRankMatrix_Sp),0,0,numRows,numCols,W,V,rowIndex,colIndex,tolerance,calculatedRank);
   
 
 }
@@ -567,6 +569,156 @@ void SVD_LowRankApprox(const T & matrixData, Eigen::MatrixXd & W, Eigen::MatrixX
 }
 
 
+int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int min_i, const int min_j,const int numRows, const int numCols,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth,int numSel = 2){
+
+  int max_i = min_i + numRows - 1;
+  int max_j = min_j + numCols - 1;
+
+  std::vector<int> rowCurrClassVec;
+  std::vector<int> colCurrClassVec;
+  std::vector<int> rowNextClassVec;
+  std::vector<int> colNextClassVec;
+  std::map<int,bool> classifiedRows,classifiedCols;
+
+  //initialize
+  
+  for (int i = 0; i < numRows; i++)
+    classifiedRows[i] = false;
+  for (int i = 0; i < numCols; i++)
+    classifiedCols[i] = false;
+
+  int numClassifiedRows = 0;
+  int numClassifiedCols = 0;
+
+  //Identify boundary nodes
+
+  for (int k = min_j; k <= max_j; ++k)
+    for (Eigen::SparseMatrix<double>::InnerIterator it(inputGraph,k); it; ++it){
+      if (it.row() >= min_i && it.row() <= max_i){
+	int currRow = it.row() - min_i;
+	int currCol = it.col() - min_j;
+	
+	if (classifiedRows[currRow] == false){
+	  rowPos[0].push_back(currRow); 
+	  classifiedRows[currRow] = true;
+	  rowCurrClassVec.push_back(currRow);
+	  numClassifiedRows ++; 
+	}
+	if (classifiedCols[currCol] == false){
+	  colPos[0].push_back(currCol);   
+	  classifiedCols[currCol] = true;
+	  colCurrClassVec.push_back(currCol);
+	  numClassifiedCols ++;   
+	}
+      }else if (it.row() > max_i)
+	break;
+    }
+  
+  if (numClassifiedRows == 0){
+    if ((numRows >= numSel ) && (numCols >= numSel) && (numSel >= 0)){
+      std::vector<int> rowSel = createUniqueRndIdx(0,numRows-1,numSel);
+      std::vector<int> colSel = createUniqueRndIdx(0,numCols-1,numSel);
+      for (int i = 0; i < numSel ; i++){
+	int rowIdx = rowSel[i];
+	int colIdx = colSel[i];
+	rowPos[0].push_back(rowIdx);
+	colPos[0].push_back(colIdx);
+	classifiedRows[rowIdx] = true;
+	classifiedCols[colIdx] = true;
+	rowCurrClassVec.push_back(rowIdx);
+	colCurrClassVec.push_back(colIdx);
+	numClassifiedRows ++;
+	numClassifiedCols ++;
+      }
+    }else
+      return 1;
+  }
+
+  
+  //Clasify other rows
+  int rowCurrClass = 0;
+  while (numClassifiedRows < numRows){
+    if (rowCurrClass == maxDepth)
+      break;			 
+    int currClassification = 0;
+    for (unsigned int i = 0; i < rowCurrClassVec.size();i++){
+      int k = rowCurrClassVec[i] + min_i;
+      for (Eigen::SparseMatrix<double>::InnerIterator it(inputGraph,k); it; ++it){
+	if (it.row() >= min_i && it.row() <= max_i){
+	  int currRow = it.row() - min_i;
+	  if (classifiedRows[currRow] == false){
+	    rowPos[rowCurrClass + 1].push_back(currRow);
+	    classifiedRows[currRow] = true;
+	    rowNextClassVec.push_back(currRow);
+	    numClassifiedRows ++;
+	    currClassification ++;
+	  }
+	}
+      }
+    }
+    
+    if (currClassification == 0){
+      // plant a seed 
+      int numSeeds = rowPos[rowCurrClass].size();
+      for (int i = 0; i < numRows; i++)
+	if (classifiedRows[i] == false){
+	  rowPos[rowCurrClass + 1].push_back(i);
+	  classifiedRows[i] = true;
+	  rowNextClassVec.push_back(i);
+	  numClassifiedRows ++;
+	  currClassification ++;
+	  if (currClassification == numSeeds)
+	    break;
+	}
+    }
+    rowCurrClass ++;
+    rowCurrClassVec = rowNextClassVec;
+    rowNextClassVec.clear();
+  }
+  
+  //Clasify other cols
+  int colCurrClass = 0;
+  while (numClassifiedCols < numCols){
+    if (colCurrClass == maxDepth)
+      break;
+    int currClassification = 0;
+    for (unsigned int i = 0; i < colCurrClassVec.size();i++){
+      int k = colCurrClassVec[i] + min_j;
+      for (Eigen::SparseMatrix<double>::InnerIterator it(inputGraph,k); it; ++it){
+	if (it.row() >= min_j && it.row() <= max_j){
+	  int currCol = it.row() - min_j;
+	  if (classifiedCols[currCol] == false){
+	    colPos[colCurrClass + 1].push_back(currCol);
+	    classifiedCols[currCol] = true;
+	    colNextClassVec.push_back(currCol);
+	    numClassifiedCols ++;
+	    currClassification ++;
+	  }
+	} 
+      }
+    }
+    if (currClassification == 0){
+      // plant a seed
+      int numSeeds = colPos[colCurrClass].size();
+      for (int i = 0; i < numCols; i++)
+	if (classifiedCols[i] == false){
+	  colPos[colCurrClass + 1].push_back(i);
+	  classifiedCols[i] = true;
+	  colNextClassVec.push_back(i);
+	  numClassifiedCols ++;
+	  currClassification ++;
+	  if (currClassification == numSeeds)
+	    break;
+	}
+    }
+    colCurrClass ++;
+    colCurrClassVec = colNextClassVec;
+    colNextClassVec.clear();
+  } 
+  return 0;
+}
+  
+/*
 int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int min_i, const int min_j,const int numRows, const int numCols,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth,int numSel = 2){
   int numRowPts = rowSet.size();
   int numColPts = colSet.size();
@@ -601,19 +753,19 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	int currCol = it.col() - min_j;
 	
 	if (rowSet.count(currRow) == 1 && colSet.count(currCol) == 1){
-
-	  /*  if (classifiedRows[currRow] == false && classifiedCols[currCol] == false){
-	    rowPos[0].push_back(currRow);
-	    colPos[0].push_back(currCol);
-	    classifiedRows[currRow] = true;
-	    classifiedCols[currCol] = true;
-	    rowCurrClassVec.push_back(currRow);
-	    colCurrClassVec.push_back(currCol);
-	    numClassifiedRows ++;
-	    numClassifiedCols ++;
-	  }
-	*/
 	  
+	  /*  if (classifiedRows[currRow] == false && classifiedCols[currCol] == false){
+	      rowPos[0].push_back(currRow);
+	      colPos[0].push_back(currCol);
+	      classifiedRows[currRow] = true;
+	      classifiedCols[currCol] = true;
+	      rowCurrClassVec.push_back(currRow);
+	      colCurrClassVec.push_back(currCol);
+	      numClassifiedRows ++;
+	      numClassifiedCols ++;
+	      }
+	  */
+/*
 	  if (classifiedRows[currRow] == false){
 	    rowPos[0].push_back(currRow); 
 	    classifiedRows[currRow] = true;
@@ -625,7 +777,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	    classifiedCols[currCol] = true;
 	    colCurrClassVec.push_back(currCol);
 	    numClassifiedCols ++;   
-	    }
+	  }
 	}
       }else if (it.row() > max_i)
 	break;
@@ -688,7 +840,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	  currClassification ++;
 	  if (currClassification == numSeeds)
 	    break;
-	    }
+	}
     }
     rowCurrClass ++;
     rowCurrClassVec = rowNextClassVec;
@@ -740,6 +892,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
   
   return 0;
 }
+*/
 
 /*
 int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth){
@@ -922,8 +1075,10 @@ void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<do
     colSet.insert(i + min_j - minIdx);
   
   //int noInteraction = identifyBoundary(graphData.block(minIdx,minIdx,numPoints,numPoints),rowSet,colSet,rowPos,colPos,depth);
-  int noInteraction = identifyBoundary(graphData,minIdx,minIdx,numPoints,numPoints,rowSet,colSet,rowPos,colPos,depth,numSel);
+  //int noInteraction = identifyBoundary(graphData,minIdx,minIdx,numPoints,numPoints,rowSet,colSet,rowPos,colPos,depth,numSel);
+  int noInteraction = identifyBoundary(graphData,min_i,min_j,numRows,numCols,rowPos,colPos,depth,numSel);
 
+  
   if (noInteraction == 1){
     W = Eigen::MatrixXd::Zero(numRows,1);
     V = Eigen::MatrixXd::Zero(numCols,1);
@@ -933,12 +1088,14 @@ void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<do
   
   createIdxFromBoundaryMap(rowPos,colPos,depth,rowIdx,colIdx);
   
+  /*
   // Adjust for offsets
   for (unsigned int i = 0; i < rowIdx.size();i++)
     rowIdx[i] -= offset_i;
   for (unsigned int i = 0; i < colIdx.size();i++)
     colIdx[i] -= offset_j;
-
+  */
+  
   extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,V,rowIdx,colIdx,tolerance,calculatedRank,"fullPivLU",maxRank);
   //std::cout<<calculatedRank<<std::endl;
   /*
@@ -968,9 +1125,9 @@ void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<do
      Eigen::VectorXi colIdxVec = Eigen::VectorXi::Zero(numPoints);
      Eigen::VectorXi rowIdxVec = Eigen::VectorXi::Zero(numPoints);
      
-     for (int i = 0; i < colIdx.size(); i++)
+     for (unsigned int i = 0; i < colIdx.size(); i++)
        colIdxVec[i] = colIdx[i] + offset_j;
-     for (int i = 0; i < rowIdx.size(); i++)
+     for (unsigned int i = 0; i < rowIdx.size(); i++)
        rowIdxVec[i] = rowIdx[i] + offset_i;
      Eigen::VectorXi colIdxVecPerm = lu.permutationQ() * colIdxVec ;
      Eigen::VectorXi rowIdxVecPerm = lu.permutationP() * rowIdxVec ;
@@ -1010,43 +1167,43 @@ void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<do
    
 int getBoundaryRowColIdx(const Eigen::SparseMatrix<double>  & graphData,const int min_i, const int min_j,const int numRows,const int numCols,const int depth,std::vector<int> & rowIdx,std::vector<int> & colIdx,int numSel){
   std::map<int,std::vector<int> > rowPos,colPos;
-  std::set<int> rowSet,colSet;
-  int max_i     = min_i + numRows - 1;
-  int max_j     = min_j + numCols - 1;
-  int minIdx    = std::min(min_i,min_j);
-  int maxIdx    = std::max(max_i,max_j);
-  int offset_i  = min_i - minIdx;
-  int offset_j  = min_j - minIdx;
-  int numPoints = maxIdx - minIdx + 1;
+  //std::set<int> rowSet,colSet;
+  //int max_i     = min_i + numRows - 1;
+  //int max_j     = min_j + numCols - 1;
+  //int minIdx    = std::min(min_i,min_j);
+  //int maxIdx    = std::max(max_i,max_j);
+  //  int offset_i  = min_i - minIdx;
+  //int offset_j  = min_j - minIdx;
+  //int numPoints = maxIdx - minIdx + 1;
   
-  for (int i = 0; i < numRows; i++)
-    rowSet.insert(i + min_i - minIdx);
+  //for (int i = 0; i < numRows; i++)
+  //  rowSet.insert(i + min_i - minIdx);
   
-  for (int i = 0; i < numCols; i++)
-    colSet.insert(i + min_j - minIdx);
+  //for (int i = 0; i < numCols; i++)
+  //  colSet.insert(i + min_j - minIdx);
   
   //int noInteraction = identifyBoundary(graphData.block(minIdx,minIdx,numPoints,numPoints),rowSet,colSet,rowPos,colPos,depth);
-  int noInteraction = identifyBoundary(graphData,minIdx,minIdx,numPoints,numPoints,rowSet,colSet,rowPos,colPos,depth,numSel);
+  //int noInteraction = identifyBoundary(graphData,minIdx,minIdx,numPoints,numPoints,rowSet,colSet,rowPos,colPos,depth,numSel);
+  int noInteraction = identifyBoundary(graphData,min_i,min_j,numRows,numCols,rowPos,colPos,depth,numSel);
 
   if (noInteraction == 1)
     return 1;
   
   createIdxFromBoundaryMap(rowPos,colPos,depth,rowIdx,colIdx);
-    
+
   // Adjust for offsets
+  /*
   for (unsigned int i = 0; i < rowIdx.size();i++)
     rowIdx[i] -= offset_i;
   for (unsigned int i = 0; i < colIdx.size();i++)
     colIdx[i] -= offset_j;
-  
+  */
   std::sort(rowIdx.begin(),rowIdx.end());
   std::sort(colIdx.begin(),colIdx.end());
  
  return 0;
 }
 
-
-//int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_K,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
 
 int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode){
 
@@ -1126,12 +1283,14 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
   }
 
   Eigen::MatrixXd tempK = Eigen::MatrixXd::Zero(numRowsSelect,numColsSelect);
-  
   for (int i = 0; i < numRowsSelect; i++)
     for (int j = 0; j < numColsSelect; j++)
-      if (i < (int)rowIdxVec.size()) 
+      if (i < (int)rowIdxVec.size()) {
 	tempK(i,j) = colMatrix(rowIdxVec[i],j);
+      }
+  
   int rank;
+
   /*
   if (mode == "fullPivACA" || (maxRank > 0 && (tempK.rows() > maxRank || tempK.cols() > maxRank))){
     Eigen::MatrixXd K_W,K_V;
@@ -1147,7 +1306,7 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
     Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
     lu.setThreshold(tol);
     rank = lu.rank();
-    double largestPivot = fabs((lu.matrixLU())(0,0));
+    //double largestPivot = fabs((lu.matrixLU())(0,0));
 
     if ((rank > 0) /*&& (largestPivot >= 1e-6)*/){
       V = ((lu.permutationP() * rowMatrix.transpose()).transpose()).leftCols(rank);
