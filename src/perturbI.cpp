@@ -12,6 +12,7 @@ perturbI::perturbI(){
   eqMatrixFactorized = false;
   calculatedDet      = false;
 }
+
 perturbI::perturbI(Eigen::MatrixXd* topU_,Eigen::MatrixXd* topV_, Eigen::MatrixXd* bottU_, Eigen::MatrixXd* bottV_){
 
   topU = topU_;
@@ -41,7 +42,7 @@ perturbI::perturbI(Eigen::MatrixXd* topU_,Eigen::MatrixXd* topV_, Eigen::MatrixX
   determinant_       = 1;
   logAbsDeterminant_ = 0;
 
-};
+}
 
 void perturbI::eqMatrixFactorize(){
   assert(eqMatrixStored == true);

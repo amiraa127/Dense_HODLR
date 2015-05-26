@@ -718,7 +718,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
   return 0;
 }
   
-/*
+#if 0
 int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int min_i, const int min_j,const int numRows, const int numCols,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth,int numSel = 2){
   int numRowPts = rowSet.size();
   int numColPts = colSet.size();
@@ -754,18 +754,18 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
 	
 	if (rowSet.count(currRow) == 1 && colSet.count(currCol) == 1){
 	  
-	  /*  if (classifiedRows[currRow] == false && classifiedCols[currCol] == false){
-	      rowPos[0].push_back(currRow);
-	      colPos[0].push_back(currCol);
-	      classifiedRows[currRow] = true;
-	      classifiedCols[currCol] = true;
-	      rowCurrClassVec.push_back(currRow);
-	      colCurrClassVec.push_back(currCol);
-	      numClassifiedRows ++;
-	      numClassifiedCols ++;
-	      }
-	  */
-/*
+// 	    if (classifiedRows[currRow] == false && classifiedCols[currCol] == false){
+// 	      rowPos[0].push_back(currRow);
+// 	      colPos[0].push_back(currCol);
+// 	      classifiedRows[currRow] = true;
+// 	      classifiedCols[currCol] = true;
+// 	      rowCurrClassVec.push_back(currRow);
+// 	      colCurrClassVec.push_back(currCol);
+// 	      numClassifiedRows ++;
+// 	      numClassifiedCols ++;
+// 	      }
+	  
+
 	  if (classifiedRows[currRow] == false){
 	    rowPos[0].push_back(currRow); 
 	    classifiedRows[currRow] = true;
@@ -892,9 +892,9 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int mi
   
   return 0;
 }
-*/
+#endif
 
-/*
+#if 0
 int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::set<int> &rowSet,const std::set<int> &colSet,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth){
   int numRows = rowSet.size();
   int numCols = colSet.size();
@@ -1031,7 +1031,7 @@ int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const std::s
   }
   return 0;
 }
-*/
+#endif
 
 void createIdxFromBoundaryMap( std::map<int,std::vector<int> > & rowPos, std::map<int,std::vector<int> > & colPos, int depth,std::vector<int> & rowIdx,std::vector<int> & colIdx){
   assert(depth >= 0 );
@@ -1098,14 +1098,14 @@ void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<do
   
   extractRowsCols(matrixData,min_i,min_j,numRows,numCols,W,V,rowIdx,colIdx,tolerance,calculatedRank,"fullPivLU",maxRank);
   //std::cout<<calculatedRank<<std::endl;
-  /*
+#if 0
     for(std::map<int,std::vector<int> >::iterator iter = rowPos.begin(); iter != rowPos.end(); ++iter){
     std::cout<<iter->first<<":";
     for (unsigned int i = 0; i < iter->second.size();i++)
     std::cout<<iter->second[i]<<" ";
     std::cout<<std::endl;
     }
-  */
+#endif
  
   if (savePath != "none"){
     int numRowsSelect = rowIdx.size();
@@ -1291,7 +1291,7 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
   
   int rank;
 
-  /*
+#if 0
   if (mode == "fullPivACA" || (maxRank > 0 && (tempK.rows() > maxRank || tempK.cols() > maxRank))){
     Eigen::MatrixXd K_W,K_V;
     int kRank;
@@ -1301,7 +1301,8 @@ int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Ei
       V = ((K_W.transpose() * K_W).partialPivLu().solve(K_W.transpose()) * rowMatrix.transpose()).transpose();
       return kRank;
 
-      }else*/
+      }else
+#endif
   if (mode == "fullPivLU"){
     Eigen::FullPivLU<Eigen::MatrixXd> lu(tempK);
     lu.setThreshold(tol);

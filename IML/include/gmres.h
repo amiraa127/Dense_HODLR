@@ -24,6 +24,7 @@
 
 
 #include <math.h> 
+#include <iostream>
 
 template<class Real> 
 void GeneratePlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)

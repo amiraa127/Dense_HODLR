@@ -281,6 +281,9 @@ public:
   void recalculateSize();
   void correctIndices();
   void initInfoVectors();
+  
+  HODLR_Tree& get_indexTree() { return indexTree; }
+  const HODLR_Tree& get_indexTree() const { return indexTree; }
 
 private:
 
@@ -380,11 +383,12 @@ private:
   int sumRanks(HODLR_Tree::node* HODLR_Root);
   Eigen::SparseMatrix<double> assembleExtendedSPMatrix();
   
+public:
   /***************************Iterative Solver Functions****************************/
 
   Eigen_IML_Vector solve(const Eigen_IML_Vector & other);
 
-
+private:
   /**********************************Accessing Matrix Entries***************************/
   void fill_Block(Eigen::MatrixXd & blkMatrix,HODLR_Tree::node* root,int min_i,int min_j,int max_i,int max_j);
   void fill_BlockWithLRProduct(Eigen::MatrixXd & blkMatrix,int LR_Min_i,int LR_Min_j, int LR_numRows, int LR_numCols,Eigen::MatrixXd & LR_U,Eigen::MatrixXd & LR_V,int blk_Min_i,int blk_Min_j);
@@ -397,18 +401,15 @@ private:
   void check_Structure(HODLR_Tree::node* HODLR_Root);
   void createExactHODLR(HODLR_Tree::node* HODLR_Root,const int rank,Eigen::MatrixXd & result);
   void printHODLRLevelInfo(HODLR_Tree::node* HODLR_Root);
-  /******************************** Determinant ************************************************/    void calcDeterminant();
+  /******************************** Determinant ************************************************/    
+  void calcDeterminant();
   void calcDeterminant(HODLR_Tree::node* HODLR_Root);
 
   /******************************** Friend Functions *******************************************/
-  friend void extendAddUpdate(HODLR_Matrix & parentHODLR, std::vector<Eigen::MatrixXd*> D_Array,std::vector<HODLR_Matrix*> D_HODLR_Array,std::vector<Eigen::MatrixXd*> U_Array,std::vector<Eigen::MatrixXd*> V_Array,std::vector<std::vector<int> > & updateIdxVec_Array_D,std::vector<std::vector<int> > & updateIdxVec_Array_D_HODLR,double tol,std::string mode,int maxRank);
-  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,HODLR_Matrix & D_HODLR,std::vector<int> & updateIdxVec,double tol,std::string mode);
-  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & U,Eigen::MatrixXd & V,std::vector<int>& updateIdxVec,double tol,std::string mode);
-  friend HODLR_Matrix extend(std::vector<int> & extendIdxVec, int parentSize, HODLR_Matrix & childHODLR);
-  friend void extendAddUpdate(HODLR_Matrix & parentHODLR,Eigen::MatrixXd & D,std::vector<int> & updateIdxVec,double tol,std::string mode);
-  template < class Operator, class Vector, class Preconditioner,
-	     class Matrix, class Real >
-  friend int GMRES(const Operator &A, Vector &x, const Vector &b,Preconditioner &M, Matrix &H, int &m, int &max_iter,Real &tol);
+  // TODO: remove friend declaration!!!
+//   template < class Operator, class Vector, class Preconditioner,
+// 	     class Matrix, class Real >
+//   friend int GMRES(const Operator &A, Vector &x, const Vector &b,Preconditioner &M, Matrix &H, int &m, int &max_iter,Real &tol);
     
 };
 

@@ -14,10 +14,10 @@ Eigen::MatrixXd readTxtIntoMatrix(const std::string inputFileName){
   inputFile.open(inputFileName.c_str());
   if (!inputFile.fail()){
     std::string currLine;
-    int numRows,numCols;
+    unsigned int numRows,numCols;
     double value;
-    int currRow = 0;
-    int currCol = 0;
+    unsigned int currRow = 0;
+    unsigned int currCol = 0;
     int error;
     getline(inputFile,currLine);
     error = sscanf(currLine.c_str(),"%u %u",&numRows,&numCols);
@@ -64,9 +64,9 @@ Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileN
   inputFile.open(inputFileName.c_str());
   if (!inputFile.fail()){
     std::string currLine;
-    int numRows,numCols,nnz;
+    unsigned int numRows,numCols,nnz;
     double value;
-    int currRow,currCol;
+    unsigned int currRow,currCol;
     int error;
     bool isSymmetric;
     //check header
@@ -110,7 +110,7 @@ Eigen::SparseMatrix<double> readMtxIntoSparseMatrix(const std::string inputFileN
     }
     Eigen::SparseMatrix<double> result(numRows,numCols);
     std::vector<Eigen::Triplet<double,int> > tripletVector;
-    int numEntries = 0;
+    unsigned int numEntries = 0;
     while ((!inputFile.eof()) && (numEntries < nnz)){
       getline(inputFile,currLine);
       error = sscanf(currLine.c_str(),"%u %u %lf",&currRow,&currCol,&value);

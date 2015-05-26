@@ -46,8 +46,13 @@ std::vector<int> createUniqueRndIdx(const int min, const int max,const int n){
   int seqVecSize = max - min + 1;
   assert(n <= seqVecSize);
   std::vector<int> idxVec = createSequentialVec(min,seqVecSize);
+#if __cplusplus > 199711L
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::shuffle(idxVec.begin(),idxVec.end(),std::default_random_engine(seed));
+#else
+  srand(unsigned(time(NULL)));
+  std::random_shuffle(idxVec.begin(), idxVec.end());
+#endif
   std::vector<int> extendIdxVec = std::vector<int>(idxVec.begin(),idxVec.begin() + n);
   std::sort(extendIdxVec.begin(),extendIdxVec.end());
   return extendIdxVec;
