@@ -28,10 +28,19 @@ void PS_LowRankApprox(const Eigen::MatrixXd & matrixData,Eigen::MatrixXd & W, Ei
   
 void PS_LowRankApprox_Sp(const Eigen::SparseMatrix<double> & matrixData_Sp,Eigen::MatrixXd & W, Eigen::MatrixXd & V,const int min_i, const int min_j,const int numRows, const int numCols, const double tolerance, int &calculatedRank);
 
-template <typename T>
-void SVD_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1);
 
-int  SVD_LowRankApprox(const Eigen::MatrixXd & matrixData, const double accuracy, Eigen::MatrixXd* Wptr = NULL, Eigen::MatrixXd* Vptr = NULL, Eigen::MatrixXd* Kptr = NULL, int minRank = -1); 
+int  SVD_LowRankApprox_(const Eigen::MatrixXd & matrixData, 
+                       const double accuracy, 
+                       Eigen::MatrixXd* Wptr = NULL, 
+                       Eigen::MatrixXd* Vptr = NULL, 
+                       Eigen::MatrixXd* Kptr = NULL, 
+                       int minRank = -1); 
+
+template <typename T>
+void SVD_LowRankApprox(const T & matrixData,Eigen::MatrixXd & W, Eigen::MatrixXd & V, Eigen::MatrixXd & K,const int min_i, const int min_j, const int numRows, const int numCols, const double tolerance, int & calculatedRank, const int minRank = -1){
+  Eigen::MatrixXd lowRankMatrix = matrixData.block(min_i,min_j,numRows,numCols);
+  calculatedRank = SVD_LowRankApprox_(lowRankMatrix, tolerance, &W, &V, &K, minRank);
+}
 
 template <typename T>
 void PS_Boundary_LowRankApprox(const T & matrixData,const Eigen::SparseMatrix<double> graphData,Eigen::MatrixXd & W, Eigen::MatrixXd & V,const int min_i, const int min_j, const int numRows, const int numCols,const double tolerance,int & calculatedRank, const int maxDepth = 2,const std::string savePath = "none",const int numSel = 2,const int maxRank = -1);  
@@ -44,5 +53,12 @@ int  getBoundaryRowColIdx(const Eigen::SparseMatrix<double>  & graphData,const i
 int add_LR(Eigen::MatrixXd & result_U,Eigen::MatrixXd & result_V,const Eigen::MatrixXd & U1, const Eigen::MatrixXd & V1, const Eigen::MatrixXd & U2, const Eigen::MatrixXd & V2,double tol,std::string mode);
 
 int PS_PseudoInverse(Eigen::MatrixXd & colMatrix,Eigen::MatrixXd & rowMatrix, Eigen::MatrixXd & U, Eigen::MatrixXd & V,std::vector<int> rowIdxVec,const  double tol,const std::string mode,const int maxRank = -1);
+
+int identifyBoundary(const Eigen::SparseMatrix<double> & inputGraph,const int min_i, const int min_j,const int numRows, const int numCols,std::map<int,std::vector<int> > & rowPos,std::map<int,std::vector<int> > & colPos,int maxDepth,int numSel = 2);
+
+int chooseNextRowCol(const std::vector<bool> &chosenRowsCols, const Eigen::VectorXd &currColRow,const int minPivot);
+void createIdxFromBoundaryMap(std::map<int,std::vector<int> > & rowPos, std::map<int,std::vector<int> > & colPos, int depth,std::vector<int> &rowIdx,std::vector<int> &colIdx);
+
+#include "lowRank.hh"
 
 #endif
